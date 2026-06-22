@@ -1,0 +1,35 @@
+---
+import Docs from '../../layouts/Docs.astro'
+---
+
+<Docs title="VS Code Extension" description="VS Code features provided by Dep Beacon.">
+  <h1>VS Code Extension</h1>
+  <p>
+    Open `package.json` or `pnpm-workspace.yaml`. Dep Beacon adds CodeLens actions above supported dependency entries and inline status text after each range.
+  </p>
+
+  <h2>CodeLens actions</h2>
+  <ul>
+    <li>`patch` updates to the highest patch in the current minor.</li>
+    <li>`minor` updates to the nearest higher minor in the current major.</li>
+    <li>`major` updates to the nearest higher major.</li>
+    <li>`latest` updates to npm's latest dist-tag or the newest stable version.</li>
+  </ul>
+
+  <h2>Commands</h2>
+  <ul>
+    <li>`Dep Beacon: Refresh Dependency Signals` re-analyzes visible manifests.</li>
+    <li>`Dep Beacon: Clear Registry Cache` clears cached npm metadata.</li>
+    <li>`Dep Beacon: Toggle Prerelease Versions` includes or excludes prerelease versions.</li>
+    <li>`Dep Beacon: Sort Current Manifest` alphabetizes package sections in `package.json`.</li>
+    <li>`Dep Beacon: Run Package Install` runs `pnpm install`, `npm install`, or `yarn install`.</li>
+  </ul>
+
+  <h2>Status colors</h2>
+  <ul>
+    <li>Green means the declared range already accepts the latest stable version.</li>
+    <li>Yellow means a newer target exists.</li>
+    <li>Orange means OSV reports low or medium risk.</li>
+    <li>Red means the package or version is invalid, missing, high risk, or critical risk.</li>
+  </ul>
+</Docs>

@@ -1,0 +1,69 @@
+{
+  "name": "@santi020k/dep-beacon-root",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "assets": "node scripts/generate-assets.mjs",
+    "build": "pnpm run assets && turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "lint": "pnpm run lint:repo && turbo run lint",
+    "lint:repo": "eslint . --cache --no-warn-ignored",
+    "lint:fix": "pnpm run lint:repo:fix && turbo run lint:fix",
+    "lint:repo:fix": "eslint . --cache --fix --no-warn-ignored",
+    "lint:spell": "cspell \"**\" --gitignore --cache --show-suggestions --show-context",
+    "lint:knip": "knip",
+    "ok": "pnpm install --frozen-lockfile && pnpm run build && pnpm run typecheck && pnpm run test && pnpm run lint",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish",
+    "package:extension": "pnpm --filter vscode-dep-beacon package",
+    "publish:ext": "pnpm --filter vscode-dep-beacon publish:ext",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "prepare": "husky",
+    "pre-commit": "lint-staged",
+    "commit": "cz"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "catalog:",
+    "@changesets/cli": "catalog:",
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@santi020k/eslint-config-astro": "catalog:",
+    "@santi020k/eslint-config-basic": "catalog:",
+    "@types/node": "catalog:",
+    "commitizen": "catalog:",
+    "cspell": "catalog:",
+    "cz-conventional-changelog": "catalog:",
+    "eslint": "catalog:",
+    "husky": "catalog:",
+    "knip": "catalog:",
+    "lint-staged": "catalog:",
+    "sharp": "catalog:",
+    "tailwindcss": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "lint-staged": {
+    "*.{astro,js,mjs,ts,mts}": [
+      "eslint --fix --no-warn-ignored"
+    ],
+    "*.{json,jsonc,md,yml,yaml}": [
+      "eslint --fix --no-warn-ignored"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.13.0"
+  },
+  "packageManager": "pnpm@11.1.2"
+}

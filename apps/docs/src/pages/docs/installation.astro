@@ -1,0 +1,26 @@
+---
+import Docs from '../../layouts/Docs.astro'
+---
+
+<Docs title="Installation" description="Install and package Dep Beacon locally.">
+  <h1>Installation</h1>
+  <p>
+    Dep Beacon is developed as a pnpm and Turbo monorepo. Use Node 22 or newer for the smoothest local experience.
+  </p>
+
+  <h2>Workspace setup</h2>
+  <pre><code>pnpm install
+pnpm run build
+pnpm run typecheck
+pnpm run test
+pnpm run lint</code></pre>
+
+  <h2>Package the extension</h2>
+  <pre><code>pnpm run package:extension</code></pre>
+  <p>
+    The VSIX is written to `packages/vscode-dep-beacon/dep-beacon.vsix`.
+  </p>
+
+  <h2>Run the docs site</h2>
+  <pre><code>pnpm --filter @santi020k/dep-beacon-docs dev</code></pre>
+</Docs>

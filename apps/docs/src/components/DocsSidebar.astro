@@ -1,0 +1,16 @@
+---
+import { DOCS_NAV } from '../data/nav'
+
+const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/'
+---
+
+<aside class="docs-sidebar">
+  <nav aria-label="Documentation navigation">
+    {DOCS_NAV.map((item) => {
+      const href = item.href.replace(/\/$/u, '')
+      const active = currentPath === href
+
+      return <a class:list={{ active }} href={item.href}>{item.label}</a>
+    })}
+  </nav>
+</aside>

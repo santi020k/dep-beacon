@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro'
+import { SITE } from '../site.config'
+---
+
+<Base title={SITE.name} description={SITE.description}>
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Version signals for npm manifests</p>
+        <h1>Dep Beacon</h1>
+        <p>
+          A VS Code extension that reads the dependency files you already edit, then shows update paths, pnpm catalog context, and OSV security risk without leaving the editor.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="/docs">Read the docs</a>
+          <a class="button secondary" href="/docs/vscode-extension">Explore the extension</a>
+        </div>
+        <div class="status-row" aria-label="Dependency status colors">
+          <span class="status-pill"><span class="dot green"></span>Up to date</span>
+          <span class="status-pill"><span class="dot yellow"></span>Update available</span>
+          <span class="status-pill"><span class="dot orange"></span>Low or medium risk</span>
+          <span class="status-pill"><span class="dot red"></span>Missing or high risk</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <h2>Built for dependency files, not dashboards.</h2>
+        <p>
+          Dep Beacon lives where version decisions happen: `package.json`, `pnpm-workspace.yaml`, overrides, resolutions, and package extensions. It keeps the feedback close and the commands reversible.
+        </p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-tile">
+          <h3>CodeLens updates</h3>
+          <p>Jump to next patch, next minor, next major, or latest while preserving `^` and `~` range style.</p>
+        </article>
+        <article class="feature-tile">
+          <h3>pnpm catalogs</h3>
+          <p>Understands default and named catalogs, plus workspace-level overrides and package extensions.</p>
+        </article>
+        <article class="feature-tile">
+          <h3>Security signal</h3>
+          <p>Queries OSV.dev and separates low or medium advisories from high and critical risk.</p>
+        </article>
+        <article class="feature-tile">
+          <h3>Editor flow</h3>
+          <p>Sort dependency sections, clear cache, toggle prerelease versions, and run install commands.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <h2>One engine, multiple surfaces.</h2>
+        <p>
+          The core package handles parsing, registry analysis, semver targets, and OSV results. The VS Code extension consumes that engine today; future CLIs and actions can reuse it without duplicating behavior.
+        </p>
+      </div>
+      <div class="quick-grid">
+        <a class="quick-tile" href="/docs/installation">
+          <h3>Install</h3>
+          <p>Set up the monorepo, package the extension, and run local checks.</p>
+        </a>
+        <a class="quick-tile" href="/docs/pnpm-workspaces">
+          <h3>Workspace catalogs</h3>
+          <p>See how `catalog:` and `catalog:name` references resolve.</p>
+        </a>
+        <a class="quick-tile" href="/docs/configuration">
+          <h3>Configuration</h3>
+          <p>Tune registry, prerelease, vulnerability, and install-on-save behavior.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

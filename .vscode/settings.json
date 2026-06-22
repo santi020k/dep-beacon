@@ -1,0 +1,8 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.experimental.useFlatConfig": true,
+  "eslint.validate": ["astro", "javascript", "javascriptreact", "json", "jsonc", "typescript", "typescriptreact", "yaml"],
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

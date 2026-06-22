@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-label="Dep Beacon">
+  <g transform="translate(32 24) scale(4.125)">
+    <rect width="32" height="32" rx="7" fill="#0f8b8d"/>
+    <path d="M8.2 13.1C10.2 8.7 13 6.8 16 6.8s5.8 1.9 7.8 6.3M11.8 15.9c1.1-2.3 2.5-3.4 4.2-3.4s3.1 1.1 4.2 3.4" fill="none" stroke="#f4fbf8" stroke-width="2.7" stroke-linecap="round"/>
+    <path d="M16 17.1 22.2 20.2 16 23.1 9.8 20.2 16 17.1ZM10.8 21.9l4.4 2.2v4.1L10.8 26v-4.1ZM16.8 24.1l4.4-2.2V26l-4.4 2.2v-4.1Z" fill="#f4fbf8"/>
+  </g>
+  <text x="196" y="82" fill="#f4fbf8" font-family="Inter, system-ui, sans-serif" font-size="54" font-weight="800">Dep Beacon</text>
+  <text x="198" y="123" fill="#b7c9c5" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="500">Dependency signals for npm manifests</text>
+</svg>

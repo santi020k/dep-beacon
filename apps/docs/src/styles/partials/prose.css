@@ -1,0 +1,46 @@
+.docs-content h1 {
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  margin-bottom: 1rem;
+}
+
+.docs-content h2 {
+  border-top: 1px solid var(--line);
+  font-size: 1.65rem;
+  margin: 2.5rem 0 1rem;
+  padding-top: 2rem;
+}
+
+.docs-content h3 {
+  font-size: 1.15rem;
+  margin: 1.8rem 0 0.6rem;
+}
+
+.docs-content p,
+.docs-content li {
+  color: var(--ink-soft);
+  line-height: 1.75;
+}
+
+.docs-content a {
+  color: var(--brand-bright);
+}
+
+.docs-content ul,
+.docs-content ol {
+  padding-left: 1.2rem;
+}
+
+.docs-content pre {
+  background: #071014;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.docs-content pre code {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  padding: 0;
+}

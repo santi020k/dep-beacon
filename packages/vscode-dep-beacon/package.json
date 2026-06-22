@@ -1,0 +1,182 @@
+{
+  "name": "vscode-dep-beacon",
+  "displayName": "Dep Beacon",
+  "version": "0.1.0",
+  "private": true,
+  "sponsor": {
+    "url": "https://github.com/sponsors/santi020k"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/santi020k"
+  },
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#0f8b8d",
+    "theme": "dark"
+  },
+  "description": "Dependency version CodeLens, pnpm workspace catalogs, update commands, and OSV security signals for npm projects.",
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "publisher": "santi020k",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "typecheck": "tsc --noEmit",
+    "dev": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js --watch=forever",
+    "package": "pnpm run build && node scripts/vsce-package.cjs",
+    "publish:ext": "pnpm run package && pnpm run publish:vsce && pnpm run publish:ovsx",
+    "publish:vsce": "pnpm dlx @vscode/vsce publish -i dep-beacon.vsix --skip-duplicate --pat \"$VSCE_PAT\"",
+    "publish:ovsx": "pnpm dlx ovsx --pat \"$OVSX_PAT\" publish dep-beacon.vsix --skip-duplicate",
+    "test": "vitest run --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:watch": "vitest --config vitest.config.ts",
+    "lint": "eslint . --no-warn-ignored",
+    "lint:fix": "eslint . --fix --no-warn-ignored",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "@santi020k/dep-beacon-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/vscode": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "esbuild": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "depBeacon.refresh",
+        "title": "Dep Beacon: Refresh Dependency Signals"
+      },
+      {
+        "command": "depBeacon.clearCache",
+        "title": "Dep Beacon: Clear Registry Cache"
+      },
+      {
+        "command": "depBeacon.togglePrerelease",
+        "title": "Dep Beacon: Toggle Prerelease Versions"
+      },
+      {
+        "command": "depBeacon.sortManifest",
+        "title": "Dep Beacon: Sort Current Manifest"
+      },
+      {
+        "command": "depBeacon.runInstall",
+        "title": "Dep Beacon: Run Package Install"
+      },
+      {
+        "command": "depBeacon.openDocs",
+        "title": "Dep Beacon: Open Documentation"
+      }
+    ],
+    "configuration": {
+      "title": "Dep Beacon",
+      "properties": {
+        "depBeacon.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Dep Beacon CodeLens, diagnostics, and inline dependency status."
+        },
+        "depBeacon.includePrerelease": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include prerelease versions while calculating latest, next minor, and next major targets."
+        },
+        "depBeacon.checkVulnerabilities": {
+          "type": "boolean",
+          "default": true,
+          "description": "Query OSV.dev for dependency vulnerability summaries."
+        },
+        "depBeacon.registryUrl": {
+          "type": "string",
+          "default": "https://registry.npmjs.org",
+          "scope": "machine-overridable",
+          "description": "npm-compatible registry URL used for package metadata."
+        },
+        "depBeacon.cacheTtlMinutes": {
+          "type": "number",
+          "default": 15,
+          "minimum": 1,
+          "maximum": 1440,
+          "description": "How long analyzed document results can be reused before rechecking the registry."
+        },
+        "depBeacon.showInlineStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show colored inline dependency status after version ranges."
+        },
+        "depBeacon.runInstallOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run the configured package-manager install command after saving a supported manifest."
+        },
+        "depBeacon.packageManager": {
+          "type": "string",
+          "enum": ["auto", "npm", "pnpm", "yarn"],
+          "default": "auto",
+          "description": "Package manager used by Dep Beacon install commands."
+        },
+        "depBeacon.docsUrl": {
+          "type": "string",
+          "default": "https://dep-beacon.santi020k.com",
+          "description": "Documentation URL opened by Dep Beacon commands."
+        }
+      }
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "command": "depBeacon.refresh",
+          "group": "navigation",
+          "when": "resourceFilename == package.json || resourceFilename == pnpm-workspace.yaml || resourceFilename == pnpm-workspace.yml"
+        },
+        {
+          "command": "depBeacon.sortManifest",
+          "group": "navigation",
+          "when": "resourceFilename == package.json"
+        }
+      ]
+    }
+  },
+  "activationEvents": [
+    "onLanguage:json",
+    "onLanguage:jsonc",
+    "onLanguage:yaml",
+    "workspaceContains:package.json",
+    "workspaceContains:pnpm-workspace.yaml"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.13.0",
+    "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/santi020k/dep-beacon.git",
+    "directory": "packages/vscode-dep-beacon"
+  },
+  "homepage": "https://dep-beacon.santi020k.com",
+  "bugs": {
+    "url": "https://github.com/santi020k/dep-beacon/issues"
+  },
+  "keywords": [
+    "dependencies",
+    "version",
+    "codelens",
+    "pnpm",
+    "workspace",
+    "npm",
+    "security",
+    "osv"
+  ],
+  "author": {
+    "name": "Santiago Molina",
+    "url": "https://santi020k.com"
+  },
+  "license": "MIT"
+}

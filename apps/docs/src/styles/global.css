@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "./partials/tokens.css";
+@import "./partials/base.css";
+@import "./partials/components.css";
+@import "./partials/prose.css";

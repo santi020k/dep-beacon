@@ -1,0 +1,36 @@
+{
+  "name": "@santi020k/dep-beacon-docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Documentation website for Dep Beacon.",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "typecheck": "astro check",
+    "lint": "eslint . --no-warn-ignored",
+    "lint:fix": "eslint . --fix --no-warn-ignored",
+    "clean": "rm -rf dist .astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "catalog:",
+    "@astrojs/sitemap": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "astro": "catalog:",
+    "tailwindcss": "catalog:"
+  },
+  "devDependencies": {
+    "@astrojs/check": "catalog:",
+    "@santi020k/eslint-config-basic": "catalog:",
+    "eslint": "catalog:",
+    "sharp": "catalog:",
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.13.0"
+  },
+  "packageManager": "pnpm@11.1.2"
+}

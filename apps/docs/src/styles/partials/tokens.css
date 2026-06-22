@@ -1,0 +1,19 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b1115;
+  --bg-soft: #101820;
+  --surface: #142027;
+  --surface-strong: #1a2a33;
+  --ink: #f4fbf8;
+  --ink-soft: #b7c9c5;
+  --ink-muted: #78908c;
+  --line: #27414a;
+  --brand: #0f8b8d;
+  --brand-bright: #3dd6b3;
+  --green: #5bd67b;
+  --yellow: #f2c14e;
+  --orange: #f59e4c;
+  --red: #f05d5e;
+  --blue: #75a7ff;
+  --shadow: 0 24px 80px rgb(0 0 0 / 0.35);
+}

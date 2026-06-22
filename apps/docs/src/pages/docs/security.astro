@@ -1,0 +1,28 @@
+---
+import Docs from '../../layouts/Docs.astro'
+
+const disableOsvExample = `{
+  "depBeacon.checkVulnerabilities": false
+}`
+---
+
+<Docs title="Security Signals" description="How Dep Beacon uses OSV.dev vulnerability data.">
+  <h1>Security Signals</h1>
+  <p>
+    Dep Beacon can query OSV.dev for the package and version currently selected by a range. The result is summarized without replacing a full audit workflow.
+  </p>
+
+  <h2>Severity mapping</h2>
+  <ul>
+    <li>Low and medium advisories show as orange warning signals.</li>
+    <li>High and critical advisories show as red error signals.</li>
+    <li>Unknown severity stays visible as known risk.</li>
+  </ul>
+
+  <h2>Privacy and control</h2>
+  <p>
+    Disable OSV checks with `depBeacon.checkVulnerabilities` when working offline or inside registries that should not send dependency names to external services.
+  </p>
+
+  <pre><code>{disableOsvExample}</code></pre>
+</Docs>

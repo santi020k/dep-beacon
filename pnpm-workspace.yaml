@@ -1,0 +1,49 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+allowBuilds:
+  "@tailwindcss/oxide": true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
+
+catalog:
+  "@astrojs/check": ^0.9.9
+  "@astrojs/mdx": ^7.0.0
+  "@astrojs/sitemap": ^3.7.3
+  "@changesets/changelog-github": ^0.7.0
+  "@changesets/cli": ^2.31.0
+  "@commitlint/cli": ^21.0.2
+  "@commitlint/config-conventional": ^21.0.2
+  "@resvg/resvg-js": ^2.6.2
+  "@santi020k/eslint-config-astro": ^2.1.1
+  "@santi020k/eslint-config-basic": ^2.1.1
+  "@tailwindcss/vite": ^4.3.1
+  "@types/node": ^26.0.0
+  "@types/semver": ^7.7.1
+  "@types/vscode": ^1.85.0
+  "@vscode/vsce": ^3.9.2
+  "@vitest/coverage-v8": ^4.1.9
+  astro: ^7.0.0
+  commitizen: ^4.3.2
+  cspell: ^10.0.1
+  cz-conventional-changelog: ^3.3.0
+  esbuild: ^0.28.1
+  eslint: ^10.5.0
+  husky: ^9.1.7
+  jsonc-parser: ^3.3.1
+  knip: ^6.18.0
+  lint-staged: ^17.0.8
+  ovsx: ^1.0.1
+  semver: ^7.8.5
+  sharp: ^0.35.2
+  tailwindcss: ^4.3.1
+  tinyglobby: ^0.2.17
+  turbo: ^2.9.18
+  typescript: ^6.0.3
+  typescript-eslint: ^8.62.0
+  vitest: ^4.1.9
+  wrangler: ^4.103.0
+  yaml: ^2.9.0

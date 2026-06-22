@@ -1,0 +1,21 @@
+---
+import DocsSidebar from '../components/DocsSidebar.astro'
+
+import Base from './Base.astro'
+
+interface Props {
+  description?: string
+  title: string
+}
+
+const { description, title } = Astro.props
+---
+
+<Base title={title} description={description}>
+  <section class="docs-shell">
+    <DocsSidebar />
+    <article class="docs-content">
+      <slot />
+    </article>
+  </section>
+</Base>

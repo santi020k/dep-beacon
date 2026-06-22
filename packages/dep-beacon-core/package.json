@@ -1,0 +1,68 @@
+{
+  "name": "@santi020k/dep-beacon-core",
+  "version": "0.1.0",
+  "description": "Dependency manifest parsing, npm version intelligence, and OSV advisory checks for Dep Beacon.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:watch": "vitest --config vitest.config.ts",
+    "lint": "eslint . --no-warn-ignored",
+    "lint:fix": "eslint . --fix --no-warn-ignored",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "jsonc-parser": "catalog:",
+    "semver": "catalog:",
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/semver": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/santi020k/dep-beacon.git",
+    "directory": "packages/dep-beacon-core"
+  },
+  "homepage": "https://dep-beacon.santi020k.com",
+  "bugs": {
+    "url": "https://github.com/santi020k/dep-beacon/issues"
+  },
+  "keywords": [
+    "dependencies",
+    "npm",
+    "pnpm",
+    "semver",
+    "vscode",
+    "osv",
+    "security"
+  ],
+  "author": {
+    "name": "Santiago Molina",
+    "url": "https://santi020k.com"
+  },
+  "license": "MIT"
+}

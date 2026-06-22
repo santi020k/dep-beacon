@@ -1,0 +1,33 @@
+---
+import Docs from '../../layouts/Docs.astro'
+
+const settingsExample = `{
+  "depBeacon.enable": true,
+  "depBeacon.includePrerelease": false,
+  "depBeacon.checkVulnerabilities": true,
+  "depBeacon.registryUrl": "https://registry.npmjs.org",
+  "depBeacon.showInlineStatus": true,
+  "depBeacon.runInstallOnSave": false,
+  "depBeacon.packageManager": "auto"
+}`
+---
+
+<Docs title="Configuration" description="Dep Beacon VS Code settings.">
+  <h1>Configuration</h1>
+  <p>
+    Configure Dep Beacon from VS Code settings or workspace `.vscode/settings.json`.
+  </p>
+
+  <h2>Common settings</h2>
+  <pre><code>{settingsExample}</code></pre>
+
+  <h2>Registry</h2>
+  <p>
+    `depBeacon.registryUrl` can point at a private npm-compatible registry. Package links still open npmjs.com by default because that is the public package reference.
+  </p>
+
+  <h2>Cache</h2>
+  <p>
+    `depBeacon.cacheTtlMinutes` controls document analysis reuse. Use `Dep Beacon: Clear Registry Cache` when you publish a package and want fresh metadata immediately.
+  </p>
+</Docs>

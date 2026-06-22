@@ -1,0 +1,31 @@
+version: "0.2"
+language: en
+words:
+  - depbeacon
+  - dep
+  - codemod
+  - CodeLens
+  - codicon
+  - GHSA
+  - jsonc
+  - npmjs
+  - OpenVSX
+  - osv
+  - OVSX
+  - OVSX_PAT
+  - packument
+  - prerelease
+  - semver
+  - Snyk
+  - vulns
+  - vsc
+  - vsce
+  - VSIX
+  - workspaces
+  - santi020k
+ignorePaths:
+  - node_modules
+  - dist
+  - coverage
+  - pnpm-lock.yaml
+  - "*.vsix"

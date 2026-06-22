@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Dep Beacon VS Code preview">
+  <rect width="1600" height="900" fill="#0b1115"/>
+  <rect x="140" y="96" width="1320" height="704" rx="18" fill="#101820" stroke="#27414a" stroke-width="2"/>
+  <rect x="140" y="96" width="1320" height="52" rx="18" fill="#142027"/>
+  <circle cx="178" cy="122" r="8" fill="#f05d5e"/>
+  <circle cx="204" cy="122" r="8" fill="#f2c14e"/>
+  <circle cx="230" cy="122" r="8" fill="#5bd67b"/>
+  <text x="276" y="130" fill="#b7c9c5" font-family="SFMono-Regular, Consolas, monospace" font-size="18">package.json</text>
+  <rect x="180" y="184" width="520" height="576" fill="#0b1115" stroke="#27414a"/>
+  <rect x="742" y="184" width="678" height="576" fill="#0f171d" stroke="#27414a"/>
+  <g font-family="SFMono-Regular, Consolas, monospace" font-size="22">
+    <text x="214" y="230" fill="#78908c">1</text>
+    <text x="254" y="230" fill="#b7c9c5">{</text>
+    <text x="214" y="270" fill="#78908c">2</text>
+    <text x="254" y="270" fill="#75a7ff">"dependencies"</text>
+    <text x="426" y="270" fill="#b7c9c5">: {</text>
+    <text x="214" y="310" fill="#78908c">3</text>
+    <text x="284" y="310" fill="#75a7ff">"astro"</text>
+    <text x="386" y="310" fill="#b7c9c5">:</text>
+    <text x="414" y="310" fill="#f2c14e">"^6.4.0"</text>
+    <text x="214" y="350" fill="#78908c">4</text>
+    <text x="284" y="350" fill="#75a7ff">"react"</text>
+    <text x="386" y="350" fill="#b7c9c5">:</text>
+    <text x="414" y="350" fill="#f2c14e">"catalog:react19"</text>
+    <text x="214" y="390" fill="#78908c">5</text>
+    <text x="284" y="390" fill="#75a7ff">"left-pad"</text>
+    <text x="426" y="390" fill="#b7c9c5">:</text>
+    <text x="454" y="390" fill="#f2c14e">"1.1.0"</text>
+    <text x="214" y="430" fill="#78908c">6</text>
+    <text x="254" y="430" fill="#b7c9c5">}</text>
+    <text x="214" y="470" fill="#78908c">7</text>
+    <text x="254" y="470" fill="#b7c9c5">}</text>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700">
+    <rect x="736" y="280" width="220" height="40" rx="6" fill="#1a2a33" stroke="#27414a"/>
+    <text x="758" y="306" fill="#f2c14e">latest 7.0.0</text>
+    <rect x="968" y="280" width="176" height="40" rx="6" fill="#1a2a33" stroke="#27414a"/>
+    <text x="990" y="306" fill="#3dd6b3">minor ^7.0.0</text>
+    <rect x="1156" y="280" width="172" height="40" rx="6" fill="#1a2a33" stroke="#27414a"/>
+    <text x="1178" y="306" fill="#75a7ff">major ^7.0.0</text>
+    <rect x="736" y="320" width="274" height="40" rx="6" fill="#132a25" stroke="#3dd6b3"/>
+    <text x="758" y="346" fill="#3dd6b3">catalog resolves ^19.0.0</text>
+    <rect x="736" y="360" width="304" height="40" rx="6" fill="#321b1c" stroke="#f05d5e"/>
+    <text x="758" y="386" fill="#f05d5e">high vulnerability reported</text>
+  </g>
+  <g transform="translate(780 480)">
+    <rect width="580" height="192" rx="10" fill="#101820" stroke="#27414a"/>
+    <text x="28" y="44" fill="#f4fbf8" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800">Dependency report</text>
+    <text x="28" y="84" fill="#b7c9c5" font-family="Inter, Arial, sans-serif" font-size="20">astro can move to next minor and latest.</text>
+    <text x="28" y="120" fill="#b7c9c5" font-family="Inter, Arial, sans-serif" font-size="20">react is managed from pnpm catalogs.</text>
+    <text x="28" y="156" fill="#b7c9c5" font-family="Inter, Arial, sans-serif" font-size="20">left-pad should be replaced or updated.</text>
+  </g>
+</svg>
