@@ -42,6 +42,9 @@ Dep Beacon preserves common range prefixes like `^` and `~` when it applies an u
 - `Dep Beacon: Sort Current Manifest`
 - `Dep Beacon: Run Package Install`
 - `Dep Beacon: Open Documentation`
+- `Dep Beacon: Show Debug Output`
+
+Manual refreshes also write activation, scheduling, cache, parse, analysis, and diagnostic details to the `Dep Beacon` output channel.
 
 ## Settings
 

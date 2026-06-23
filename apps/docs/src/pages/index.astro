@@ -3,53 +3,124 @@ import Base from '../layouts/Base.astro'
 import { SITE } from '../site.config'
 ---
 
-<Base title={SITE.name} description={SITE.description}>
+<Base title={SITE.name} description={SITE.description} image="/og/home.png" imageAlt="Dep Beacon social preview">
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-copy">
-        <p class="eyebrow">Version signals for npm manifests</p>
+        <p class="eyebrow">VS Code extension for npm manifests</p>
         <h1>Dep Beacon</h1>
-        <p>
-          A VS Code extension that reads the dependency files you already edit, then shows update paths, pnpm catalog context, and OSV security risk without leaving the editor.
+        <p class="hero-summary">
+          See dependency update paths, pnpm catalog context, and OSV security risk beside the versions you already edit.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href="/docs">Read the docs</a>
-          <a class="button secondary" href="/docs/vscode-extension">Explore the extension</a>
+          <a class="button primary" href={SITE.marketplaceUrl}>Install from Marketplace</a>
+          <a class="button secondary" href={SITE.openVsxUrl}>Open VSX</a>
+          <a class="button tertiary" href="/docs">Read docs</a>
         </div>
-        <div class="status-row" aria-label="Dependency status colors">
-          <span class="status-pill"><span class="dot green"></span>Up to date</span>
-          <span class="status-pill"><span class="dot yellow"></span>Update available</span>
-          <span class="status-pill"><span class="dot orange"></span>Low or medium risk</span>
-          <span class="status-pill"><span class="dot red"></span>Missing or high risk</span>
+        <div class="hero-proof" aria-label="Supported dependency surfaces">
+          <span>package.json</span>
+          <span>pnpm-workspace.yaml</span>
+          <span>OSV.dev</span>
+          <span>npm registry</span>
         </div>
       </div>
     </div>
   </section>
 
+  <section class="signal-band" aria-label="Dep Beacon value summary">
+    <div class="signal-band-inner">
+      <div class="signal-stat">
+        <strong>4 update paths</strong>
+        <span>patch, minor, major, latest</span>
+      </div>
+      <div class="signal-stat">
+        <strong>Catalog aware</strong>
+        <span>default and named pnpm catalogs</span>
+      </div>
+      <div class="signal-stat">
+        <strong>Risk visible</strong>
+        <span>OSV severity mapped to editor signals</span>
+      </div>
+      <div class="signal-stat">
+        <strong>Editor native</strong>
+        <span>CodeLens, diagnostics, and commands</span>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
+    <div class="section-inner split-layout">
+      <div class="section-heading compact">
+        <p class="eyebrow">The moment it helps</p>
+        <h2>Turn a dependency line into a decision.</h2>
+        <p>
+          Dep Beacon keeps version status where the change happens. You can compare the next safe move, spot security risk, and understand catalog-managed ranges without leaving VS Code.
+        </p>
+      </div>
+
+      <figure class="editor-demo" aria-label="Example dependency signals in a package manifest">
+        <div class="editor-demo-bar">
+          <span></span>
+          <span></span>
+          <span></span>
+          <strong>package.json</strong>
+        </div>
+        <div class="editor-demo-body">
+          <code>
+            <span class="line-no">3</span>
+            <span class="key">"astro"</span>: <span class="version-value">"^6.4.0"</span>
+          </code>
+          <div class="lens-row">
+            <span class="lens warning">latest 7.0.0</span>
+            <span class="lens ok">minor ^7.0.0</span>
+          </div>
+          <code>
+            <span class="line-no">4</span>
+            <span class="key">"react"</span>: <span class="version-value">"catalog:react19"</span>
+          </code>
+          <div class="lens-row">
+            <span class="lens catalog">catalog resolves ^19.0.0</span>
+          </div>
+          <code>
+            <span class="line-no">5</span>
+            <span class="key">"left-pad"</span>: <span class="version-value">"1.1.0"</span>
+          </code>
+          <div class="lens-row">
+            <span class="lens danger">high vulnerability reported</span>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section alt-section">
     <div class="section-inner">
       <div class="section-heading">
-        <h2>Built for dependency files, not dashboards.</h2>
+        <h2>Useful signals, not another dashboard.</h2>
         <p>
-          Dep Beacon lives where version decisions happen: `package.json`, `pnpm-workspace.yaml`, overrides, resolutions, and package extensions. It keeps the feedback close and the commands reversible.
+          The extension focuses on maintainers who review manifests all day: clear status colors, practical update targets, and commands that fit the VS Code workflow.
         </p>
       </div>
       <div class="feature-grid">
         <article class="feature-tile">
-          <h3>CodeLens updates</h3>
-          <p>Jump to next patch, next minor, next major, or latest while preserving `^` and `~` range style.</p>
+          <span class="feature-icon green"></span>
+          <h3>Version status</h3>
+          <p>Know when a range already accepts the latest stable release and when a newer target is available.</p>
         </article>
         <article class="feature-tile">
+          <span class="feature-icon yellow"></span>
+          <h3>Semver choices</h3>
+          <p>Apply patch, minor, major, or latest updates while preserving common `^` and `~` range style.</p>
+        </article>
+        <article class="feature-tile">
+          <span class="feature-icon blue"></span>
           <h3>pnpm catalogs</h3>
-          <p>Understands default and named catalogs, plus workspace-level overrides and package extensions.</p>
+          <p>Resolve `catalog:` and `catalog:name` entries before showing status, diagnostics, and update context.</p>
         </article>
         <article class="feature-tile">
-          <h3>Security signal</h3>
-          <p>Queries OSV.dev and separates low or medium advisories from high and critical risk.</p>
-        </article>
-        <article class="feature-tile">
-          <h3>Editor flow</h3>
-          <p>Sort dependency sections, clear cache, toggle prerelease versions, and run install commands.</p>
+          <span class="feature-icon red"></span>
+          <h3>Security risk</h3>
+          <p>Use OSV results to separate routine update work from low, medium, high, and critical advisory risk.</p>
         </article>
       </div>
     </div>
@@ -58,24 +129,37 @@ import { SITE } from '../site.config'
   <section class="section">
     <div class="section-inner">
       <div class="section-heading">
-        <h2>Install it, open a manifest, keep moving.</h2>
+        <h2>Designed for the files teams actually touch.</h2>
         <p>
-          Dep Beacon is designed for marketplace users who want useful dependency signals without switching to a separate dashboard.
+          Dep Beacon reads package manifests and workspace policy files, then keeps dependency maintenance actions close to the line that needs attention.
         </p>
       </div>
-      <div class="quick-grid">
-        <a class="quick-tile" href="/docs/installation">
-          <h3>Install</h3>
-          <p>Add Dep Beacon from the marketplace and open a supported manifest.</p>
-        </a>
-        <a class="quick-tile" href="/docs/pnpm-workspaces">
-          <h3>Workspace catalogs</h3>
-          <p>See how `catalog:` and `catalog:name` references resolve.</p>
-        </a>
-        <a class="quick-tile" href="/docs/configuration">
-          <h3>Configuration</h3>
-          <p>Tune registry, prerelease, vulnerability, and install-on-save behavior.</p>
-        </a>
+      <div class="workflow-grid">
+        <article class="workflow-item">
+          <strong>Open a manifest</strong>
+          <span>`package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` activates the extension automatically.</span>
+        </article>
+        <article class="workflow-item">
+          <strong>Review the signal</strong>
+          <span>Green, yellow, orange, and red labels distinguish healthy ranges, updates, warnings, and errors.</span>
+        </article>
+        <article class="workflow-item">
+          <strong>Apply the next move</strong>
+          <span>Use CodeLens actions, sorting, cache refresh, prerelease toggles, and package page links from VS Code.</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="section-inner cta-inner">
+      <div>
+        <p class="eyebrow">Ready when the manifest opens</p>
+        <h2>Make dependency reviews easier to scan.</h2>
+      </div>
+      <div class="cta-actions">
+        <a class="button primary" href={SITE.marketplaceUrl}>Install from Marketplace</a>
+        <a class="button secondary" href="/docs/vscode-extension">Explore features</a>
       </div>
     </div>
   </section>

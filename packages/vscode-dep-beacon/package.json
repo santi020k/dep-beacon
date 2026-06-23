@@ -52,27 +52,41 @@
     "commands": [
       {
         "command": "depBeacon.refresh",
-        "title": "Dep Beacon: Refresh Dependency Signals"
+        "title": "Refresh Dependency Signals",
+        "shortTitle": "Refresh",
+        "category": "Dep Beacon",
+        "icon": "$(refresh)"
       },
       {
         "command": "depBeacon.clearCache",
-        "title": "Dep Beacon: Clear Registry Cache"
+        "title": "Clear Registry Cache",
+        "category": "Dep Beacon"
       },
       {
         "command": "depBeacon.togglePrerelease",
-        "title": "Dep Beacon: Toggle Prerelease Versions"
+        "title": "Toggle Prerelease Versions",
+        "category": "Dep Beacon"
       },
       {
         "command": "depBeacon.sortManifest",
-        "title": "Dep Beacon: Sort Current Manifest"
+        "title": "Sort Current Manifest",
+        "category": "Dep Beacon"
       },
       {
         "command": "depBeacon.runInstall",
-        "title": "Dep Beacon: Run Package Install"
+        "title": "Run Package Install",
+        "category": "Dep Beacon"
       },
       {
         "command": "depBeacon.openDocs",
-        "title": "Dep Beacon: Open Documentation"
+        "title": "Open Documentation",
+        "category": "Dep Beacon"
+      },
+      {
+        "command": "depBeacon.showOutput",
+        "title": "Show Debug Output",
+        "category": "Dep Beacon",
+        "icon": "$(output)"
       }
     ],
     "configuration": {
@@ -145,6 +159,13 @@
     }
   },
   "activationEvents": [
+    "onCommand:depBeacon.refresh",
+    "onCommand:depBeacon.clearCache",
+    "onCommand:depBeacon.togglePrerelease",
+    "onCommand:depBeacon.sortManifest",
+    "onCommand:depBeacon.runInstall",
+    "onCommand:depBeacon.openDocs",
+    "onCommand:depBeacon.showOutput",
     "onLanguage:json",
     "onLanguage:jsonc",
     "onLanguage:yaml",

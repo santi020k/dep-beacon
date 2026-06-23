@@ -1,5 +1,5 @@
 .docs-content h1 {
-  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  font-size: 3.8rem;
   margin-bottom: 1rem;
 }
 
@@ -43,4 +43,10 @@
   border: 0;
   color: var(--ink);
   padding: 0;
+}
+
+@media (max-width: 720px) {
+  .docs-content h1 {
+    font-size: 2.6rem;
+  }
 }

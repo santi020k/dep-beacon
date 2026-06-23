@@ -19,7 +19,7 @@ import {
 import * as vscode from 'vscode'
 
 import { type DepBeaconConfig, getDepBeaconConfig, type PackageManagerPreference } from './config.js'
-import { decorationText, type DecorationTone,statusTitle, statusTone, updateActions } from './presentation.js'
+import { decorationText, type DecorationTone, statusTitle, statusTone, updateActions } from './presentation.js'
 
 interface CachedAnalysis {
   analyses: DependencyAnalysis[]
@@ -58,6 +58,9 @@ const toUpdateRange = (range: TextRange): UpdateDependencyArgs['range'] => ({
 
 const isSupportedDocument = (document: vscode.TextDocument): boolean =>
   document.uri.scheme === 'file' && isSupportedManifestPath(document.fileName)
+
+const describeDocument = (document: vscode.TextDocument): string =>
+  vscode.workspace.asRelativePath(document.uri, false)
 
 const formatReplacement = (currentText: string, targetSpec: string): string => {
   const trimmed = currentText.trimStart()
@@ -147,6 +150,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     this.#output = vscode.window.createOutputChannel('Dep Beacon')
 
+    this.log('Activating Dep Beacon.')
+
     this.#decorationTypes = {
       green: createDecoration(new vscode.ThemeColor('charts.green')),
       muted: createDecoration(new vscode.ThemeColor('descriptionForeground')),
@@ -159,13 +164,13 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     this.#subscriptions.push(
       vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, this),
-      vscode.workspace.onDidChangeTextDocument((event) => { this.schedule(event.document); }),
-      vscode.workspace.onDidOpenTextDocument((document) => { this.schedule(document); }),
+      vscode.workspace.onDidChangeTextDocument((event) => { this.schedule(event.document, false, 'document changed'); }),
+      vscode.workspace.onDidOpenTextDocument((document) => { this.schedule(document, false, 'document opened'); }),
       vscode.workspace.onDidSaveTextDocument((document) => {
-        this.schedule(document, true)
+        this.schedule(document, true, 'document saved')
 
         this.runInstallOnSave(document).catch((error: unknown) => {
-          this.logError(error)
+          this.logError(error, `Install-on-save failed for ${describeDocument(document)}.`)
         })
       }),
       vscode.workspace.onDidChangeConfiguration((event) => {
@@ -173,24 +178,35 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
         this.clearCache()
 
-        this.refreshVisibleEditors()
+        this.log('Configuration changed; cache cleared and visible editors will be refreshed.')
+
+        this.refreshVisibleEditors(false, 'configuration changed')
       }),
       vscode.window.onDidChangeVisibleTextEditors(() => { this.updateVisibleDecorations(); }),
-      vscode.commands.registerCommand('depBeacon.refresh', () => { this.refreshVisibleEditors(true); }),
+      vscode.commands.registerCommand('depBeacon.refresh', () => { this.refreshVisibleEditors(true, 'manual refresh command'); }),
       vscode.commands.registerCommand('depBeacon.clearCache', () => {
         this.clearCache()
 
+        this.log('Registry cache cleared by command.')
+
         return vscode.window.showInformationMessage('Dep Beacon registry cache cleared.').then(undefined, (error: unknown) => {
-          this.logError(error)
+          this.logError(error, 'Failed to show cache-cleared message.')
         })
       }),
       vscode.commands.registerCommand('depBeacon.togglePrerelease', () => this.togglePrerelease()),
       vscode.commands.registerCommand('depBeacon.sortManifest', () => this.sortCurrentManifest()),
       vscode.commands.registerCommand('depBeacon.runInstall', () => this.runInstall(vscode.window.activeTextEditor?.document)),
       vscode.commands.registerCommand('depBeacon.openDocs', () => this.openDocs()),
+      vscode.commands.registerCommand('depBeacon.showOutput', () => {
+        this.log('Debug output opened by command.')
+
+        this.#output.show()
+      }),
       vscode.commands.registerCommand('depBeacon.openPackage', (url: string) => vscode.env.openExternal(vscode.Uri.parse(url))),
       vscode.commands.registerCommand('depBeacon.updateDependency', (args: UpdateDependencyArgs) => this.updateDependency(args)),
     )
+
+    this.log('Registered Dep Beacon commands and providers.')
 
     context.subscriptions.push(...this.#subscriptions)
   }
@@ -200,30 +216,50 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     if (!config.enable || !isSupportedDocument(document)) return []
 
-    const analyses = await this.analyzeDocument(document)
+    try {
+      const analyses = await this.analyzeDocument(document)
 
-    return analyses.flatMap((analysis) => this.createCodeLenses(document, analysis))
+      return analyses.flatMap((analysis) => this.createCodeLenses(document, analysis))
+    } catch (error) {
+      this.logError(error, `Failed to provide CodeLens for ${describeDocument(document)}.`)
+
+      return []
+    }
   }
 
-  schedule(document: vscode.TextDocument, force = false): void {
-    if (!isSupportedDocument(document)) return
+  schedule(document: vscode.TextDocument, force = false, reason = 'scheduled refresh'): void {
+    if (!isSupportedDocument(document)) {
+      this.log(`Skipped unsupported document: ${describeDocument(document)}.`)
+
+      return
+    }
 
     const key = document.uri.toString()
     const timer = this.#timers.get(key)
 
     if (timer) clearTimeout(timer)
 
+    this.log(`Scheduled ${force ? 'forced ' : ''}analysis for ${describeDocument(document)} (${reason}).`)
+
     this.#timers.set(key, setTimeout(() => {
       this.#timers.delete(key)
 
       this.analyzeDocument(document, force).catch((error: unknown) => {
-        this.logError(error)
+        this.logError(error, `Failed to analyze ${describeDocument(document)}.`)
       })
     }, 250))
   }
 
-  logError(error: unknown): void {
-    this.#output.appendLine(error instanceof Error ? error.stack ?? error.message : String(error))
+  log(message: string): void {
+    this.#output.appendLine(`[${new Date().toISOString()}] ${message}`)
+  }
+
+  logError(error: unknown, context?: string): void {
+    if (context) this.log(context)
+
+    const message = error instanceof Error ? error.stack ?? error.message : String(error)
+
+    this.log(`Error: ${message}`)
   }
 
   clearCache(): void {
@@ -236,26 +272,60 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     this.#onDidChangeCodeLenses.fire()
   }
 
-  refreshVisibleEditors(force = false): void {
-    for (const editor of vscode.window.visibleTextEditors) {
-      this.schedule(editor.document, force)
+  refreshVisibleEditors(force = false, reason = 'visible editors changed'): void {
+    const editors = vscode.window.visibleTextEditors
+    let supportedCount = 0
+
+    this.log(`Refresh requested for ${editors.length} visible editor(s) (${reason}).`)
+
+    if (force) this.#output.show(true)
+
+    if (editors.length === 0) {
+      this.log('No visible editors to refresh.')
+
+      return
     }
+
+    for (const editor of editors) {
+      if (isSupportedDocument(editor.document)) supportedCount += 1
+
+      this.schedule(editor.document, force, reason)
+    }
+
+    if (supportedCount === 0) this.log('No supported package.json or pnpm-workspace.yaml editors are visible.')
   }
 
   async analyzeDocument(document: vscode.TextDocument, force = false): Promise<DependencyAnalysis[]> {
     const config = getDepBeaconConfig()
 
-    if (!config.enable || !isSupportedDocument(document)) return []
+    if (!config.enable) {
+      this.log(`Skipped ${describeDocument(document)} because depBeacon.enable is false.`)
+
+      return []
+    }
+
+    if (!isSupportedDocument(document)) {
+      this.log(`Skipped unsupported document during analysis: ${describeDocument(document)}.`)
+
+      return []
+    }
 
     const key = document.uri.toString()
     const fingerprint = createFingerprint(document, config)
     const cached = this.#cache.get(key)
 
     if (!force && cached?.fingerprint === fingerprint && cached.expiresAt > Date.now()) {
+      this.log(`Cache hit for ${describeDocument(document)} (${cached.analyses.length} dependencies).`)
+
       return cached.analyses
     }
 
+    this.log(`Analyzing ${describeDocument(document)}${force ? ' with cache bypass' : ''}.`)
+
     const parseResult = parseManifest(document.fileName, document.getText())
+
+    this.log(`Parsed ${describeDocument(document)}: ${parseResult.dependencies.length} dependencies, ${parseResult.errors.length} parse error(s).`)
+
     const catalogSnapshot = await this.loadCatalogSnapshot(document)
     const registryClient = this.getRegistryClient(config)
 
@@ -267,6 +337,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
       vulnerabilities: config.checkVulnerabilities,
       osvClient: new OsvClient(),
     })
+
+    this.log(`Analyzed ${describeDocument(document)}: ${analyses.length} dependency signal(s).`)
 
     this.#cache.set(key, {
       analyses,
@@ -321,6 +393,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     const uniqueUris = [...new Map(uris.map((uri) => [uri.toString(), uri])).values()]
     const manifests: ManifestParseResult[] = []
 
+    this.log(`Loading pnpm catalog data from ${uniqueUris.length} workspace manifest(s).`)
+
     for (const uri of uniqueUris) {
       try {
         const document = uri.toString() === currentDocument.uri.toString()
@@ -329,7 +403,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
         manifests.push(parseManifest(document.fileName, document.getText()))
       } catch (error) {
-        this.#output.appendLine(`Failed to read ${uri.toString()}: ${error instanceof Error ? error.message : String(error)}`)
+        this.logError(error, `Failed to read ${uri.toString()}.`)
       }
     }
 
@@ -341,7 +415,11 @@ export class DepBeaconController implements vscode.CodeLensProvider {
       }
     }
 
-    return collectCatalogSnapshot(manifests)
+    const catalogSnapshot = collectCatalogSnapshot(manifests)
+
+    this.log(`Loaded pnpm catalog data from ${manifests.length} parsed manifest(s).`)
+
+    return catalogSnapshot
   }
 
   updateDiagnostics(uri: vscode.Uri, parseResult: ManifestParseResult, analyses: readonly DependencyAnalysis[]): void {
@@ -365,6 +443,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     ]
 
     this.#diagnostics.set(uri, diagnostics)
+
+    this.log(`Updated diagnostics for ${vscode.workspace.asRelativePath(uri, false)}: ${diagnostics.length} diagnostic(s).`)
   }
 
   updateVisibleDecorations(): void {
@@ -426,6 +506,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     const replacement = formatReplacement(document.getText(range), args.targetSpec)
     const edit = new vscode.WorkspaceEdit()
 
+    this.log(`Updating dependency in ${describeDocument(document)} to ${args.targetSpec}.`)
+
     edit.replace(uri, range, replacement)
 
     const applied = await vscode.workspace.applyEdit(edit)
@@ -440,7 +522,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport)
 
-    this.schedule(document, true)
+    this.schedule(document, true, 'dependency updated')
   }
 
   async sortCurrentManifest(): Promise<void> {
@@ -466,8 +548,12 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
       await editor.document.save()
 
-      this.schedule(editor.document, true)
+      this.log(`Sorted dependency sections in ${describeDocument(editor.document)}.`)
+
+      this.schedule(editor.document, true, 'manifest sorted')
     } catch (error) {
+      this.logError(error, 'Failed to sort package.json.')
+
       await vscode.window.showErrorMessage(`Dep Beacon could not sort package.json: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
@@ -477,11 +563,15 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     await vscode.workspace.getConfiguration('depBeacon').update('includePrerelease', !config.includePrerelease, vscode.ConfigurationTarget.Workspace)
 
+    this.log(`Prerelease checks ${config.includePrerelease ? 'disabled' : 'enabled'} by command.`)
+
     await vscode.window.showInformationMessage(`Dep Beacon prerelease checks ${config.includePrerelease ? 'disabled' : 'enabled'}.`)
   }
 
   async openDocs(): Promise<void> {
     const config = getDepBeaconConfig()
+
+    this.log(`Opening documentation: ${config.docsUrl}.`)
 
     await vscode.env.openExternal(vscode.Uri.parse(config.docsUrl))
   }
@@ -490,6 +580,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     const config = getDepBeaconConfig()
 
     if (!config.enable || !config.runInstallOnSave || !isSupportedDocument(document)) return
+
+    this.log(`Install-on-save triggered for ${describeDocument(document)}.`)
 
     await this.runInstall(document)
   }
@@ -505,6 +597,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     const manager = await resolvePackageManager(folder.uri, getDepBeaconConfig().packageManager)
 
+    this.log(`Starting ${manager} install in ${folder.uri.fsPath}.`)
+
     const terminal = vscode.window.createTerminal({
       cwd: folder.uri.fsPath,
       name: `Dep Beacon ${manager}`,
@@ -519,7 +613,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 export const activate = (context: vscode.ExtensionContext): void => {
   const controller = new DepBeaconController(context)
 
-  controller.refreshVisibleEditors()
+  controller.refreshVisibleEditors(false, 'extension activation')
 }
 
 export const deactivate = (): undefined => undefined

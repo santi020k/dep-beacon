@@ -1,6 +1,7 @@
 :root {
   color-scheme: dark;
   --bg: #0b1115;
+  --bg-warm: #17140f;
   --bg-soft: #101820;
   --surface: #142027;
   --surface-strong: #1a2a33;
@@ -15,5 +16,7 @@
   --orange: #f59e4c;
   --red: #f05d5e;
   --blue: #75a7ff;
+  --teal: #3dd6b3;
+  --warm: #f8c65c;
   --shadow: 0 24px 80px rgb(0 0 0 / 0.35);
 }

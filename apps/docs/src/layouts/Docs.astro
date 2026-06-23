@@ -5,13 +5,24 @@ import Base from './Base.astro'
 
 interface Props {
   description?: string
+  image?: string
   title: string
 }
 
-const { description, title } = Astro.props
+const docsOgImages: Record<string, string> = {
+  '/docs': '/og/docs.png',
+  '/docs/configuration': '/og/configuration.png',
+  '/docs/installation': '/og/install.png',
+  '/docs/pnpm-workspaces': '/og/pnpm-workspaces.png',
+  '/docs/security': '/og/security.png',
+  '/docs/vscode-extension': '/og/extension.png',
+}
+
+const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/docs'
+const { description, image = docsOgImages[currentPath] ?? '/og/docs.png', title } = Astro.props
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} image={image} imageAlt={`${title} social preview`}>
   <section class="docs-shell">
     <DocsSidebar />
     <article class="docs-content">

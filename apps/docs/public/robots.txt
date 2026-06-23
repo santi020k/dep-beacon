@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dep-beacon.santi020k.com/sitemap-index.xml

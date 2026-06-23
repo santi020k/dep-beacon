@@ -1,5 +1,6 @@
 ---
 import Docs from '../../layouts/Docs.astro'
+import { SITE } from '../../site.config'
 ---
 
 <Docs title="Install" description="Install Dep Beacon from a VS Code marketplace.">
@@ -7,6 +8,11 @@ import Docs from '../../layouts/Docs.astro'
   <p>
     Install Dep Beacon from the Visual Studio Marketplace or Open VSX, then open a supported npm manifest in VS Code.
   </p>
+
+  <div class="docs-callout">
+    <strong>Install links:</strong>
+    <span><a href={SITE.marketplaceUrl}>Visual Studio Marketplace</a> or <a href={SITE.openVsxUrl}>Open VSX</a>.</span>
+  </div>
 
   <h2>From VS Code</h2>
   <ol>
