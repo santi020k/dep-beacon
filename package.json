@@ -10,6 +10,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
+    "check:astro": "pnpm --filter @santi020k/dep-beacon-docs check",
     "lint": "pnpm run lint:repo && turbo run lint",
     "lint:repo": "eslint . --cache --no-warn-ignored",
     "lint:fix": "pnpm run lint:repo:fix && turbo run lint:fix",
@@ -28,6 +29,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky",
     "pre-commit": "lint-staged",
+    "pre-push": "pnpm run check:astro && pnpm run typecheck && pnpm run test && pnpm run lint",
     "commit": "cz"
   },
   "devDependencies": {
