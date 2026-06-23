@@ -14,13 +14,13 @@ catalogs:
   conflicts_astro_h6_4_0:
     astro: ^6.4.0
   conflicts_typescript_h5_4_0:
-    typescript: ^5.4.0
+    typescript: ^6.0.3
 
 overrides:
-  rollup: ^4.0.0
-  vite: ^7.0.0
+  rollup: ^4.62.2
+  vite: ^8.0.16
 
 packageExtensions:
   left-pad@*:
     dependencies:
-      debug: ^4.4.0
+      debug: ^4.4.3

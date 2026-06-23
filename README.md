@@ -38,6 +38,9 @@ Open the repo in VS Code and use Run and Debug:
 - `Dep Beacon: Extension (Watch)` is for active development after starting the `vscode-dep-beacon: dev` task.
 - `Dep Beacon: Extension (Current Workspace)` opens the repo itself in the Extension Host.
 
+Local launch configurations mirror Dep Beacon output to `.vscode/dep-beacon-extension-host.log`.
+If the Extension Development Host reports `The window terminated unexpectedly (reason: 'killed', code: '15')`, that means it received `SIGTERM`; check this log file first, then VS Code's `Developer: Open Logs Folder` command for the Extension Host logs.
+
 The sample workspace includes `package.json` and `pnpm-workspace.yaml` entries for regular dependencies, catalogs, overrides, and package extensions.
 
 ## Environment

@@ -1,10 +1,10 @@
-import { basename } from 'node:path'
+import { appendFileSync, mkdirSync } from 'node:fs'
+import { basename, dirname, join } from 'node:path'
 
 import {
   analyzeDependencies,
   type CatalogSnapshot,
   collectCatalogSnapshot,
-  createTargetSpec,
   type DependencyAnalysis,
   isHighRiskSeverity,
   isSupportedManifestPath,
@@ -19,7 +19,14 @@ import {
 import * as vscode from 'vscode'
 
 import { type DepBeaconConfig, getDepBeaconConfig, type PackageManagerPreference } from './config.js'
-import { decorationText, type DecorationTone, statusTitle, statusTone, updateActions } from './presentation.js'
+import {
+  decorationText,
+  type DecorationTone,
+  packageLensTitle,
+  type ResolvedUpdateAction,
+  resolvedUpdateActions,
+  statusTone,
+} from './presentation.js'
 
 interface CachedAnalysis {
   analyses: DependencyAnalysis[]
@@ -33,6 +40,10 @@ interface InflightAnalysis {
   request: Promise<DependencyAnalysis[]>
 }
 
+interface ProcessWarning extends Error {
+  code?: string
+}
+
 interface UpdateDependencyArgs {
   targetSpec: string
   uri: string
@@ -42,11 +53,22 @@ interface UpdateDependencyArgs {
   }
 }
 
+interface PickDependencyUpdateArgs {
+  actions: ResolvedUpdateAction[]
+  packageName: string
+  range: UpdateDependencyArgs['range']
+  uri: string
+}
+
 const DOCUMENT_SELECTOR: vscode.DocumentSelector = [
   { language: 'json', scheme: 'file' },
   { language: 'jsonc', scheme: 'file' },
   { language: 'yaml', scheme: 'file' },
 ]
+
+const LOCAL_LOG_FILE_NAME = 'dep-beacon-extension-host.log'
+const LOCAL_DIAGNOSTIC_SIGNALS = ['SIGHUP', 'SIGINT', 'SIGTERM'] as const satisfies readonly NodeJS.Signals[]
+let localRuntimeDiagnosticsRegistered = false
 
 const toVscodeRange = (range: TextRange): vscode.Range =>
   new vscode.Range(
@@ -63,6 +85,28 @@ const toUpdateRange = (range: TextRange): UpdateDependencyArgs['range'] => ({
 
 const isSupportedDocument = (document: vscode.TextDocument): boolean =>
   document.uri.scheme === 'file' && isSupportedManifestPath(document.fileName)
+
+const isLocalExtensionHost = (): boolean =>
+  process.env.DEP_BEACON_EXTENSION_ENV === 'local'
+
+const configuredLogFilePath = (): string | undefined => {
+  const filePath = process.env.DEP_BEACON_LOG_FILE?.trim()
+
+  return filePath || undefined
+}
+
+const shouldRegisterLocalRuntimeDiagnostics = (): boolean =>
+  isLocalExtensionHost() || configuredLogFilePath() !== undefined
+
+const localLogFilePath = (context: vscode.ExtensionContext): string | undefined =>
+  configuredLogFilePath() ?? (isLocalExtensionHost() ? join(context.logUri.fsPath, LOCAL_LOG_FILE_NAME) : undefined)
+
+const isDepBeaconWarning = (warning: ProcessWarning, context: vscode.ExtensionContext): boolean => {
+  const stack = warning.stack ?? ''
+  const extensionPath = context.extensionUri.fsPath
+
+  return stack.includes(extensionPath) || stack.includes('/vscode-dep-beacon/') || stack.includes('\\vscode-dep-beacon\\')
+}
 
 const describeDocument = (document: vscode.TextDocument): string =>
   vscode.workspace.asRelativePath(document.uri, false)
@@ -85,6 +129,32 @@ const createDecoration = (color: vscode.ThemeColor): vscode.TextEditorDecoration
     },
     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
   })
+
+const updateLensTitle = (actions: readonly ResolvedUpdateAction[]): string => {
+  const action = actions[0]
+
+  if (!action) return '$(arrow-up) update'
+
+  if (actions.length > 1) return '$(arrow-up) choose update...'
+
+  return `$(arrow-up) update ${action.targetSpec}`
+}
+
+const updateQuickPickLabel = (action: ResolvedUpdateAction): string => {
+  switch (action.kind) {
+    case 'patch':
+      return '$(arrow-up) Patch'
+
+    case 'minor':
+      return '$(arrow-up) Minor'
+
+    case 'major':
+      return '$(arrow-up) Major'
+
+    case 'latest':
+      return '$(rocket) Latest'
+  }
+}
 
 const diagnosticSeverity = (analysis: DependencyAnalysis): vscode.DiagnosticSeverity | undefined => {
   switch (analysis.status) {
@@ -146,10 +216,12 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   readonly #decorationTypes: Record<DecorationTone, vscode.TextEditorDecorationType>
   readonly #diagnostics: vscode.DiagnosticCollection
   readonly #inflightAnalyses = new Map<string, InflightAnalysis>()
+  readonly #logFilePath: string | undefined
   readonly #onDidChangeCodeLenses = new vscode.EventEmitter<void>()
   readonly #output: vscode.OutputChannel
   readonly #subscriptions: vscode.Disposable[] = []
   readonly #timers = new Map<string, ReturnType<typeof setTimeout>>()
+  #fileLoggingDisabled = false
   #registryClient = new NpmRegistryClient()
 
   readonly onDidChangeCodeLenses = this.#onDidChangeCodeLenses.event
@@ -157,9 +229,19 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   constructor(context: vscode.ExtensionContext) {
     this.#diagnostics = vscode.languages.createDiagnosticCollection('dep-beacon')
 
-    this.#output = vscode.window.createOutputChannel('Dep Beacon')
+    this.#output = vscode.window.createOutputChannel('Dep Beacon', { log: true })
+
+    this.#logFilePath = localLogFilePath(context)
+
+    this.initializeFileLog()
+
+    this.registerLocalRuntimeDiagnostics(context)
 
     this.log('Activating Dep Beacon.')
+
+    this.log(`Runtime: pid ${process.pid}, node ${process.version}, VS Code ${vscode.version}, platform ${process.platform}/${process.arch}.`)
+
+    if (this.#logFilePath) this.log(`Mirroring Dep Beacon diagnostics to ${this.#logFilePath}.`)
 
     this.#decorationTypes = {
       green: createDecoration(new vscode.ThemeColor('charts.green')),
@@ -212,12 +294,105 @@ export class DepBeaconController implements vscode.CodeLensProvider {
         this.#output.show()
       }),
       vscode.commands.registerCommand('depBeacon.openPackage', (url: string) => vscode.env.openExternal(vscode.Uri.parse(url))),
+      vscode.commands.registerCommand('depBeacon.pickDependencyUpdate', (args: PickDependencyUpdateArgs) => this.pickDependencyUpdate(args)),
       vscode.commands.registerCommand('depBeacon.updateDependency', (args: UpdateDependencyArgs) => this.updateDependency(args)),
     )
 
     this.log('Registered Dep Beacon commands and providers.')
 
     context.subscriptions.push(...this.#subscriptions)
+  }
+
+  initializeFileLog(): void {
+    if (!this.#logFilePath) return
+
+    try {
+      mkdirSync(dirname(this.#logFilePath), { recursive: true })
+
+      appendFileSync(this.#logFilePath, `\n--- Dep Beacon session started ${new Date().toISOString()} pid ${process.pid} ---\n`, 'utf8')
+    } catch (error) {
+      this.#fileLoggingDisabled = true
+
+      this.#output.appendLine(`[${new Date().toISOString()}] File logging disabled: ${errorMessage(error)}`)
+    }
+  }
+
+  appendFileLog(line: string): void {
+    if (!this.#logFilePath || this.#fileLoggingDisabled) return
+
+    try {
+      appendFileSync(this.#logFilePath, `${line}\n`, 'utf8')
+    } catch (error) {
+      this.#fileLoggingDisabled = true
+
+      this.#output.appendLine(`[${new Date().toISOString()}] File logging disabled: ${errorMessage(error)}`)
+    }
+  }
+
+  registerLocalRuntimeDiagnostics(context: vscode.ExtensionContext): void {
+    if (!shouldRegisterLocalRuntimeDiagnostics() || localRuntimeDiagnosticsRegistered) return
+
+    const warningListener = (warning: ProcessWarning) => {
+      if (!isDepBeaconWarning(warning, context)) return
+
+      const code = warning.code ? ` [${warning.code}]` : ''
+
+      this.log(`Node warning captured: ${warning.name}${code}: ${warning.message}`)
+
+      for (const line of (warning.stack ?? '').split(/\r?\n/u).slice(1)) {
+        this.log(`  ${line}`)
+      }
+    }
+
+    const unhandledRejectionListener = (reason: unknown) => {
+      this.logError(reason, 'Unhandled promise rejection.')
+    }
+
+    const uncaughtExceptionMonitorListener = (error: Error, origin: NodeJS.UncaughtExceptionOrigin) => {
+      this.logError(error, `Uncaught exception monitor (${origin}).`)
+    }
+
+    const signalListeners: { listener: () => void, signal: typeof LOCAL_DIAGNOSTIC_SIGNALS[number] }[] = []
+
+    for (const signal of LOCAL_DIAGNOSTIC_SIGNALS) {
+      const listener = () => {
+        this.log(`Received ${signal}; re-sending signal after writing diagnostics.`)
+
+        for (const registered of signalListeners) {
+          process.off(registered.signal, registered.listener)
+        }
+
+        process.kill(process.pid, signal)
+      }
+
+      process.once(signal, listener)
+
+      signalListeners.push({ listener, signal })
+    }
+
+    process.on('warning', warningListener)
+
+    process.on('unhandledRejection', unhandledRejectionListener)
+
+    process.on('uncaughtExceptionMonitor', uncaughtExceptionMonitorListener)
+
+    localRuntimeDiagnosticsRegistered = true
+
+    context.subscriptions.push({
+      dispose: () => {
+        process.off('warning', warningListener)
+
+        process.off('unhandledRejection', unhandledRejectionListener)
+
+        process.off('uncaughtExceptionMonitor', uncaughtExceptionMonitorListener)
+
+        for (const { listener, signal } of signalListeners) {
+          process.off(signal, listener)
+        }
+
+        localRuntimeDiagnosticsRegistered = false
+      },
+    })
   }
 
   async provideCodeLenses(document: vscode.TextDocument): Promise<vscode.CodeLens[]> {
@@ -259,6 +434,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     const line = `[${new Date().toISOString()}] ${message}`
 
     this.#output.appendLine(line)
+
+    this.appendFileLog(line)
 
     // eslint-disable-next-line no-console -- Mirrors extension output to the VS Code Debug Console.
     console.info(`[Dep Beacon] ${line}`)
@@ -408,31 +585,76 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 
   createCodeLenses(document: vscode.TextDocument, analysis: DependencyAnalysis): vscode.CodeLens[] {
-    const range = toVscodeRange(analysis.dependency.specRange)
+    const nameRange = toVscodeRange(analysis.dependency.nameRange)
+    const specRange = toVscodeRange(analysis.dependency.specRange)
+    const actions = resolvedUpdateActions(analysis)
+
+    const updateArgs = {
+      range: toUpdateRange(analysis.dependency.specRange),
+      uri: document.uri.toString(),
+    }
 
     const lenses = [
-      new vscode.CodeLens(range, {
+      new vscode.CodeLens(nameRange, {
         arguments: [analysis.packageUrl],
         command: 'depBeacon.openPackage',
-        title: statusTitle(analysis),
+        title: packageLensTitle(analysis),
       }),
     ]
 
-    for (const action of updateActions(analysis)) {
-      const targetSpec = createTargetSpec(analysis.dependency.spec, action.version)
+    if (actions.length === 1) {
+      const action = actions[0]
 
-      lenses.push(new vscode.CodeLens(range, {
+      if (!action) return lenses
+
+      lenses.push(new vscode.CodeLens(specRange, {
         arguments: [{
-          range: toUpdateRange(analysis.dependency.specRange),
-          targetSpec,
-          uri: document.uri.toString(),
+          ...updateArgs,
+          targetSpec: action.targetSpec,
         } satisfies UpdateDependencyArgs],
         command: 'depBeacon.updateDependency',
-        title: `${action.title} ${targetSpec}`,
+        title: updateLensTitle(actions),
+      }))
+    } else if (actions.length > 1) {
+      lenses.push(new vscode.CodeLens(specRange, {
+        arguments: [{
+          ...updateArgs,
+          actions,
+          packageName: analysis.dependency.packageName,
+        } satisfies PickDependencyUpdateArgs],
+        command: 'depBeacon.pickDependencyUpdate',
+        title: updateLensTitle(actions),
       }))
     }
 
     return lenses
+  }
+
+  async pickDependencyUpdate(args: PickDependencyUpdateArgs): Promise<void> {
+    type UpdateQuickPickItem = vscode.QuickPickItem & {
+      action: ResolvedUpdateAction
+    }
+
+    const items: UpdateQuickPickItem[] = args.actions.map((action) => ({
+      action,
+      description: action.targetSpec,
+      detail: `Use ${action.version} for ${args.packageName}.`,
+      label: updateQuickPickLabel(action),
+    }))
+
+    const selection = await vscode.window.showQuickPick(items, {
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: `Update ${args.packageName}`,
+    })
+
+    if (!selection) return
+
+    await this.updateDependency({
+      range: args.range,
+      targetSpec: selection.action.targetSpec,
+      uri: args.uri,
+    })
   }
 
   async loadCatalogSnapshot(currentDocument: vscode.TextDocument): Promise<CatalogSnapshot> {
@@ -664,7 +886,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 const reportActivationError = (error: unknown): never => {
   const message = errorMessage(error)
   const line = `[${new Date().toISOString()}] Activation failed.`
-  const output = vscode.window.createOutputChannel('Dep Beacon')
+  const output = vscode.window.createOutputChannel('Dep Beacon', { log: true })
 
   output.appendLine(line)
 

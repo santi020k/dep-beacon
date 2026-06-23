@@ -1,4 +1,4 @@
-import type { DependencyAnalysis, DependencyStatus } from '@santi020k/dep-beacon-core'
+import { createTargetSpec, type DependencyAnalysis, type DependencyStatus } from '@santi020k/dep-beacon-core'
 
 export type DecorationTone = 'green' | 'muted' | 'orange' | 'red' | 'yellow'
 
@@ -6,6 +6,35 @@ export interface UpdateAction {
   kind: 'latest' | 'major' | 'minor' | 'patch'
   title: string
   version: string
+}
+
+export interface ResolvedUpdateAction extends UpdateAction {
+  targetSpec: string
+}
+
+const versionSummary = (analysis: DependencyAnalysis): string => {
+  const current = analysis.targets.current
+  const latest = analysis.targets.latest
+
+  if (current && latest) return `current ${current} | latest ${latest}`
+
+  if (current) return `current ${current}`
+
+  if (latest) return `latest ${latest}`
+
+  return ''
+}
+
+const withVersionSummary = (label: string, summary: string): string =>
+  summary ? `${label} | ${summary}` : label
+
+const versionTransition = (analysis: DependencyAnalysis): string => {
+  const current = analysis.targets.current
+  const latest = analysis.targets.latest
+
+  if (current && latest && current !== latest) return `${current} -> ${latest}`
+
+  return latest ?? current ?? ''
 }
 
 export const statusTone = (status: DependencyStatus): DecorationTone => {
@@ -31,19 +60,19 @@ export const statusTone = (status: DependencyStatus): DecorationTone => {
 }
 
 export const statusTitle = (analysis: DependencyAnalysis): string => {
-  const latest = analysis.targets.latest ? ` ${analysis.targets.latest}` : ''
+  const summary = versionSummary(analysis)
 
   switch (analysis.status) {
     case 'up-to-date':
-      return `$(pass-filled) up to date${latest}`
+      return withVersionSummary('$(pass-filled) up to date', summary)
 
     case 'outdated':
-      return `$(warning) latest${latest}`
+      return withVersionSummary('$(warning) update available', summary)
 
     case 'vulnerable': {
       const severity = analysis.vulnerability?.severity ?? 'unknown'
 
-      return `$(flame) ${severity} vulnerability`
+      return withVersionSummary(`$(flame) ${severity} vulnerability`, summary)
     }
 
     case 'missing':
@@ -57,18 +86,22 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
   }
 }
 
+export const packageLensTitle = (analysis: DependencyAnalysis): string =>
+  `$(link-external) ${analysis.dependency.packageName}`
+
 export const decorationText = (analysis: DependencyAnalysis): string => {
-  const latest = analysis.targets.latest ? ` ${analysis.targets.latest}` : ''
+  const transition = versionTransition(analysis)
+  const suffix = transition ? ` ${transition}` : ''
 
   switch (analysis.status) {
     case 'up-to-date':
-      return ` ok${latest}`
+      return ` ok${suffix}`
 
     case 'outdated':
-      return ` update${latest}`
+      return ` update${suffix}`
 
     case 'vulnerable':
-      return ` ${analysis.vulnerability?.severity ?? 'known'} risk`
+      return ` ${analysis.vulnerability?.severity ?? 'known'} risk${suffix}`
 
     case 'missing':
       return ' missing'
@@ -84,13 +117,18 @@ export const decorationText = (analysis: DependencyAnalysis): string => {
 export const updateActions = (analysis: DependencyAnalysis): UpdateAction[] => {
   if (analysis.dependency.spec.startsWith('catalog:')) return []
 
+  const currentSpec = analysis.dependency.spec.trim()
   const seen = new Set<string>()
   const actions: UpdateAction[] = []
 
   const push = (kind: UpdateAction['kind'], title: string, version: string | undefined): void => {
-    if (!version || version === analysis.targets.current || seen.has(version)) return
+    if (!version) return
 
-    seen.add(version)
+    const targetSpec = createTargetSpec(analysis.dependency.spec, version)
+
+    if (targetSpec === currentSpec || seen.has(targetSpec)) return
+
+    seen.add(targetSpec)
 
     actions.push({ kind, title, version })
   }
@@ -105,3 +143,9 @@ export const updateActions = (analysis: DependencyAnalysis): UpdateAction[] => {
 
   return actions
 }
+
+export const resolvedUpdateActions = (analysis: DependencyAnalysis): ResolvedUpdateAction[] =>
+  updateActions(analysis).map((action) => ({
+    ...action,
+    targetSpec: createTargetSpec(analysis.dependency.spec, action.version),
+  }))

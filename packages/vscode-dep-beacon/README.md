@@ -35,6 +35,7 @@ Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` and the exte
 - `latest`: move to npm's latest dist-tag or newest stable version.
 
 Dep Beacon preserves common range prefixes like `^` and `~` when it applies an update.
+Up-to-date ranges can still show a `latest` action when the written range can be synced to the latest version, such as `^19.0.0` to `^19.2.7`.
 
 ## Commands
 

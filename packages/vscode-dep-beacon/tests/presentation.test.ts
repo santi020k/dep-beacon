@@ -2,44 +2,60 @@ import type { DependencyAnalysis } from '@santi020k/dep-beacon-core'
 
 import { describe, expect, test } from 'vitest'
 
-import { decorationText, statusTitle, statusTone, updateActions } from '../src/presentation.js'
+import {
+  decorationText,
+  packageLensTitle,
+  resolvedUpdateActions,
+  statusTitle,
+  statusTone,
+  updateActions,
+} from '../src/presentation.js'
 
-const baseAnalysis = (status: DependencyAnalysis['status']): DependencyAnalysis => ({
-  dependency: {
-    id: 'dependencies:demo',
-    manager: 'npm',
-    nameRange: {
-      end: 8,
-      endPosition: { character: 8, line: 1 },
-      start: 4,
-      startPosition: { character: 4, line: 1 },
+const baseAnalysis = (status: DependencyAnalysis['status']): DependencyAnalysis => {
+  const targets = status === 'up-to-date'
+    ? {
+        current: '2.0.0',
+        latest: '2.0.0',
+      }
+    : {
+        current: '1.0.0',
+        latest: '2.0.0',
+        nextMajor: '2.0.0',
+        nextMinor: '1.1.0',
+        nextPatch: '1.0.1',
+      }
+
+  return {
+    dependency: {
+      id: 'dependencies:demo',
+      manager: 'npm',
+      nameRange: {
+        end: 8,
+        endPosition: { character: 8, line: 1 },
+        start: 4,
+        startPosition: { character: 4, line: 1 },
+      },
+      packageName: 'demo',
+      path: ['dependencies', 'demo'],
+      section: 'dependencies',
+      source: 'package-json',
+      spec: '^1.0.0',
+      specRange: {
+        end: 20,
+        endPosition: { character: 20, line: 1 },
+        start: 12,
+        startPosition: { character: 12, line: 1 },
+      },
     },
-    packageName: 'demo',
-    path: ['dependencies', 'demo'],
-    section: 'dependencies',
-    source: 'package-json',
-    spec: '^1.0.0',
-    specRange: {
-      end: 20,
-      endPosition: { character: 20, line: 1 },
-      start: 12,
-      startPosition: { character: 12, line: 1 },
-    },
-  },
-  displaySpec: '^1.0.0',
-  exists: true,
-  isLatestSatisfied: false,
-  message: 'A newer version is available.',
-  packageUrl: 'https://www.npmjs.com/package/demo',
-  status,
-  targets: {
-    current: '1.0.0',
-    latest: '2.0.0',
-    nextMajor: '2.0.0',
-    nextMinor: '1.1.0',
-    nextPatch: '1.0.1',
-  },
-})
+    displaySpec: '^1.0.0',
+    exists: true,
+    isLatestSatisfied: status === 'up-to-date',
+    message: 'A newer version is available.',
+    packageUrl: 'https://www.npmjs.com/package/demo',
+    status,
+    targets,
+  }
+}
 
 describe('presentation helpers', () => {
   test('maps status to editor decoration tones', () => {
@@ -52,13 +68,15 @@ describe('presentation helpers', () => {
   })
 
   test.each([
-    ['up-to-date', '$(pass-filled) up to date 2.0.0', ' ok 2.0.0'],
-    ['outdated', '$(warning) latest 2.0.0', ' update 2.0.0'],
+    ['up-to-date', '$(pass-filled) up to date | current 2.0.0 | latest 2.0.0', ' ok 2.0.0'],
+    ['outdated', '$(warning) update available | current 1.0.0 | latest 2.0.0', ' update 1.0.0 -> 2.0.0'],
     ['missing', '$(error) missing package or version', ' missing'],
     ['invalid', '$(error) invalid range', ' invalid'],
     ['protocol', '$(symbol-key) local or catalog-managed', ' managed'],
   ] as const)('creates compact labels and inline text for %s', (status, title, decoration) => {
     const analysis = baseAnalysis(status)
+
+    if (status === 'missing' || status === 'invalid' || status === 'protocol') analysis.targets = {}
 
     expect(statusTitle(analysis)).toBe(title)
     expect(decorationText(analysis)).toBe(decoration)
@@ -74,13 +92,13 @@ describe('presentation helpers', () => {
       source: 'osv',
     }
 
-    expect(statusTitle(vulnerable)).toBe('$(flame) critical vulnerability')
-    expect(decorationText(vulnerable)).toBe(' critical risk')
+    expect(statusTitle(vulnerable)).toBe('$(flame) critical vulnerability | current 1.0.0 | latest 2.0.0')
+    expect(decorationText(vulnerable)).toBe(' critical risk 1.0.0 -> 2.0.0')
 
     delete vulnerable.vulnerability
 
-    expect(statusTitle(vulnerable)).toBe('$(flame) unknown vulnerability')
-    expect(decorationText(vulnerable)).toBe(' known risk')
+    expect(statusTitle(vulnerable)).toBe('$(flame) unknown vulnerability | current 1.0.0 | latest 2.0.0')
+    expect(decorationText(vulnerable)).toBe(' known risk 1.0.0 -> 2.0.0')
   })
 
   test('omits the latest version suffix when no latest target is known', () => {
@@ -90,12 +108,27 @@ describe('presentation helpers', () => {
       current: '1.0.0',
     }
 
-    expect(statusTitle(analysis)).toBe('$(warning) latest')
-    expect(decorationText(analysis)).toBe(' update')
+    expect(statusTitle(analysis)).toBe('$(warning) update available | current 1.0.0')
+    expect(decorationText(analysis)).toBe(' update 1.0.0')
   })
 
   test('creates deduplicated update actions', () => {
     expect(updateActions(baseAnalysis('outdated')).map((action) => action.kind)).toEqual(['patch', 'minor', 'major'])
+  })
+
+  test('creates compact package lens labels', () => {
+    expect(packageLensTitle(baseAnalysis('outdated'))).toBe('$(link-external) demo')
+  })
+
+  test('resolves update actions with manifest target specs', () => {
+    expect(resolvedUpdateActions(baseAnalysis('outdated')).map((action) => ({
+      kind: action.kind,
+      targetSpec: action.targetSpec,
+    }))).toEqual([
+      { kind: 'patch', targetSpec: '^1.0.1' },
+      { kind: 'minor', targetSpec: '^1.1.0' },
+      { kind: 'major', targetSpec: '^2.0.0' },
+    ])
   })
 
   test('uses latest when it is distinct from patch, minor, and major targets', () => {
@@ -117,7 +150,25 @@ describe('presentation helpers', () => {
     ])
   })
 
-  test('skips empty, current, and duplicate update targets', () => {
+  test('offers latest when the current range accepts latest but the manifest can be synced', () => {
+    const analysis = baseAnalysis('up-to-date')
+
+    analysis.dependency.spec = '^19.0.0'
+    analysis.targets = {
+      current: '19.2.7',
+      latest: '19.2.7',
+    }
+
+    expect(updateActions(analysis)).toEqual([
+      { kind: 'latest', title: '$(rocket) latest', version: '19.2.7' },
+    ])
+
+    analysis.dependency.spec = '^19.2.7'
+
+    expect(updateActions(analysis)).toEqual([])
+  })
+
+  test('skips empty, no-op, and duplicate update targets', () => {
     const analysis = baseAnalysis('outdated')
 
     analysis.targets = {

@@ -12,7 +12,8 @@
         "${workspaceFolder}/examples/sample-workspace"
       ],
       "env": {
-        "DEP_BEACON_EXTENSION_ENV": "local"
+        "DEP_BEACON_EXTENSION_ENV": "local",
+        "DEP_BEACON_LOG_FILE": "${workspaceFolder}/.vscode/dep-beacon-extension-host.log"
       },
       "outFiles": [
         "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
@@ -29,7 +30,8 @@
         "${workspaceFolder}/examples/sample-workspace"
       ],
       "env": {
-        "DEP_BEACON_EXTENSION_ENV": "local"
+        "DEP_BEACON_EXTENSION_ENV": "local",
+        "DEP_BEACON_LOG_FILE": "${workspaceFolder}/.vscode/dep-beacon-extension-host.log"
       },
       "outFiles": [
         "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
@@ -47,7 +49,8 @@
         "${workspaceFolder}"
       ],
       "env": {
-        "DEP_BEACON_EXTENSION_ENV": "local"
+        "DEP_BEACON_EXTENSION_ENV": "local",
+        "DEP_BEACON_LOG_FILE": "${workspaceFolder}/.vscode/dep-beacon-extension-host.log"
       },
       "outFiles": [
         "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
@@ -65,7 +68,8 @@
         "${workspaceFolder}/examples/sample-workspace"
       ],
       "env": {
-        "DEP_BEACON_EXTENSION_ENV": "production"
+        "DEP_BEACON_EXTENSION_ENV": "production",
+        "DEP_BEACON_LOG_FILE": "${workspaceFolder}/.vscode/dep-beacon-extension-host.log"
       },
       "outFiles": [
         "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
