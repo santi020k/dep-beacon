@@ -2,15 +2,15 @@
 import Docs from '../../layouts/Docs.astro'
 ---
 
-<Docs title="Docs" description="Dep Beacon documentation overview.">
+<Docs title="Docs" description="Dep Beacon documentation for VS Code users.">
   <h1>Dep Beacon Docs</h1>
   <p>
     Dep Beacon brings dependency status into VS Code manifests. It checks npm registry metadata, calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear status colors.
   </p>
 
   <div class="docs-callout">
-    <strong>Project shape:</strong>
-    <span>Turbo monorepo, shared core package, bundled VS Code extension, Astro docs, Changesets release flow, and GitHub Actions.</span>
+    <strong>Start here:</strong>
+    <span>Install Dep Beacon from the marketplace, open `package.json` or `pnpm-workspace.yaml`, and review the inline signals beside each dependency range.</span>
   </div>
 
   <h2>Core ideas</h2>
@@ -19,7 +19,7 @@ import Docs from '../../layouts/Docs.astro'
     <li>Show next minor, next major, and latest targets instead of a single vague update.</li>
     <li>Respect pnpm workspace catalogs rather than treating `catalog:` as an unknown version.</li>
     <li>Separate outdated packages from invalid packages and vulnerability risk.</li>
-    <li>Launch a local Extension Host from VS Code against the included sample workspace.</li>
+    <li>Keep common maintenance actions available from the command palette.</li>
   </ul>
 
   <h2>Supported files</h2>

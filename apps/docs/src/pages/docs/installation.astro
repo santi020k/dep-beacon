@@ -2,31 +2,29 @@
 import Docs from '../../layouts/Docs.astro'
 ---
 
-<Docs title="Installation" description="Install and package Dep Beacon locally.">
-  <h1>Installation</h1>
+<Docs title="Install" description="Install Dep Beacon from a VS Code marketplace.">
+  <h1>Install Dep Beacon</h1>
   <p>
-    Dep Beacon is developed as a pnpm and Turbo monorepo. Use Node 22 or newer for the smoothest local experience.
+    Install Dep Beacon from the Visual Studio Marketplace or Open VSX, then open a supported npm manifest in VS Code.
   </p>
 
-  <h2>Workspace setup</h2>
-  <pre><code>pnpm install
-pnpm run build
-pnpm run typecheck
-pnpm run test
-pnpm run lint</code></pre>
+  <h2>From VS Code</h2>
+  <ol>
+    <li>Open the Extensions view.</li>
+    <li>Search for `Dep Beacon`.</li>
+    <li>Select Install.</li>
+    <li>Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.</li>
+  </ol>
 
-  <h2>Package the extension</h2>
-  <pre><code>pnpm run package:extension</code></pre>
+  <h2>What happens next</h2>
   <p>
-    The VSIX is written to `packages/vscode-dep-beacon/dep-beacon.vsix`.
+    Dep Beacon activates automatically for JSON, JSONC, and YAML dependency files. It adds inline status labels, diagnostics, and CodeLens actions when it finds supported dependency entries.
   </p>
 
-  <h2>Validate everything</h2>
-  <pre><code>pnpm run validate</code></pre>
-  <p>
-    Validation builds assets, checks types, runs tests, lints the repo, and packages the extension.
-  </p>
-
-  <h2>Run the docs site</h2>
-  <pre><code>pnpm --filter @santi020k/dep-beacon-docs dev</code></pre>
+  <h2>Useful first settings</h2>
+  <ul>
+    <li>Use `depBeacon.showInlineStatus` to show or hide the inline labels.</li>
+    <li>Use `depBeacon.checkVulnerabilities` to enable or disable OSV vulnerability checks.</li>
+    <li>Use `depBeacon.packageManager` if automatic package-manager detection picks the wrong command.</li>
+  </ul>
 </Docs>
