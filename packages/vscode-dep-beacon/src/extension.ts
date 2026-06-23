@@ -160,7 +160,7 @@ const createDecoration = (color: vscode.ThemeColor): vscode.TextEditorDecoration
 
 const updateLensTitle = (actions: readonly ResolvedUpdateAction[]): string => {
   const action = actions[0]
-  const icon = '$(arrow-small-up)\u00A0'
+  const icon = '$(chevron-up)\u00A0'
 
   if (!action) return `${icon}update`
 
@@ -170,7 +170,7 @@ const updateLensTitle = (actions: readonly ResolvedUpdateAction[]): string => {
 }
 
 const updateQuickPickLabel = (action: ResolvedUpdateAction): string => {
-  const arrow = '$(arrow-small-up)\u00A0'
+  const arrow = '$(chevron-up)\u00A0'
   const rocket = '$(rocket)\u00A0'
 
   switch (action.kind) {

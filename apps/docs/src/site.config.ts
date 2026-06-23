@@ -1,4 +1,6 @@
-const siteUrl = 'https://beacon.santi020k.com'
+import { normalizeSiteUrl } from './site-url'
+
+const siteUrl = normalizeSiteUrl(import.meta.env.DEP_BEACON_DOCS_URL)
 
 export const SITE = {
   description: 'Dependency version CodeLens, pnpm workspace catalogs, update commands, and OSV security signals for npm projects.',

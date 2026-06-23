@@ -45,8 +45,9 @@ The sample workspace includes `package.json` and `pnpm-workspace.yaml` entries f
 
 ## Environment
 
-Copy `.env.example` to `.env` for local release or deploy commands. GitHub Actions expects:
+Copy `.env.example` to `.env` for local release or deploy commands. Use these names for local envs and GitHub secrets or variables:
 
+- `GH_TOKEN` locally for GitHub API access. Do not create a custom `GITHUB_TOKEN` secret; GitHub Actions provides its runtime token automatically.
 - `NPM_TOKEN`
 - `VSCE_PAT`
 - `OVSX_PAT`
