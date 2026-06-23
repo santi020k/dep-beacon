@@ -153,26 +153,26 @@ const createDecoration = (color: vscode.ThemeColor): vscode.TextEditorDecoration
 const updateLensTitle = (actions: readonly ResolvedUpdateAction[]): string => {
   const action = actions[0]
 
-  if (!action) return 'update'
+  if (!action) return '$(arrow-up) update'
 
-  if (actions.length > 1) return 'update...'
+  if (actions.length > 1) return '$(arrow-up) update...'
 
-  return `update ${action.targetSpec}`
+  return `$(arrow-up) update ${action.targetSpec}`
 }
 
 const updateQuickPickLabel = (action: ResolvedUpdateAction): string => {
   switch (action.kind) {
     case 'patch':
-      return 'Patch'
+      return '$(arrow-up) Patch'
 
     case 'minor':
-      return 'Minor'
+      return '$(arrow-up) Minor'
 
     case 'major':
-      return 'Major'
+      return '$(arrow-up) Major'
 
     case 'latest':
-      return 'Latest'
+      return '$(rocket) Latest'
   }
 }
 

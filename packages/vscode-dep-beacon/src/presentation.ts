@@ -87,7 +87,7 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
 }
 
 export const packageLensTitle = (analysis: DependencyAnalysis): string =>
-  `open ${analysis.dependency.packageName}`
+  `$(link-external) open ${analysis.dependency.packageName}`
 
 export const decorationText = (analysis: DependencyAnalysis): string => {
   const signal = versionSignal(analysis)

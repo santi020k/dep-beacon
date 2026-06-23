@@ -4,7 +4,7 @@ import { SITE } from '../site.config'
 import LogoMark from './LogoMark.astro'
 ---
 
-<header class="site-header">
+<header class="site-header" transition:name="site-header" transition:persist>
   <a class="brand-link" href="/" aria-label="Dep Beacon home">
     <LogoMark class="brand-mark" />
     <span>{SITE.name}</span>

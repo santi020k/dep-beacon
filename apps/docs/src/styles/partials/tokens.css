@@ -18,5 +18,9 @@
   --blue: #75a7ff;
   --teal: #3dd6b3;
   --warm: #f8c65c;
+  --motion-fast: 160ms;
+  --motion-medium: 260ms;
+  --motion-slow: 560ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --shadow: 0 24px 80px rgb(0 0 0 / 0.35);
 }
