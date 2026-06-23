@@ -4,6 +4,8 @@ Dep Beacon adds dependency version and security signals to npm manifests in VS C
 
 Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` and the extension highlights dependency ranges with inline status, diagnostics, and CodeLens update actions.
 
+![Dep Beacon showing package.json and pnpm workspace dependency signals](resources/usage-preview.png)
+
 ## What You Get
 
 - CodeLens actions for next patch, next minor, next major, and latest dependency updates.

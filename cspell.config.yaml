@@ -1,13 +1,23 @@
 version: "0.2"
 language: en
 words:
-  - depbeacon
-  - dep
+  - ACIP
+  - astrojs
   - codemod
   - CodeLens
   - codicon
+  - commitizen
+  - commitlint
+  - Consolas
+  - dep
+  - depbeacon
+  - esbuild
   - GHSA
   - jsonc
+  - keytar
+  - knip
+  - linecap
+  - linejoin
   - npmjs
   - OpenVSX
   - osv
@@ -15,12 +25,17 @@ words:
   - OVSX_PAT
   - packument
   - prerelease
+  - rollup
   - semver
   - Snyk
+  - unrs
+  - vite
+  - vitest
   - vulns
   - vsc
   - vsce
   - VSIX
+  - workerd
   - workspaces
   - santi020k
 ignorePaths:

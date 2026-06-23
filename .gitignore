@@ -4,6 +4,7 @@ coverage
 .astro
 .turbo
 .eslintcache
+.cspellcache
 *.vsix
 .DS_Store
 .env

@@ -4,9 +4,9 @@ packages:
 
 allowBuilds:
   "@tailwindcss/oxide": true
-  '@vscode/vsce-sign': set this to true or false
+  "@vscode/vsce-sign": true
   esbuild: true
-  keytar: set this to true or false
+  keytar: true
   sharp: true
   unrs-resolver: true
   workerd: true

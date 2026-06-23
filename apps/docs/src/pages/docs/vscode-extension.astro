@@ -8,6 +8,18 @@ import Docs from '../../layouts/Docs.astro'
     Open `package.json` or `pnpm-workspace.yaml`. Dep Beacon adds CodeLens actions above supported dependency entries and inline status text after each range.
   </p>
 
+  <figure class="docs-media">
+    <img
+      src="/usage-preview.png"
+      alt="Dep Beacon showing package.json and pnpm-workspace.yaml with inline version status, CodeLens update actions, and diagnostics."
+      loading="eager"
+      decoding="async"
+    />
+    <figcaption>
+      Dependency status stays beside the manifest entries you are already editing, including pnpm catalogs, overrides, missing versions, and update targets.
+    </figcaption>
+  </figure>
+
   <h2>CodeLens actions</h2>
   <ul>
     <li>`patch` updates to the highest patch in the current minor.</li>

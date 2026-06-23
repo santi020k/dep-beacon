@@ -231,11 +231,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 
   schedule(document: vscode.TextDocument, force = false, reason = 'scheduled refresh'): void {
-    if (!isSupportedDocument(document)) {
-      this.log(`Skipped unsupported document: ${describeDocument(document)}.`)
-
-      return
-    }
+    if (!isSupportedDocument(document)) return
 
     const key = document.uri.toString()
     const timer = this.#timers.get(key)
