@@ -19,7 +19,6 @@ catalog:
   "@changesets/cli": ^2.31.0
   "@commitlint/cli": ^21.0.2
   "@commitlint/config-conventional": ^21.0.2
-  "@santi020k/dep-beacon-core": 0.1.0
   "@santi020k/eslint-config-basic": ^2.1.1
   "@tailwindcss/vite": ^4.3.1
   "@types/node": ^26.0.0
