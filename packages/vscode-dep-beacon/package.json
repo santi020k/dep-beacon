@@ -24,9 +24,10 @@
   "main": "./dist/extension.js",
   "scripts": {
     "build": "node scripts/build.cjs",
+    "build:core": "pnpm --filter @santi020k/dep-beacon-core run build",
     "typecheck": "tsc --noEmit",
     "dev": "esbuild src/extension.ts --bundle --platform=node --format=cjs --main-fields=module,main --external:vscode --outfile=dist/extension.js --watch=forever",
-    "package": "pnpm run build && node scripts/vsce-package.cjs",
+    "package": "pnpm run build:core && pnpm run build && node scripts/vsce-package.cjs",
     "publish:ext": "pnpm run package && pnpm run publish:vsce && pnpm run publish:ovsx",
     "publish:vsce": "vsce publish -i dep-beacon.vsix --skip-duplicate --pat \"$VSCE_PAT\"",
     "publish:ovsx": "ovsx --pat \"$OVSX_PAT\" publish dep-beacon.vsix --skip-duplicate",
