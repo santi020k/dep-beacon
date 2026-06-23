@@ -28,11 +28,11 @@ const versionSummary = (analysis: DependencyAnalysis): string => {
 const withVersionSummary = (label: string, summary: string): string =>
   summary ? `${label} | ${summary}` : label
 
-const versionTransition = (analysis: DependencyAnalysis): string => {
+const versionSignal = (analysis: DependencyAnalysis): string => {
   const current = analysis.targets.current
   const latest = analysis.targets.latest
 
-  if (current && latest && current !== latest) return `${current} -> ${latest}`
+  if (current && latest && current !== latest) return `-> ${latest}`
 
   return latest ?? current ?? ''
 }
@@ -87,11 +87,11 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
 }
 
 export const packageLensTitle = (analysis: DependencyAnalysis): string =>
-  `$(link-external) ${analysis.dependency.packageName}`
+  `open ${analysis.dependency.packageName}`
 
 export const decorationText = (analysis: DependencyAnalysis): string => {
-  const transition = versionTransition(analysis)
-  const suffix = transition ? ` ${transition}` : ''
+  const signal = versionSignal(analysis)
+  const suffix = signal ? ` ${signal}` : ''
 
   switch (analysis.status) {
     case 'up-to-date':
@@ -114,17 +114,15 @@ export const decorationText = (analysis: DependencyAnalysis): string => {
   }
 }
 
-export const updateActions = (analysis: DependencyAnalysis): UpdateAction[] => {
-  if (analysis.dependency.spec.startsWith('catalog:')) return []
-
-  const currentSpec = analysis.dependency.spec.trim()
+const updateActionsForSpec = (analysis: DependencyAnalysis, spec: string): UpdateAction[] => {
+  const currentSpec = spec.trim()
   const seen = new Set<string>()
   const actions: UpdateAction[] = []
 
   const push = (kind: UpdateAction['kind'], title: string, version: string | undefined): void => {
     if (!version) return
 
-    const targetSpec = createTargetSpec(analysis.dependency.spec, version)
+    const targetSpec = createTargetSpec(spec, version)
 
     if (targetSpec === currentSpec || seen.has(targetSpec)) return
 
@@ -133,19 +131,30 @@ export const updateActions = (analysis: DependencyAnalysis): UpdateAction[] => {
     actions.push({ kind, title, version })
   }
 
-  push('patch', '$(arrow-up) patch', analysis.targets.nextPatch)
+  push('patch', 'Patch', analysis.targets.nextPatch)
 
-  push('minor', '$(arrow-up) minor', analysis.targets.nextMinor)
+  push('minor', 'Minor', analysis.targets.nextMinor)
 
-  push('major', '$(arrow-up) major', analysis.targets.nextMajor)
+  push('major', 'Major', analysis.targets.nextMajor)
 
-  push('latest', '$(rocket) latest', analysis.targets.latest)
+  push('latest', 'Latest', analysis.targets.latest)
 
   return actions
 }
 
-export const resolvedUpdateActions = (analysis: DependencyAnalysis): ResolvedUpdateAction[] =>
-  updateActions(analysis).map((action) => ({
+export const updateActions = (analysis: DependencyAnalysis): UpdateAction[] => {
+  if (analysis.dependency.spec.startsWith('catalog:')) return []
+
+  return updateActionsForSpec(analysis, analysis.dependency.spec)
+}
+
+export const resolvedUpdateActions = (analysis: DependencyAnalysis, spec?: string): ResolvedUpdateAction[] => {
+  if (spec === undefined && analysis.dependency.spec.startsWith('catalog:')) return []
+
+  const currentSpec = spec ?? analysis.dependency.spec
+
+  return updateActionsForSpec(analysis, currentSpec).map((action) => ({
     ...action,
-    targetSpec: createTargetSpec(analysis.dependency.spec, action.version),
+    targetSpec: createTargetSpec(currentSpec, action.version),
   }))
+}

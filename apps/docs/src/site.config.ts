@@ -17,6 +17,7 @@ export const SITE = {
   npmPackage: '@santi020k/dep-beacon-core',
   ogImage: '/og/home.png',
   openVsxUrl: 'https://open-vsx.org/extension/santi020k/vscode-dep-beacon',
+  personalUrl: 'https://santi020k.com',
   shortDescription: 'Dependency signals for npm manifests in VS Code.',
   url: siteUrl,
   vscodePackage: 'vscode-dep-beacon',

@@ -5,11 +5,11 @@ catalog:
   astro: ^7.0.0
   left-pad: 1.1.0
   typescript: ^6.0.3
-  vitest: ^3.0.0
+  vitest: ^4.1.9
 
 catalogs:
   react19:
-    react: ^19.0.0
+    react: ^19.2.7
     react-dom: ^19.0.0
   conflicts_astro_h6_4_0:
     astro: ^6.4.0

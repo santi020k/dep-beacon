@@ -7,6 +7,23 @@ import type { CatalogSnapshot, DependencyEntry, DependencySection, ManifestParse
 
 type YamlMapNode = YAMLMap & { items: { key: YamlNode | null, value: YamlNode | null }[] }
 
+interface CollectStringMapArgs {
+  catalogName?: string
+  catalogs?: CatalogSnapshot
+  entries: DependencyEntry[]
+  lineStarts: readonly number[]
+  node: YamlNode | null | undefined
+  packageNameTransform?: (packageName: string) => string
+  path: string[]
+  section: DependencySection
+}
+
+interface YamlMapEntry {
+  key: YamlNode
+  keyText: string
+  value: YamlNode
+}
+
 const DIRECT_SECTIONS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const
 const isYamlMapNode = (node: YamlNode | null | undefined): node is YamlMapNode => isMap(node)
 const isYamlScalar = (node: YamlNode | null | undefined): node is Scalar => isScalar(node)
@@ -45,7 +62,7 @@ const getMapValue = (node: YamlNode | null | undefined, key: string): YamlNode |
   return undefined
 }
 
-const mapEntries = (node: YamlNode | null | undefined): { key: YamlNode, keyText: string, value: YamlNode }[] => {
+const mapEntries = (node: YamlNode | null | undefined): YamlMapEntry[] => {
   if (!isYamlMapNode(node)) return []
 
   return node.items.flatMap((item) => {
@@ -90,46 +107,47 @@ const createEntry = (
   }
 }
 
-const collectStringMap = (
-  args: {
-    catalogName?: string
-    catalogs?: CatalogSnapshot
-    entries: DependencyEntry[]
-    lineStarts: readonly number[]
-    node: YamlNode | null | undefined
-    packageNameTransform?: (packageName: string) => string
-    path: string[]
-    section: DependencySection
-  },
-): void => {
-  for (const item of mapEntries(args.node)) {
-    const packageName = args.packageNameTransform?.(item.keyText) ?? item.keyText
+const createStringMapEntry = (args: CollectStringMapArgs, item: YamlMapEntry): DependencyEntry | undefined => {
+  const packageName = args.packageNameTransform?.(item.keyText) ?? item.keyText
 
-    const entry = createEntry({
-      catalogName: args.catalogName,
-      lineStarts: args.lineStarts,
-      nameNode: item.key,
-      packageName,
-      path: [...args.path, item.keyText],
-      section: args.section,
-      specNode: item.value,
-    })
+  return createEntry({
+    catalogName: args.catalogName,
+    lineStarts: args.lineStarts,
+    nameNode: item.key,
+    packageName,
+    path: [...args.path, item.keyText],
+    section: args.section,
+    specNode: item.value,
+  })
+}
+
+const rememberCatalogEntry = (args: CollectStringMapArgs, entry: DependencyEntry): void => {
+  if (!args.catalogs) return
+
+  if (args.section === 'catalog') {
+    args.catalogs.default.set(entry.packageName, entry.spec)
+
+    return
+  }
+
+  if (args.section === 'catalogs' && args.catalogName) {
+    const named = args.catalogs.named.get(args.catalogName) ?? new Map<string, string>()
+
+    named.set(entry.packageName, entry.spec)
+
+    args.catalogs.named.set(args.catalogName, named)
+  }
+}
+
+const collectStringMap = (args: CollectStringMapArgs): void => {
+  for (const item of mapEntries(args.node)) {
+    const entry = createStringMapEntry(args, item)
 
     if (!entry) continue
 
     args.entries.push(entry)
 
-    if (args.catalogs && args.section === 'catalog') {
-      args.catalogs.default.set(packageName, entry.spec)
-    }
-
-    if (args.catalogs && args.section === 'catalogs' && args.catalogName) {
-      const named = args.catalogs.named.get(args.catalogName) ?? new Map<string, string>()
-
-      named.set(packageName, entry.spec)
-
-      args.catalogs.named.set(args.catalogName, named)
-    }
+    rememberCatalogEntry(args, entry)
   }
 }
 

@@ -23,10 +23,12 @@ const { description, image = docsOgImages[currentPath] ?? '/og/docs.png', title 
 ---
 
 <Base title={title} description={description} image={image} imageAlt={`${title} social preview`}>
-  <section class="docs-shell">
-    <DocsSidebar />
-    <article class="docs-content">
-      <slot />
-    </article>
+  <section class="docs-stage">
+    <div class="docs-shell">
+      <DocsSidebar />
+      <article class="docs-content">
+        <slot />
+      </article>
+    </div>
   </section>
 </Base>

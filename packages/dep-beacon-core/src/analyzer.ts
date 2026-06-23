@@ -6,7 +6,10 @@ import type {
   DependencyAnalysis,
   DependencyEntry,
   DependencyStatus,
+  DependencyUpdateTargets,
+  NpmPackageMetadata,
   OsvQuery,
+  RegistryLookupError,
   VulnerabilitySummary,
 } from './types.js'
 import {
@@ -27,6 +30,64 @@ const createProtocolAnalysis = (dependency: DependencyEntry, displaySpec: string
   packageUrl: createNpmPackageUrl(dependency.packageName),
   status: 'protocol',
   targets: {},
+})
+
+const unsupportedProtocolMessage = (dependency: DependencyEntry): string =>
+  dependency.spec.startsWith('catalog:')
+    ? 'This dependency uses a catalog reference that could not be resolved from pnpm-workspace.yaml.'
+    : 'This dependency uses a local, workspace, git, or URL protocol, so Dep Beacon does not query npm for it.'
+
+const createEmptyRangeAnalysis = (
+  dependency: DependencyEntry,
+  displaySpec: string,
+  packageName: string,
+): DependencyAnalysis => ({
+  dependency,
+  displaySpec,
+  exists: false,
+  isLatestSatisfied: false,
+  message: 'This dependency has an empty version range.',
+  packageUrl: createNpmPackageUrl(packageName),
+  status: 'invalid',
+  targets: {},
+})
+
+const lookupFailureStatus = (error: RegistryLookupError): DependencyStatus =>
+  error.code === 'not-found' ? 'missing' : 'invalid'
+
+const createLookupFailureAnalysis = (
+  dependency: DependencyEntry,
+  displaySpec: string,
+  packageName: string,
+  error: RegistryLookupError,
+): DependencyAnalysis => ({
+  dependency,
+  displaySpec,
+  exists: false,
+  isLatestSatisfied: false,
+  message: error.message,
+  packageUrl: createNpmPackageUrl(packageName),
+  status: lookupFailureStatus(error),
+  targets: {},
+})
+
+const createInvalidTargetAnalysis = (
+  dependency: DependencyEntry,
+  displaySpec: string,
+  packageName: string,
+  range: string,
+  metadata: NpmPackageMetadata,
+  targets: DependencyUpdateTargets,
+): DependencyAnalysis => ({
+  dependency,
+  displaySpec,
+  exists: false,
+  isLatestSatisfied: false,
+  message: getInvalidSpecMessage(range),
+  packageUrl: createNpmPackageUrl(packageName),
+  registry: metadata,
+  status: 'invalid',
+  targets,
 })
 
 const withVulnerability = (
@@ -64,6 +125,44 @@ const createVersionMessage = (
   return `A newer version is available. ${latestMessage}`
 }
 
+const createVersionAnalysis = (
+  args: {
+    dependency: DependencyEntry
+    displaySpec: string
+    includePrerelease: boolean
+    metadata: NpmPackageMetadata
+    packageName: string
+    range: string
+    targets: DependencyUpdateTargets
+    vulnerability?: VulnerabilitySummary
+  },
+): DependencyAnalysis => {
+  const exists = specLooksPublished(args.range, args.metadata)
+  const isLatestSatisfied = specSatisfiesLatest(args.range, args.targets.latest, args.includePrerelease)
+
+  const status = getDependencyStatus({
+    exists,
+    isLatestSatisfied,
+    statusBeforeVulnerability: exists ? 'outdated' : 'missing',
+    vulnerability: args.vulnerability,
+  })
+
+  const latestMessage = args.targets.latest ? `Latest is ${args.targets.latest}.` : 'No latest npm version was found.'
+  const message = createVersionMessage(exists, isLatestSatisfied, latestMessage)
+
+  return withVulnerability({
+    dependency: args.dependency,
+    displaySpec: args.displaySpec,
+    exists,
+    isLatestSatisfied,
+    message,
+    packageUrl: createNpmPackageUrl(args.packageName),
+    registry: args.metadata,
+    status,
+    targets: args.targets,
+  }, args.vulnerability)
+}
+
 export const analyzeDependency = async (
   dependency: DependencyEntry,
   options: AnalyzeDependencyOptions & {
@@ -78,85 +177,39 @@ export const analyzeDependency = async (
     return createProtocolAnalysis(
       dependency,
       normalized.displaySpec,
-      dependency.spec.startsWith('catalog:')
-        ? 'This dependency uses a catalog reference that could not be resolved from pnpm-workspace.yaml.'
-        : 'This dependency uses a local, workspace, git, or URL protocol, so Dep Beacon does not query npm for it.',
+      unsupportedProtocolMessage(dependency),
     )
   }
 
   const range = normalized.spec.trim()
 
   if (range.length === 0) {
-    return {
-      dependency,
-      displaySpec: normalized.displaySpec,
-      exists: false,
-      isLatestSatisfied: false,
-      message: 'This dependency has an empty version range.',
-      packageUrl: createNpmPackageUrl(normalized.packageName),
-      status: 'invalid',
-      targets: {},
-    }
+    return createEmptyRangeAnalysis(dependency, normalized.displaySpec, normalized.packageName)
   }
 
   const registryClient = options.registryClient ?? new NpmRegistryClient({ registryUrl: options.registryUrl })
   const lookup = await registryClient.getPackage(normalized.packageName)
 
   if (!lookup.ok) {
-    const status: DependencyStatus = lookup.error.code === 'not-found' ? 'missing' : 'invalid'
-
-    return {
-      dependency,
-      displaySpec: normalized.displaySpec,
-      exists: false,
-      isLatestSatisfied: false,
-      message: lookup.error.message,
-      packageUrl: createNpmPackageUrl(normalized.packageName),
-      status,
-      targets: {},
-    }
+    return createLookupFailureAnalysis(dependency, normalized.displaySpec, normalized.packageName, lookup.error)
   }
 
   const targets = computeUpdateTargets(range, lookup.metadata, includePrerelease)
 
   if (!targets.current) {
-    return {
-      dependency,
-      displaySpec: normalized.displaySpec,
-      exists: false,
-      isLatestSatisfied: false,
-      message: getInvalidSpecMessage(range),
-      packageUrl: createNpmPackageUrl(normalized.packageName),
-      registry: lookup.metadata,
-      status: 'invalid',
-      targets,
-    }
+    return createInvalidTargetAnalysis(dependency, normalized.displaySpec, normalized.packageName, range, lookup.metadata, targets)
   }
 
-  const exists = specLooksPublished(range, lookup.metadata)
-  const isLatestSatisfied = specSatisfiesLatest(range, targets.latest, includePrerelease)
-
-  const status = getDependencyStatus({
-    exists,
-    isLatestSatisfied,
-    statusBeforeVulnerability: exists ? 'outdated' : 'missing',
-    vulnerability: options.vulnerability,
-  })
-
-  const latestMessage = targets.latest ? `Latest is ${targets.latest}.` : 'No latest npm version was found.'
-  const message = createVersionMessage(exists, isLatestSatisfied, latestMessage)
-
-  return withVulnerability({
+  return createVersionAnalysis({
     dependency,
     displaySpec: normalized.displaySpec,
-    exists,
-    isLatestSatisfied,
-    message,
-    packageUrl: createNpmPackageUrl(normalized.packageName),
-    registry: lookup.metadata,
-    status,
+    includePrerelease,
+    metadata: lookup.metadata,
+    packageName: normalized.packageName,
+    range,
     targets,
-  }, options.vulnerability)
+    vulnerability: options.vulnerability,
+  })
 }
 
 export const analyzeDependencies = async (

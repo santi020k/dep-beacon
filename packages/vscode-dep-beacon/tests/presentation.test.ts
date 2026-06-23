@@ -69,7 +69,7 @@ describe('presentation helpers', () => {
 
   test.each([
     ['up-to-date', '$(pass-filled) up to date | current 2.0.0 | latest 2.0.0', ' ok 2.0.0'],
-    ['outdated', '$(warning) update available | current 1.0.0 | latest 2.0.0', ' update 1.0.0 -> 2.0.0'],
+    ['outdated', '$(warning) update available | current 1.0.0 | latest 2.0.0', ' update -> 2.0.0'],
     ['missing', '$(error) missing package or version', ' missing'],
     ['invalid', '$(error) invalid range', ' invalid'],
     ['protocol', '$(symbol-key) local or catalog-managed', ' managed'],
@@ -93,12 +93,12 @@ describe('presentation helpers', () => {
     }
 
     expect(statusTitle(vulnerable)).toBe('$(flame) critical vulnerability | current 1.0.0 | latest 2.0.0')
-    expect(decorationText(vulnerable)).toBe(' critical risk 1.0.0 -> 2.0.0')
+    expect(decorationText(vulnerable)).toBe(' critical risk -> 2.0.0')
 
     delete vulnerable.vulnerability
 
     expect(statusTitle(vulnerable)).toBe('$(flame) unknown vulnerability | current 1.0.0 | latest 2.0.0')
-    expect(decorationText(vulnerable)).toBe(' known risk 1.0.0 -> 2.0.0')
+    expect(decorationText(vulnerable)).toBe(' known risk -> 2.0.0')
   })
 
   test('omits the latest version suffix when no latest target is known', () => {
@@ -117,11 +117,27 @@ describe('presentation helpers', () => {
   })
 
   test('creates compact package lens labels', () => {
-    expect(packageLensTitle(baseAnalysis('outdated'))).toBe('$(link-external) demo')
+    expect(packageLensTitle(baseAnalysis('outdated'))).toBe('$(link-external) open demo')
   })
 
   test('resolves update actions with manifest target specs', () => {
     expect(resolvedUpdateActions(baseAnalysis('outdated')).map((action) => ({
+      kind: action.kind,
+      targetSpec: action.targetSpec,
+    }))).toEqual([
+      { kind: 'patch', targetSpec: '^1.0.1' },
+      { kind: 'minor', targetSpec: '^1.1.0' },
+      { kind: 'major', targetSpec: '^2.0.0' },
+    ])
+  })
+
+  test('resolves catalog-backed update actions with the editable catalog spec', () => {
+    const analysis = baseAnalysis('outdated')
+
+    analysis.dependency.spec = 'catalog:'
+
+    expect(resolvedUpdateActions(analysis)).toEqual([])
+    expect(resolvedUpdateActions(analysis, '^1.0.0').map((action) => ({
       kind: action.kind,
       targetSpec: action.targetSpec,
     }))).toEqual([
@@ -143,10 +159,10 @@ describe('presentation helpers', () => {
     }
 
     expect(updateActions(analysis)).toEqual([
-      { kind: 'patch', title: '$(arrow-up) patch', version: '1.0.1' },
-      { kind: 'minor', title: '$(arrow-up) minor', version: '1.1.0' },
-      { kind: 'major', title: '$(arrow-up) major', version: '2.0.0' },
-      { kind: 'latest', title: '$(rocket) latest', version: '3.0.0' },
+      { kind: 'patch', title: 'Patch', version: '1.0.1' },
+      { kind: 'minor', title: 'Minor', version: '1.1.0' },
+      { kind: 'major', title: 'Major', version: '2.0.0' },
+      { kind: 'latest', title: 'Latest', version: '3.0.0' },
     ])
   })
 
@@ -160,7 +176,7 @@ describe('presentation helpers', () => {
     }
 
     expect(updateActions(analysis)).toEqual([
-      { kind: 'latest', title: '$(rocket) latest', version: '19.2.7' },
+      { kind: 'latest', title: 'Latest', version: '19.2.7' },
     ])
 
     analysis.dependency.spec = '^19.2.7'
@@ -179,7 +195,7 @@ describe('presentation helpers', () => {
     }
 
     expect(updateActions(analysis)).toEqual([
-      { kind: 'minor', title: '$(arrow-up) minor', version: '2.0.0' },
+      { kind: 'minor', title: 'Minor', version: '2.0.0' },
     ])
   })
 

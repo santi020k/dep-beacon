@@ -1,7 +1,11 @@
 import type { FetchLike, OsvQuery, Severity, VulnerabilitySummary } from './types.js'
 
 interface OsvBatchResponse {
-  results?: { vulns?: { id?: unknown }[] }[]
+  results?: OsvBatchResult[]
+}
+
+interface OsvBatchResult {
+  vulns?: { id?: unknown }[]
 }
 
 interface OsvVulnerability {
@@ -112,6 +116,26 @@ const toBatchResponse = (value: unknown): OsvBatchResponse => {
 
 const queryKey = (query: OsvQuery): string => `${query.name}@${query.version}`
 
+const vulnerabilityIds = (result: OsvBatchResult | undefined): string[] =>
+  (result?.vulns ?? []).flatMap((vulnerability) => (typeof vulnerability.id === 'string' ? [vulnerability.id] : []))
+
+const vulnerabilityAliases = (details: readonly (OsvVulnerability | undefined)[]): string[] => {
+  const aliases = new Set<string>()
+
+  for (const detail of details) {
+    if (!detail) continue
+
+    for (const alias of detail.aliases ?? []) {
+      if (typeof alias === 'string') aliases.add(alias)
+    }
+  }
+
+  return [...aliases]
+}
+
+const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined)[]): Severity[] =>
+  details.flatMap((detail) => (detail ? [vulnerabilitySeverity(detail)] : []))
+
 export class OsvClient {
   readonly #baseUrl: string
   readonly #detailCache = new Map<string, Promise<OsvVulnerability | undefined>>()
@@ -145,37 +169,30 @@ export class OsvClient {
     if (!response.ok) return new Map()
 
     const batch = toBatchResponse(await response.json())
-    const summaries = new Map<string, VulnerabilitySummary>()
 
-    for (const [index, query] of queries.entries()) {
-      const result = batch.results?.[index]
-      const ids = (result?.vulns ?? []).flatMap((vulnerability) => (typeof vulnerability.id === 'string' ? [vulnerability.id] : []))
+    const summaries = await Promise.all(
+      queries.map((query, index) => this.#summarizeQuery(query, batch.results?.[index])),
+    )
 
-      if (ids.length === 0) continue
+    return new Map(summaries.flatMap((summary) => (summary ? [summary] : [])))
+  }
 
-      const details = await Promise.all(ids.map((id) => this.#getVulnerability(id)))
-      const aliases = new Set<string>()
-      const severities: Severity[] = []
+  async #summarizeQuery(
+    query: OsvQuery,
+    result: OsvBatchResult | undefined,
+  ): Promise<[string, VulnerabilitySummary] | undefined> {
+    const ids = vulnerabilityIds(result)
 
-      for (const detail of details) {
-        if (!detail) continue
+    if (ids.length === 0) return undefined
 
-        for (const alias of detail.aliases ?? []) {
-          if (typeof alias === 'string') aliases.add(alias)
-        }
+    const details = await Promise.all(ids.map((id) => this.#getVulnerability(id)))
 
-        severities.push(vulnerabilitySeverity(detail))
-      }
-
-      summaries.set(queryKey(query), {
-        aliases: [...aliases],
-        ids,
-        severity: maxSeverity(severities),
-        source: 'osv',
-      })
-    }
-
-    return summaries
+    return [queryKey(query), {
+      aliases: vulnerabilityAliases(details),
+      ids,
+      severity: maxSeverity(vulnerabilitySeverities(details)),
+      source: 'osv',
+    }]
   }
 
   async #getVulnerability(id: string): Promise<OsvVulnerability | undefined> {

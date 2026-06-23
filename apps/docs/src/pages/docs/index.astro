@@ -1,30 +1,99 @@
 ---
 import Docs from '../../layouts/Docs.astro'
+import { SITE } from '../../site.config'
 ---
 
 <Docs title="Docs" description="Dep Beacon documentation for VS Code users.">
-  <h1>Dep Beacon Docs</h1>
-  <p>
-    Dep Beacon brings dependency status into VS Code manifests. It checks npm registry metadata, calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear status colors.
-  </p>
+  <div class="docs-hero-panel">
+    <div>
+      <p class="eyebrow">Documentation</p>
+      <h1>Dep Beacon Docs</h1>
+      <p>
+        Dep Beacon brings dependency status into VS Code manifests. It checks npm registry metadata, calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear status colors.
+      </p>
+      <div class="docs-actions">
+        <a class="button primary" href={SITE.marketplaceUrl}>Install extension</a>
+        <a class="button secondary" href="/docs/vscode-extension">Explore features</a>
+      </div>
+    </div>
+
+    <figure class="docs-signal-card" aria-label="Dep Beacon dependency signal flow">
+      <div class="signal-orbit">
+        <span class="dot green"></span>
+        <span class="dot yellow"></span>
+        <span class="dot blue"></span>
+        <span class="dot red"></span>
+      </div>
+      <div class="signal-stack">
+        <span class="lens warning">latest 7.0.0</span>
+        <span class="lens ok">minor ^7.0.0</span>
+        <span class="lens catalog">catalog resolves ^19.0.0</span>
+        <span class="lens danger">high vulnerability reported</span>
+      </div>
+    </figure>
+  </div>
 
   <div class="docs-callout">
     <strong>Start here:</strong>
     <span>Install Dep Beacon from the marketplace, open `package.json` or `pnpm-workspace.yaml`, and review the inline signals beside each dependency range.</span>
   </div>
 
+  <div class="docs-link-grid" aria-label="Documentation shortcuts">
+    <a href="/docs/installation">
+      <span>01</span>
+      <strong>Install</strong>
+      <p>Add Dep Beacon from Marketplace or Open VSX and open a supported manifest.</p>
+    </a>
+    <a href="/docs/vscode-extension">
+      <span>02</span>
+      <strong>VS Code Extension</strong>
+      <p>Understand inline labels, CodeLens actions, commands, and status colors.</p>
+    </a>
+    <a href="/docs/pnpm-workspaces">
+      <span>03</span>
+      <strong>pnpm Workspaces</strong>
+      <p>See how default and named catalogs resolve before dependency analysis.</p>
+    </a>
+    <a href="/docs/security">
+      <span>04</span>
+      <strong>Security Signals</strong>
+      <p>Use OSV severity signals to separate routine updates from advisory risk.</p>
+    </a>
+  </div>
+
   <h2>Core ideas</h2>
-  <ul>
-    <li>Keep update decisions close to the dependency line.</li>
-    <li>Show next minor, next major, and latest targets instead of a single vague update.</li>
-    <li>Respect pnpm workspace catalogs rather than treating `catalog:` as an unknown version.</li>
-    <li>Separate outdated packages from invalid packages and vulnerability risk.</li>
-    <li>Keep common maintenance actions available from the command palette.</li>
-  </ul>
+  <div class="docs-idea-grid">
+    <article>
+      <strong>Stay on the line</strong>
+      <p>Keep update decisions beside the dependency range instead of sending maintainers to another dashboard.</p>
+    </article>
+    <article>
+      <strong>Choose the next move</strong>
+      <p>Show patch, minor, major, and latest targets instead of one vague update suggestion.</p>
+    </article>
+    <article>
+      <strong>Respect workspace policy</strong>
+      <p>Resolve pnpm catalogs before analysis, so `catalog:` never looks like an unknown version.</p>
+    </article>
+    <article>
+      <strong>Separate risk from noise</strong>
+      <p>Keep outdated packages, invalid ranges, and vulnerability severity visually distinct.</p>
+    </article>
+  </div>
 
   <h2>Supported files</h2>
-  <ul>
-    <li>`package.json` dependency sections, npm overrides, Yarn resolutions, and pnpm-specific blocks.</li>
-    <li>`pnpm-workspace.yaml` default catalogs, named catalogs, overrides, and package extensions.</li>
-  </ul>
+  <div class="docs-file-grid">
+    <article>
+      <strong>package.json</strong>
+      <p>Dependency sections, npm overrides, Yarn resolutions, and pnpm-specific blocks.</p>
+    </article>
+    <article>
+      <strong>pnpm-workspace.yaml</strong>
+      <p>Default catalogs, named catalogs, overrides, and package extensions.</p>
+    </article>
+    <article>
+      <strong>Command palette</strong>
+      <p>Refresh signals, clear registry cache, sort manifests, toggle prereleases, and run installs.</p>
+    </article>
+  </div>
 </Docs>

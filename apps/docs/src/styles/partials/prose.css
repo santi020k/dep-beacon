@@ -1,13 +1,26 @@
 .docs-content h1 {
   font-size: 3.8rem;
   margin-bottom: 1rem;
+  text-wrap: balance;
 }
 
 .docs-content h2 {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
   font-size: 1.65rem;
   margin: 2.5rem 0 1rem;
   padding-top: 2rem;
+  position: relative;
+  text-wrap: balance;
+}
+
+.docs-content h2::before {
+  background: var(--brand-bright);
+  border-radius: 99px;
+  content: "";
+  height: 3px;
+  inset: -2px auto auto 0;
+  position: absolute;
+  width: 3.4rem;
 }
 
 .docs-content h3 {
@@ -19,6 +32,13 @@
 .docs-content li {
   color: var(--ink-soft);
   line-height: 1.75;
+}
+
+.docs-content > h1 + p {
+  color: var(--ink);
+  font-size: 1.18rem;
+  line-height: 1.72;
+  max-width: 68ch;
 }
 
 .docs-content a {
@@ -51,9 +71,12 @@
 }
 
 .docs-content pre {
-  background: #071014;
-  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 24%, transparent), transparent),
+    #071014;
+  border: 1px solid color-mix(in srgb, var(--brand-bright) 24%, var(--line));
   border-radius: 8px;
+  box-shadow: 0 20px 58px rgb(0 0 0 / 0.22);
   overflow-x: auto;
   padding: 1rem;
 }

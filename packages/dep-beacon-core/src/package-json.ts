@@ -1,14 +1,27 @@
-import { type Node as JsonNode, type ParseError,parseTree } from 'jsonc-parser'
+import { type Node as JsonNode, type ParseError, parseTree } from 'jsonc-parser'
 
 import { createEmptyCatalogSnapshot } from './catalogs.js'
 import { getOverridePackageName, getResolutionPackageName } from './package-name.js'
 import { createLineStarts, createTextRange } from './text.js'
-import type { DependencyEntry, DependencySection, ManifestParseError, ManifestParseResult, TextRange } from './types.js'
+import type { DependencyEntry, DependencyManager, DependencySection, ManifestParseError, ManifestParseResult, TextRange } from './types.js'
 
 const DIRECT_SECTIONS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const
 const parseErrorMessage = (error: ParseError): string => `JSON parse error ${error.error} at offset ${error.offset}.`
 
 type JsonStringNode = JsonNode & { value: string }
+
+interface CollectStringMapOptions {
+  basePath?: string[]
+  manager?: DependencyManager
+  packageNameTransform?: (packageName: string) => string
+}
+
+interface StringMapProperty {
+  key: string
+  keyNode: JsonStringNode
+  spec: string
+  valueNode: JsonStringNode
+}
 
 const isObjectNode = (node: JsonNode | undefined): node is JsonNode & { children: JsonNode[] } =>
   node?.type === 'object' && Array.isArray(node.children)
@@ -47,7 +60,7 @@ const propertyValue = (property: JsonNode | undefined): JsonNode | undefined => 
 const createEntry = (
   args: {
     lineStarts: readonly number[]
-    manager?: 'npm' | 'pnpm' | 'yarn'
+    manager?: DependencyManager
     nameNode: JsonStringNode
     packageName: string
     path: string[]
@@ -67,43 +80,62 @@ const createEntry = (
   specRange: nodeRange(args.lineStarts, args.specNode),
 })
 
+const stringMapProperty = (property: JsonNode): StringMapProperty | undefined => {
+  if (!isPropertyNode(property)) return undefined
+
+  const [keyNode, valueNode] = property.children
+
+  if (!isStringNode(keyNode) || !isStringNode(valueNode)) return undefined
+
+  return {
+    key: stringNodeValue(keyNode),
+    keyNode,
+    spec: stringNodeValue(valueNode),
+    valueNode,
+  }
+}
+
+const defaultPackageName = (key: string, section: DependencySection): string =>
+  section === 'resolutions' ? getResolutionPackageName(key) : key
+
+const packageNameForStringMapProperty = (
+  property: StringMapProperty,
+  section: DependencySection,
+  options: CollectStringMapOptions,
+): string =>
+  options.packageNameTransform?.(property.key) ?? defaultPackageName(property.key, section)
+
+const managerForStringMapEntry = (
+  section: DependencySection,
+  options: CollectStringMapOptions,
+): DependencyManager =>
+  options.manager ?? (section === 'resolutions' ? 'yarn' : 'npm')
+
 const collectStringMap = (
   lineStarts: readonly number[],
   parent: JsonNode | undefined,
   section: DependencySection,
   entries: DependencyEntry[],
-  options: {
-    basePath?: string[]
-    manager?: 'npm' | 'pnpm' | 'yarn'
-    packageNameTransform?: (packageName: string) => string
-  } = {},
+  options: CollectStringMapOptions = {},
 ): void => {
   if (!isObjectNode(parent)) return
 
+  const basePath = options.basePath ?? [section]
+
   for (const property of objectProperties(parent)) {
-    if (!isPropertyNode(property)) continue
+    const stringProperty = stringMapProperty(property)
 
-    const [keyNode, valueNode] = property.children
-
-    if (!isStringNode(keyNode) || !isStringNode(valueNode)) continue
-
-    const key = stringNodeValue(keyNode)
-    const spec = stringNodeValue(valueNode)
-
-    const packageName = options.packageNameTransform?.(key)
-      ?? (section === 'resolutions' ? getResolutionPackageName(key) : key)
-
-    const basePath = options.basePath ?? [section]
+    if (!stringProperty) continue
 
     entries.push(createEntry({
       lineStarts,
-      manager: options.manager ?? (section === 'resolutions' ? 'yarn' : 'npm'),
-      nameNode: keyNode,
-      packageName,
-      path: [...basePath, key],
+      manager: managerForStringMapEntry(section, options),
+      nameNode: stringProperty.keyNode,
+      packageName: packageNameForStringMapProperty(stringProperty, section, options),
+      path: [...basePath, stringProperty.key],
       section,
-      spec,
-      specNode: valueNode,
+      spec: stringProperty.spec,
+      specNode: stringProperty.valueNode,
     }))
   }
 }

@@ -13,6 +13,10 @@ html {
 }
 
 body {
+  background:
+    linear-gradient(180deg, rgb(12 24 28 / 0.7), transparent 28rem),
+    linear-gradient(90deg, rgb(18 38 37 / 0.18), rgb(23 20 15 / 0.16) 48%, transparent),
+    var(--bg);
   margin: 0;
   min-width: 320px;
 }
@@ -38,4 +42,20 @@ code {
 
 main {
   min-height: 70vh;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand-bright) 38%, transparent);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }
