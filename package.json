@@ -47,6 +47,7 @@
     "knip": "catalog:",
     "lint-staged": "catalog:",
     "sharp": "catalog:",
+    "tailwindcss": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
