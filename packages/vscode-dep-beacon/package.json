@@ -1,7 +1,7 @@
 {
   "name": "vscode-dep-beacon",
   "displayName": "Dep Beacon",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "sponsor": {
     "url": "https://github.com/sponsors/santi020k"
@@ -139,7 +139,12 @@
         },
         "depBeacon.packageManager": {
           "type": "string",
-          "enum": ["auto", "npm", "pnpm", "yarn"],
+          "enum": [
+            "auto",
+            "npm",
+            "pnpm",
+            "yarn"
+          ],
           "default": "auto",
           "description": "Package manager used by Dep Beacon install commands."
         },
