@@ -1,6 +1,8 @@
+const siteUrl = 'https://beacon.santi020k.com'
+
 export const SITE = {
   description: 'Dependency version CodeLens, pnpm workspace catalogs, update commands, and OSV security signals for npm projects.',
-  docsUrl: 'https://dep-beacon.santi020k.com/docs',
+  docsUrl: `${siteUrl}/docs`,
   githubUrl: 'https://github.com/santi020k/dep-beacon',
   keywords: [
     'VS Code extension',
@@ -16,6 +18,6 @@ export const SITE = {
   ogImage: '/og/home.png',
   openVsxUrl: 'https://open-vsx.org/extension/santi020k/vscode-dep-beacon',
   shortDescription: 'Dependency signals for npm manifests in VS Code.',
-  url: 'https://dep-beacon.santi020k.com',
+  url: siteUrl,
   vscodePackage: 'vscode-dep-beacon',
 }

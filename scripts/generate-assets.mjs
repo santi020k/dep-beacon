@@ -7,6 +7,8 @@ import sharp from 'sharp'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const publicDir = resolve(root, 'apps/docs/public')
 const ogDir = resolve(publicDir, 'og')
+const siteUrl = 'https://beacon.santi020k.com'
+const siteHost = new URL(siteUrl).host
 
 const escapeXml = (value) =>
   value
@@ -108,7 +110,7 @@ const socialCardSvg = ({ accent, eyebrow, subtitle, title }) => `\
     <rect x="486" y="446" width="182" height="48" rx="8" fill="#321b1c" stroke="#f05d5e"/>
     <text x="510" y="478" fill="#f05d5e">security risk</text>
   </g>
-  <text x="896" y="505" fill="#78908c" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">dep-beacon.santi020k.com</text>
+  <text x="896" y="505" fill="#78908c" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">${escapeXml(siteHost)}</text>
 </svg>
 `
 

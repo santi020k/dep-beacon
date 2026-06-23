@@ -143,7 +143,7 @@
         },
         "depBeacon.docsUrl": {
           "type": "string",
-          "default": "https://dep-beacon.santi020k.com",
+          "default": "https://beacon.santi020k.com",
           "description": "Documentation URL opened by Dep Beacon commands."
         }
       }
@@ -186,7 +186,7 @@
     "url": "https://github.com/santi020k/dep-beacon.git",
     "directory": "packages/vscode-dep-beacon"
   },
-  "homepage": "https://dep-beacon.santi020k.com",
+  "homepage": "https://beacon.santi020k.com",
   "bugs": {
     "url": "https://github.com/santi020k/dep-beacon/issues"
   },

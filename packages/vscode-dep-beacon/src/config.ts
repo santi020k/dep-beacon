@@ -2,6 +2,8 @@ import * as vscode from 'vscode'
 
 export type PackageManagerPreference = 'auto' | 'npm' | 'pnpm' | 'yarn'
 
+const DEFAULT_DOCS_URL = 'https://beacon.santi020k.com'
+
 export interface DepBeaconConfig {
   cacheTtlMinutes: number
   checkVulnerabilities: boolean
@@ -20,7 +22,7 @@ export const getDepBeaconConfig = (): DepBeaconConfig => {
   return {
     cacheTtlMinutes: config.get('cacheTtlMinutes', 15),
     checkVulnerabilities: config.get('checkVulnerabilities', true),
-    docsUrl: config.get('docsUrl', 'https://dep-beacon.santi020k.com'),
+    docsUrl: config.get('docsUrl', DEFAULT_DOCS_URL),
     enable: config.get('enable', true),
     includePrerelease: config.get('includePrerelease', false),
     packageManager: config.get<PackageManagerPreference>('packageManager', 'auto'),
