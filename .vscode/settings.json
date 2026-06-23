@@ -3,7 +3,6 @@
     "source.fixAll.eslint": "explicit"
   },
   "debug.javascript.autoAttachFilter": "disabled",
-  "eslint.experimental.useFlatConfig": true,
   "eslint.validate": ["astro", "javascript", "javascriptreact", "json", "jsonc", "typescript", "typescriptreact", "yaml"],
   "files.associations": {
     ".env.example": "dotenv",

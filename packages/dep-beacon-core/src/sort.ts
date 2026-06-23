@@ -14,6 +14,14 @@ const isJsonObject = (value: unknown): value is JsonObject =>
 const sortObjectByKey = (value: JsonObject): JsonObject =>
   Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
 
+const detectIndent = (text: string): string | number => {
+  const match = /\n([ \t]+)/u.exec(text)
+
+  if (!match?.[1]) return 2
+
+  return match[1].includes('\t') ? '\t' : match[1].length
+}
+
 export const sortPackageJsonDependencies = (text: string): string => {
   const parsed = JSON.parse(text) as unknown
 
@@ -42,7 +50,7 @@ export const sortPackageJsonDependencies = (text: string): string => {
     sorted.overrides = sortObjectByKey(sorted.overrides)
   }
 
-  return `${JSON.stringify(sorted, null, 2)}\n`
+  return `${JSON.stringify(sorted, null, detectIndent(text))}\n`
 }
 
 export const replaceDependencySpec = (text: string, start: number, end: number, nextSpec: string): string => {

@@ -4,14 +4,12 @@ const { execSync } = require('node:child_process')
 const { readFileSync, writeFileSync } = require('node:fs')
 const { resolve } = require('node:path')
 const { parseDocument } = require('yaml')
-
 const PKG_PATH = resolve(__dirname, '../package.json')
 const WORKSPACE_PATH = resolve(__dirname, '../../../pnpm-workspace.yaml')
 const CORE_PKG_PATH = resolve(__dirname, '../../dep-beacon-core/package.json')
 const originalContent = readFileSync(PKG_PATH, 'utf8')
 const workspace = parseDocument(readFileSync(WORKSPACE_PATH, 'utf8')).toJS()
 const pkg = JSON.parse(originalContent)
-
 const isRecord = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const resolveCatalogVersion = (packageName) => {

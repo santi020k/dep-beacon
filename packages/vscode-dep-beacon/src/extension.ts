@@ -114,6 +114,12 @@ const toUpdateRange = (range: TextRange): UpdateDependencyArgs['range'] => ({
 const isSupportedDocument = (document: vscode.TextDocument): boolean =>
   document.uri.scheme === 'file' && isSupportedManifestPath(document.fileName)
 
+const isWorkspaceManifestDocument = (document: vscode.TextDocument): boolean => {
+  const name = basename(document.fileName)
+
+  return name === 'pnpm-workspace.yaml' || name === 'pnpm-workspace.yml'
+}
+
 const isLocalExtensionHost = (): boolean =>
   process.env.DEP_BEACON_EXTENSION_ENV === 'local'
 
@@ -278,7 +284,9 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   readonly #output: vscode.OutputChannel
   readonly #subscriptions: vscode.Disposable[] = []
   readonly #timers = new Map<string, ReturnType<typeof setTimeout>>()
+  #catalogCache: CatalogWorkspaceData | undefined
   #fileLoggingDisabled = false
+  #osvClient: OsvClient | undefined
   #registryClient: NpmRegistryClient | undefined
   #registryClientKey: string | undefined
 
@@ -313,9 +321,19 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     this.#subscriptions.push(
       vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, this),
-      vscode.workspace.onDidChangeTextDocument((event) => { this.schedule(event.document, false, 'document changed'); }),
-      vscode.workspace.onDidOpenTextDocument((document) => { this.schedule(document, false, 'document opened'); }),
+      vscode.workspace.onDidChangeTextDocument((event) => {
+        if (isWorkspaceManifestDocument(event.document)) this.#catalogCache = undefined
+
+        this.schedule(event.document, false, 'document changed')
+      }),
+      vscode.workspace.onDidOpenTextDocument((document) => {
+        if (isWorkspaceManifestDocument(document)) this.#catalogCache = undefined
+
+        this.schedule(document, false, 'document opened')
+      }),
       vscode.workspace.onDidSaveTextDocument((document) => {
+        if (isWorkspaceManifestDocument(document)) this.#catalogCache = undefined
+
         this.schedule(document, true, 'document saved')
 
         this.runInstallOnSave(document).catch((error: unknown) => {
@@ -511,6 +529,10 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   clearCache(): void {
     this.#cache.clear()
 
+    this.#catalogCache = undefined
+
+    this.#osvClient = undefined
+
     this.#registryClient?.clear()
 
     this.#registryClient = undefined
@@ -613,10 +635,10 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     const analyses = await analyzeDependencies(parseResult.dependencies, {
       catalogSnapshot: catalogData.snapshot,
       includePrerelease: config.includePrerelease,
+      osvClient: this.getOsvClient(),
       registryClient,
       registryUrl: config.registryUrl,
       vulnerabilities: config.checkVulnerabilities,
-      osvClient: new OsvClient(),
     })
 
     this.log(`Analyzed ${describeDocument(document)}: ${analyses.length} dependency signal(s).`)
@@ -759,6 +781,12 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 
   async loadCatalogWorkspaceData(currentDocument: vscode.TextDocument): Promise<CatalogWorkspaceData> {
+    if (this.#catalogCache && !isWorkspaceManifestDocument(currentDocument)) {
+      this.log('Catalog cache hit.')
+
+      return this.#catalogCache
+    }
+
     const uris = [
       ...await vscode.workspace.findFiles('**/pnpm-workspace.yaml', '**/node_modules/**', 20),
       ...await vscode.workspace.findFiles('**/pnpm-workspace.yml', '**/node_modules/**', 20),
@@ -802,10 +830,16 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     this.log(`Loaded pnpm catalog data from ${manifests.length} parsed manifest(s) with ${editTargets.length} editable catalog entries.`)
 
-    return {
+    const data: CatalogWorkspaceData = {
       editTargets,
       snapshot: catalogSnapshot,
     }
+
+    if (!isWorkspaceManifestDocument(currentDocument)) {
+      this.#catalogCache = data
+    }
+
+    return data
   }
 
   updateDiagnostics(uri: vscode.Uri, parseResult: ManifestParseResult, analyses: readonly DependencyAnalysis[]): void {
@@ -874,6 +908,12 @@ export class DepBeaconController implements vscode.CodeLensProvider {
         editor.setDecorations(this.#decorationTypes[tone], decorations)
       }
     }
+  }
+
+  getOsvClient(): OsvClient {
+    this.#osvClient ??= new OsvClient()
+
+    return this.#osvClient
   }
 
   getRegistryClient(config: DepBeaconConfig): NpmRegistryClient {
@@ -992,15 +1032,16 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     }
 
     const manager = await resolvePackageManager(folder.uri, getDepBeaconConfig().packageManager)
+    const terminalName = `Dep Beacon ${manager}`
 
     this.log(`Starting ${manager} install in ${folder.uri.fsPath}.`)
 
-    const terminal = vscode.window.createTerminal({
-      cwd: folder.uri.fsPath,
-      name: `Dep Beacon ${manager}`,
-    })
+    const existing = vscode.window.terminals.find((t) => t.name === terminalName && t.exitStatus === undefined)
+    const terminal = existing ?? vscode.window.createTerminal({ cwd: folder.uri.fsPath, name: terminalName })
 
     terminal.show()
+
+    if (existing) terminal.sendText(`cd "${folder.uri.fsPath}"`)
 
     terminal.sendText(`${manager} install`)
   }

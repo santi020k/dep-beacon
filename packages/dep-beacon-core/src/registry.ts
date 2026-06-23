@@ -46,6 +46,7 @@ export const createNpmPackageUrl = (packageName: string): string =>
 export class NpmRegistryClient {
   readonly #cache = new Map<string, CacheEntry>()
   readonly #cacheTtlMs: number
+  readonly #errorCacheTtlMs: number
   readonly #fetch: FetchLike
   readonly #now: () => number
   readonly #requestTimeoutMs: number
@@ -53,12 +54,18 @@ export class NpmRegistryClient {
 
   constructor(options: {
     cacheTtlMs?: number
+    errorCacheTtlMs?: number
     fetch?: FetchLike
     now?: () => number
     registryUrl?: string
     requestTimeoutMs?: number
   } = {}) {
     this.#cacheTtlMs = Math.max(0, options.cacheTtlMs ?? Number.POSITIVE_INFINITY)
+
+    this.#errorCacheTtlMs = Math.min(
+      Math.max(0, options.errorCacheTtlMs ?? 30_000),
+      this.#cacheTtlMs,
+    )
 
     this.#fetch = options.fetch ?? fetch
 
@@ -81,6 +88,8 @@ export class NpmRegistryClient {
       expiresAt: Number.isFinite(this.#cacheTtlMs) ? now + this.#cacheTtlMs : Number.POSITIVE_INFINITY,
       request,
     })
+
+    this.#shortenErrorCache(packageName, request).catch(() => null)
 
     return request
   }
@@ -147,5 +156,20 @@ export class NpmRegistryClient {
         ok: false,
       }
     }
+  }
+
+  async #shortenErrorCache(packageName: string, request: Promise<RegistryLookupResult>): Promise<void> {
+    const result = await request
+
+    if (result.ok) return
+
+    const entry = this.#cache.get(packageName)
+
+    if (entry?.request !== request) return
+
+    this.#cache.set(packageName, {
+      expiresAt: this.#now() + this.#errorCacheTtlMs,
+      request,
+    })
   }
 }
