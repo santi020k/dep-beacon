@@ -66,7 +66,7 @@ for (const section of ['dependencies', 'devDependencies']) {
 try {
   writeFileSync(PKG_PATH, `${JSON.stringify(pkg, null, 2)}\n`)
 
-  execSync('pnpm dlx @vscode/vsce package --no-dependencies -o dep-beacon.vsix', {
+  execSync('pnpm exec vsce package --no-dependencies -o dep-beacon.vsix', {
     cwd: resolve(__dirname, '..'),
     stdio: 'inherit',
   })

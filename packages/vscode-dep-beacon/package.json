@@ -25,11 +25,11 @@
   "scripts": {
     "build": "node scripts/build.cjs",
     "typecheck": "tsc --noEmit",
-    "dev": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js --watch=forever",
+    "dev": "esbuild src/extension.ts --bundle --platform=node --format=cjs --main-fields=module,main --external:vscode --outfile=dist/extension.js --watch=forever",
     "package": "pnpm run build && node scripts/vsce-package.cjs",
     "publish:ext": "pnpm run package && pnpm run publish:vsce && pnpm run publish:ovsx",
-    "publish:vsce": "pnpm dlx @vscode/vsce publish -i dep-beacon.vsix --skip-duplicate --pat \"$VSCE_PAT\"",
-    "publish:ovsx": "pnpm dlx ovsx --pat \"$OVSX_PAT\" publish dep-beacon.vsix --skip-duplicate",
+    "publish:vsce": "vsce publish -i dep-beacon.vsix --skip-duplicate --pat \"$VSCE_PAT\"",
+    "publish:ovsx": "ovsx --pat \"$OVSX_PAT\" publish dep-beacon.vsix --skip-duplicate",
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "test:watch": "vitest --config vitest.config.ts",
@@ -41,10 +41,12 @@
     "@santi020k/dep-beacon-core": "workspace:*"
   },
   "devDependencies": {
+    "@vscode/vsce": "catalog:",
     "@types/node": "catalog:",
     "@types/vscode": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "esbuild": "catalog:",
+    "ovsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
@@ -55,7 +57,10 @@
         "title": "Refresh Dependency Signals",
         "shortTitle": "Refresh",
         "category": "Dep Beacon",
-        "icon": "$(refresh)"
+        "icon": {
+          "dark": "resources/toolbar-icon-dark.svg",
+          "light": "resources/toolbar-icon-light.svg"
+        }
       },
       {
         "command": "depBeacon.clearCache",

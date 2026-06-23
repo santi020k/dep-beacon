@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@astrojs/check": "catalog:",
-    "@santi020k/eslint-config-basic": "catalog:",
     "eslint": "catalog:",
     "sharp": "catalog:",
     "typescript": "catalog:",

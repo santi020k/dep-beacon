@@ -14,6 +14,7 @@ const run = async () => {
     entryPoints: [resolve(PACKAGE_ROOT, 'src/extension.ts')],
     external: ['vscode'],
     format: 'cjs',
+    mainFields: ['module', 'main'],
     outfile: resolve(DIST_PATH, 'extension.js'),
     platform: 'node',
     sourcemap: true,

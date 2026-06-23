@@ -14,7 +14,17 @@ const isYamlScalar = (node: YamlNode | null | undefined): node is Scalar => isSc
 const scalarText = (node: YamlNode | null | undefined): string | undefined => {
   if (!isYamlScalar(node)) return undefined
 
-  return typeof node.value === 'string' ? node.value : String(node.value)
+  const value = node.value
+
+  if (value === null || value === undefined) return undefined
+
+  if (typeof value === 'string') return value
+
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value)
+  }
+
+  return undefined
 }
 
 const scalarRange = (lineStarts: readonly number[], node: YamlNode | null | undefined): TextRange | undefined => {

@@ -1,28 +1,58 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": [
-    "eslint.config.js",
-    "packages/*/src/index.ts",
-    "packages/vscode-dep-beacon/src/extension.ts",
-    "packages/vscode-dep-beacon/scripts/*.cjs",
-    "apps/docs/src/pages/**/*.astro"
-  ],
-  "project": [
-    "apps/docs/src/**/*.{astro,ts}",
-    "packages/*/src/**/*.ts",
-    "packages/*/tests/**/*.ts",
-    "packages/vscode-dep-beacon/scripts/*.cjs"
-  ],
   "ignoreDependencies": [
     "@changesets/changelog-github",
     "@commitlint/cli",
     "@commitlint/config-conventional",
-    "@vscode/vsce",
     "commitizen",
     "cz-conventional-changelog",
     "husky",
     "lint-staged",
-    "ovsx",
     "wrangler"
-  ]
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "eslint.config.js",
+        "scripts/*.mjs"
+      ],
+      "project": [
+        "*.{js,json,yml,yaml}",
+        ".github/workflows/*.yml",
+        "scripts/**/*.mjs"
+      ]
+    },
+    "apps/docs": {
+      "entry": [
+        "astro.config.ts",
+        "src/pages/**/*.astro"
+      ],
+      "project": [
+        "astro.config.ts",
+        "src/**/*.{astro,ts}"
+      ]
+    },
+    "packages/dep-beacon-core": {
+      "entry": [
+        "src/index.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "tests/**/*.ts",
+        "vitest.config.ts"
+      ]
+    },
+    "packages/vscode-dep-beacon": {
+      "entry": [
+        "scripts/*.cjs",
+        "src/extension.ts"
+      ],
+      "project": [
+        "scripts/*.cjs",
+        "src/**/*.ts",
+        "tests/**/*.ts",
+        "vitest.config.ts"
+      ]
+    }
+  }
 }

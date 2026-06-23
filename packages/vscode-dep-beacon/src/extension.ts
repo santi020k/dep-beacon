@@ -113,6 +113,9 @@ const createFingerprint = (document: vscode.TextDocument, config: DepBeaconConfi
     config.registryUrl,
   ].join(':')
 
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.stack ?? error.message : String(error)
+
 const fileExists = async (uri: vscode.Uri): Promise<boolean> => {
   try {
     await vscode.workspace.fs.stat(uri)
@@ -251,13 +254,18 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 
   log(message: string): void {
-    this.#output.appendLine(`[${new Date().toISOString()}] ${message}`)
+    const line = `[${new Date().toISOString()}] ${message}`
+
+    this.#output.appendLine(line)
+
+    // eslint-disable-next-line no-console -- Mirrors extension output to the VS Code Debug Console.
+    console.info(`[Dep Beacon] ${line}`)
   }
 
   logError(error: unknown, context?: string): void {
     if (context) this.log(context)
 
-    const message = error instanceof Error ? error.stack ?? error.message : String(error)
+    const message = errorMessage(error)
 
     this.log(`Error: ${message}`)
   }
@@ -610,10 +618,34 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 }
 
-export const activate = (context: vscode.ExtensionContext): void => {
-  const controller = new DepBeaconController(context)
+const reportActivationError = (error: unknown): never => {
+  const message = errorMessage(error)
+  const line = `[${new Date().toISOString()}] Activation failed.`
+  const output = vscode.window.createOutputChannel('Dep Beacon')
 
-  controller.refreshVisibleEditors(false, 'extension activation')
+  output.appendLine(line)
+
+  output.appendLine(message)
+
+  output.show(true)
+
+  // eslint-disable-next-line no-console -- Activation errors can happen before the output channel is visible.
+  console.error(`[Dep Beacon] ${line}`)
+
+  // eslint-disable-next-line no-console -- Keep the original stack trace in the VS Code Debug Console.
+  console.error(message)
+
+  throw error
+}
+
+export const activate = (context: vscode.ExtensionContext): void => {
+  try {
+    const controller = new DepBeaconController(context)
+
+    controller.refreshVisibleEditors(false, 'extension activation')
+  } catch (error) {
+    reportActivationError(error)
+  }
 }
 
 export const deactivate = (): undefined => undefined

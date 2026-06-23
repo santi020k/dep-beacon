@@ -122,6 +122,14 @@ const highestPatch = (versions: readonly string[], baseVersion: string): string 
 
 const isConcreteSpec = (spec: string): boolean => /^[\^~]?\d/u.test(spec.trim())
 
+const safeMinVersion = (spec: string): string | undefined => {
+  try {
+    return minVersion(spec)?.version
+  } catch {
+    return undefined
+  }
+}
+
 export const getVersionPrefix = (spec: string): string => {
   const prefix = VERSION_PREFIX_PATTERN.exec(spec.trim())?.groups?.prefix?.trim()
 
@@ -140,7 +148,7 @@ export const computeUpdateTargets = (
 ): DependencyUpdateTargets => {
   const range = validRange(spec)
   const candidates = versionCandidates(metadata, includePrerelease)
-  const floor = valid(spec) ?? minVersion(spec)?.version
+  const floor = valid(spec) ?? safeMinVersion(spec)
   const current = range ? maxSatisfying(candidates, range, { includePrerelease }) ?? floor : floor
 
   if (!current) return {}

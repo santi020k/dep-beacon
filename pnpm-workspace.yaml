@@ -4,7 +4,9 @@ packages:
 
 allowBuilds:
   "@tailwindcss/oxide": true
+  '@vscode/vsce-sign': set this to true or false
   esbuild: true
+  keytar: set this to true or false
   sharp: true
   unrs-resolver: true
   workerd: true
@@ -17,8 +19,6 @@ catalog:
   "@changesets/cli": ^2.31.0
   "@commitlint/cli": ^21.0.2
   "@commitlint/config-conventional": ^21.0.2
-  "@resvg/resvg-js": ^2.6.2
-  "@santi020k/eslint-config-astro": ^2.1.1
   "@santi020k/eslint-config-basic": ^2.1.1
   "@tailwindcss/vite": ^4.3.1
   "@types/node": ^26.0.0
@@ -35,21 +35,14 @@ catalog:
   husky: ^9.1.7
   jsonc-parser: ^3.3.1
   knip: ^6.18.0
-  left-pad: 1.1.0
   lint-staged: ^17.0.8
   ovsx: ^1.0.1
   semver: ^7.8.5
   sharp: ^0.35.2
   tailwindcss: ^4.3.1
-  tinyglobby: ^0.2.17
   turbo: ^2.9.18
   typescript: ^6.0.3
   typescript-eslint: ^8.62.0
   vitest: ^4.1.9
   wrangler: ^4.103.0
   yaml: ^2.9.0
-
-catalogs:
-  react19:
-    react: ^19.0.0
-    react-dom: ^19.0.0
