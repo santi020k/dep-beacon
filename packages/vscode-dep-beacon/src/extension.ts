@@ -98,6 +98,14 @@ const toVscodeRange = (range: TextRange): vscode.Range =>
     range.endPosition.character,
   )
 
+const toCodeLensRange = (range: TextRange): vscode.Range =>
+  new vscode.Range(
+    range.startPosition.line,
+    range.startPosition.character,
+    range.startPosition.line,
+    range.startPosition.character,
+  )
+
 const toUpdateRange = (range: TextRange): UpdateDependencyArgs['range'] => ({
   end: range.endPosition,
   start: range.startPosition,
@@ -152,27 +160,31 @@ const createDecoration = (color: vscode.ThemeColor): vscode.TextEditorDecoration
 
 const updateLensTitle = (actions: readonly ResolvedUpdateAction[]): string => {
   const action = actions[0]
+  const icon = '$(arrow-small-up)\u00A0'
 
-  if (!action) return '$(arrow-up) update'
+  if (!action) return `${icon}update`
 
-  if (actions.length > 1) return '$(arrow-up) update...'
+  if (actions.length > 1) return `${icon}update...`
 
-  return `$(arrow-up) update ${action.targetSpec}`
+  return `${icon}update ${action.targetSpec}`
 }
 
 const updateQuickPickLabel = (action: ResolvedUpdateAction): string => {
+  const arrow = '$(arrow-small-up)\u00A0'
+  const rocket = '$(rocket)\u00A0'
+
   switch (action.kind) {
     case 'patch':
-      return '$(arrow-up) Patch'
+      return `${arrow}Patch`
 
     case 'minor':
-      return '$(arrow-up) Minor'
+      return `${arrow}Minor`
 
     case 'major':
-      return '$(arrow-up) Major'
+      return `${arrow}Major`
 
     case 'latest':
-      return '$(rocket) Latest'
+      return `${rocket}Latest`
   }
 }
 
@@ -267,7 +279,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   readonly #subscriptions: vscode.Disposable[] = []
   readonly #timers = new Map<string, ReturnType<typeof setTimeout>>()
   #fileLoggingDisabled = false
-  #registryClient = new NpmRegistryClient()
+  #registryClient: NpmRegistryClient | undefined
+  #registryClientKey: string | undefined
 
   readonly onDidChangeCodeLenses = this.#onDidChangeCodeLenses.event
 
@@ -498,9 +511,11 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   clearCache(): void {
     this.#cache.clear()
 
-    this.#registryClient.clear()
+    this.#registryClient?.clear()
 
-    this.#registryClient = new NpmRegistryClient()
+    this.#registryClient = undefined
+
+    this.#registryClientKey = undefined
 
     this.#onDidChangeCodeLenses.fire()
   }
@@ -636,8 +651,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     analysis: DependencyAnalysis,
     catalogTargets: readonly CatalogEditTarget[],
   ): vscode.CodeLens[] {
-    const nameRange = toVscodeRange(analysis.dependency.nameRange)
-    const specRange = toVscodeRange(analysis.dependency.specRange)
+    const nameRange = toCodeLensRange(analysis.dependency.nameRange)
+    const specRange = toCodeLensRange(analysis.dependency.specRange)
     const updateTarget = this.getDependencyUpdateTarget(document, analysis, catalogTargets)
     const actions = updateTarget ? resolvedUpdateActions(analysis, updateTarget.spec) : []
 
@@ -862,11 +877,19 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 
   getRegistryClient(config: DepBeaconConfig): NpmRegistryClient {
-    const cached = this.#registryClient
+    const cacheTtlMs = config.cacheTtlMinutes * 60 * 1000
+    const key = `${config.registryUrl}:${cacheTtlMs}`
 
-    if (config.registryUrl === 'https://registry.npmjs.org') return cached
+    if (this.#registryClient && this.#registryClientKey === key) return this.#registryClient
 
-    return new NpmRegistryClient({ registryUrl: config.registryUrl })
+    this.#registryClient = new NpmRegistryClient({
+      cacheTtlMs,
+      registryUrl: config.registryUrl,
+    })
+
+    this.#registryClientKey = key
+
+    return this.#registryClient
   }
 
   async updateDependency(args: UpdateDependencyArgs): Promise<void> {

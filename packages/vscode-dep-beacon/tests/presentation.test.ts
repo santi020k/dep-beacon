@@ -117,7 +117,7 @@ describe('presentation helpers', () => {
   })
 
   test('creates compact package lens labels', () => {
-    expect(packageLensTitle(baseAnalysis('outdated'))).toBe('$(link-external) open demo')
+    expect(packageLensTitle(baseAnalysis('outdated'))).toBe('$(link-external)\u00A0open demo')
   })
 
   test('resolves update actions with manifest target specs', () => {

@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from './fetch.js'
 import type { FetchLike, OsvQuery, Severity, VulnerabilitySummary } from './types.js'
 
 interface OsvBatchResponse {
@@ -140,35 +141,44 @@ export class OsvClient {
   readonly #baseUrl: string
   readonly #detailCache = new Map<string, Promise<OsvVulnerability | undefined>>()
   readonly #fetch: FetchLike
+  readonly #requestTimeoutMs: number
 
-  constructor(options: { baseUrl?: string, fetch?: FetchLike } = {}) {
+  constructor(options: { baseUrl?: string, fetch?: FetchLike, requestTimeoutMs?: number } = {}) {
     this.#baseUrl = (options.baseUrl ?? 'https://api.osv.dev').replace(/\/+$/u, '')
 
     this.#fetch = options.fetch ?? fetch
+
+    this.#requestTimeoutMs = options.requestTimeoutMs ?? 10_000
   }
 
   async queryMany(queries: readonly OsvQuery[]): Promise<Map<string, VulnerabilitySummary>> {
     if (queries.length === 0) return new Map()
 
-    const response = await this.#fetch(`${this.#baseUrl}/v1/querybatch`, {
-      body: JSON.stringify({
-        queries: queries.map((query) => ({
-          package: {
-            ecosystem: 'npm',
-            name: query.name,
-          },
-          version: query.version,
-        })),
-      }),
-      headers: {
-        'content-type': 'application/json',
-      },
-      method: 'POST',
-    })
+    let batch: OsvBatchResponse
 
-    if (!response.ok) return new Map()
+    try {
+      const response = await fetchWithTimeout(this.#fetch, `${this.#baseUrl}/v1/querybatch`, {
+        body: JSON.stringify({
+          queries: queries.map((query) => ({
+            package: {
+              ecosystem: 'npm',
+              name: query.name,
+            },
+            version: query.version,
+          })),
+        }),
+        headers: {
+          'content-type': 'application/json',
+        },
+        method: 'POST',
+      }, this.#requestTimeoutMs)
 
-    const batch = toBatchResponse(await response.json())
+      if (!response.ok) return new Map()
+
+      batch = toBatchResponse(await response.json())
+    } catch {
+      return new Map()
+    }
 
     const summaries = await Promise.all(
       queries.map((query, index) => this.#summarizeQuery(query, batch.results?.[index])),
@@ -209,7 +219,7 @@ export class OsvClient {
 
   async #requestVulnerability(id: string): Promise<OsvVulnerability | undefined> {
     try {
-      const response = await this.#fetch(`${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`)
+      const response = await fetchWithTimeout(this.#fetch, `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`, {}, this.#requestTimeoutMs)
 
       if (!response.ok) return undefined
 

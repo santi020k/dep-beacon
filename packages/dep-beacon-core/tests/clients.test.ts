@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { createNpmPackageUrl, type FetchLike,NpmRegistryClient, OsvClient } from '../src/index.js'
+import { createNpmPackageUrl, type FetchLike, NpmRegistryClient, OsvClient } from '../src/index.js'
 import { getOsvQueryKey } from '../src/osv.js'
 
 const packument = (name: string, versions: readonly string[] = ['1.0.0']): unknown => ({
@@ -53,6 +53,43 @@ describe('npm registry client', () => {
 
     await client.getPackage('@scope/demo')
 
+    expect(calls).toHaveLength(2)
+  })
+
+  test('refreshes cached package lookups after the configured ttl', async () => {
+    let now = 1_000
+    const calls: string[] = []
+    const client = new NpmRegistryClient({
+      cacheTtlMs: 1_000,
+      fetch: (url) => {
+        calls.push(url)
+
+        return Promise.resolve(new Response(JSON.stringify(packument('demo', [`1.0.${calls.length}`])), { status: 200 }))
+      },
+      now: () => now,
+    })
+
+    expect(await client.getPackage('demo')).toMatchObject({
+      metadata: {
+        versions: ['1.0.1'],
+      },
+      ok: true,
+    })
+    expect(await client.getPackage('demo')).toMatchObject({
+      metadata: {
+        versions: ['1.0.1'],
+      },
+      ok: true,
+    })
+
+    now += 1_001
+
+    expect(await client.getPackage('demo')).toMatchObject({
+      metadata: {
+        versions: ['1.0.2'],
+      },
+      ok: true,
+    })
     expect(calls).toHaveLength(2)
   })
 
@@ -118,6 +155,10 @@ describe('OSV client', () => {
     expect(calls).toEqual([])
     expect(await client.queryMany([{ name: 'demo', version: '1.0.0' }])).toEqual(new Map())
     expect(calls).toEqual(['https://api.osv.dev/v1/querybatch'])
+
+    await expect(new OsvClient({
+      fetch: () => Promise.reject(new Error('batch request failed')),
+    }).queryMany([{ name: 'demo', version: '1.0.0' }])).resolves.toEqual(new Map())
   })
 
   test('builds batch queries, fetches vulnerability details, and caches repeated ids', async () => {

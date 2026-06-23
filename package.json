@@ -16,7 +16,7 @@
     "lint:repo:fix": "eslint . --cache --fix --no-warn-ignored",
     "lint:spell": "cspell \"**\" --gitignore --cache --show-suggestions --show-context",
     "lint:knip": "knip",
-    "validate": "pnpm run build && pnpm run typecheck && pnpm run test && pnpm run lint && pnpm run package:extension",
+    "validate": "pnpm run build && pnpm run typecheck && pnpm run test:coverage && pnpm run lint && pnpm run lint:spell && pnpm run lint:knip && pnpm run package:extension",
     "ok": "pnpm install --frozen-lockfile && pnpm run validate",
     "changeset": "changeset",
     "version-packages": "changeset version",

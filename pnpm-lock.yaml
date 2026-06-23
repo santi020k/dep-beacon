@@ -257,6 +257,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-v8@4.1.9)(jsdom@25.0.1)(vite@8.0.16(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
 
 packages:
 

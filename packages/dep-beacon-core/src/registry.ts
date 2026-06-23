@@ -1,9 +1,15 @@
+import { fetchWithTimeout } from './fetch.js'
 import type { FetchLike, NpmPackageMetadata, RegistryLookupResult } from './types.js'
 
 interface PackumentShape {
   'dist-tags'?: Record<string, unknown>
   name?: unknown
   versions?: Record<string, unknown>
+}
+
+interface CacheEntry {
+  expiresAt: number
+  request: Promise<RegistryLookupResult>
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -38,24 +44,43 @@ export const createNpmPackageUrl = (packageName: string): string =>
   `https://www.npmjs.com/package/${packageName}`
 
 export class NpmRegistryClient {
-  readonly #cache = new Map<string, Promise<RegistryLookupResult>>()
+  readonly #cache = new Map<string, CacheEntry>()
+  readonly #cacheTtlMs: number
   readonly #fetch: FetchLike
+  readonly #now: () => number
+  readonly #requestTimeoutMs: number
   readonly #registryUrl: string
 
-  constructor(options: { fetch?: FetchLike, registryUrl?: string } = {}) {
+  constructor(options: {
+    cacheTtlMs?: number
+    fetch?: FetchLike
+    now?: () => number
+    registryUrl?: string
+    requestTimeoutMs?: number
+  } = {}) {
+    this.#cacheTtlMs = Math.max(0, options.cacheTtlMs ?? Number.POSITIVE_INFINITY)
+
     this.#fetch = options.fetch ?? fetch
+
+    this.#now = options.now ?? Date.now
+
+    this.#requestTimeoutMs = options.requestTimeoutMs ?? 10_000
 
     this.#registryUrl = trimTrailingSlash(options.registryUrl ?? 'https://registry.npmjs.org')
   }
 
   getPackage(packageName: string): Promise<RegistryLookupResult> {
     const cached = this.#cache.get(packageName)
+    const now = this.#now()
 
-    if (cached) return cached
+    if (cached && cached.expiresAt > now) return cached.request
 
     const request = this.#requestPackage(packageName)
 
-    this.#cache.set(packageName, request)
+    this.#cache.set(packageName, {
+      expiresAt: Number.isFinite(this.#cacheTtlMs) ? now + this.#cacheTtlMs : Number.POSITIVE_INFINITY,
+      request,
+    })
 
     return request
   }
@@ -68,11 +93,11 @@ export class NpmRegistryClient {
     const encodedName = encodeURIComponent(packageName)
 
     try {
-      const response = await this.#fetch(`${this.#registryUrl}/${encodedName}`, {
+      const response = await fetchWithTimeout(this.#fetch, `${this.#registryUrl}/${encodedName}`, {
         headers: {
           accept: 'application/vnd.npm.install-v1+json, application/json',
         },
-      })
+      }, this.#requestTimeoutMs)
 
       if (response.status === 404) {
         return {

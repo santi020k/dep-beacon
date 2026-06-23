@@ -3,30 +3,23 @@
 const { execSync } = require('node:child_process')
 const { readFileSync, writeFileSync } = require('node:fs')
 const { resolve } = require('node:path')
+const { parseDocument } = require('yaml')
+
 const PKG_PATH = resolve(__dirname, '../package.json')
 const WORKSPACE_PATH = resolve(__dirname, '../../../pnpm-workspace.yaml')
 const CORE_PKG_PATH = resolve(__dirname, '../../dep-beacon-core/package.json')
 const originalContent = readFileSync(PKG_PATH, 'utf8')
-const workspace = readFileSync(WORKSPACE_PATH, 'utf8')
+const workspace = parseDocument(readFileSync(WORKSPACE_PATH, 'utf8')).toJS()
 const pkg = JSON.parse(originalContent)
 
+const isRecord = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+
 const resolveCatalogVersion = (packageName) => {
-  const lines = workspace.split('\n')
-  const patterns = [`"${packageName}":`, `'${packageName}':`, `${packageName}:`]
+  if (!isRecord(workspace) || !isRecord(workspace.catalog)) return null
 
-  for (const line of lines) {
-    const trimmed = line.trimStart()
+  const value = workspace.catalog[packageName]
 
-    for (const pattern of patterns) {
-      if (trimmed.startsWith(pattern)) {
-        const value = trimmed.slice(pattern.length).trim()
-
-        return value.length > 0 ? value : undefined
-      }
-    }
-  }
-
-  return null
+  return typeof value === 'string' && value.length > 0 ? value : undefined
 }
 
 const resolveWorkspaceVersion = (packageName) => {

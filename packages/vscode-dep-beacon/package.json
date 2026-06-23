@@ -48,7 +48,8 @@
     "esbuild": "catalog:",
     "ovsx": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "catalog:"
   },
   "contributes": {
     "commands": [
