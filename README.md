@@ -24,6 +24,34 @@ To package the extension locally:
 pnpm run package:extension
 ```
 
+To run the same local gate used before publishing:
+
+```sh
+pnpm run validate
+```
+
+## Local Extension Debugging
+
+Open the repo in VS Code and use Run and Debug:
+
+- `Dep Beacon: Extension (Build Once)` builds the core and extension, then opens `examples/sample-workspace`.
+- `Dep Beacon: Extension (Watch)` is for active development after starting the `vscode-dep-beacon: dev` task.
+- `Dep Beacon: Extension (Current Workspace)` opens the repo itself in the Extension Host.
+
+The sample workspace includes `package.json` and `pnpm-workspace.yaml` entries for regular dependencies, catalogs, overrides, and package extensions.
+
+## Environment
+
+Copy `.env.example` to `.env` for local release or deploy commands. GitHub Actions expects:
+
+- `NPM_TOKEN`
+- `VSCE_PAT`
+- `OVSX_PAT`
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+- optional `CLOUDFLARE_PAGES_PROJECT_NAME`
+- optional `TURBO_TOKEN` and `TURBO_TEAM`
+
 ## What It Tracks
 
 - `package.json` dependency sections, peer dependencies, optional dependencies, npm `overrides`, Yarn `resolutions`, and pnpm `pnpm.overrides`.

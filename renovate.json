@@ -1,0 +1,72 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    "group:monorepos"
+  ],
+  "baseBranches": ["main"],
+  "labels": ["dependencies", "skip-changelog"],
+  "schedule": ["before 9am on Monday"],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 3,
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "description": "ESLint core, framework configs, and plugins",
+      "matchPackageNames": ["eslint", "@eslint/*", "eslint-*", "@typescript-eslint/*", "typescript-eslint", "@santi020k/eslint-config-*"],
+      "groupName": "ESLint",
+      "groupSlug": "eslint"
+    },
+    {
+      "description": "TypeScript",
+      "matchPackageNames": ["typescript"],
+      "groupName": "TypeScript",
+      "groupSlug": "typescript"
+    },
+    {
+      "description": "Build tooling",
+      "matchPackageNames": ["turbo", "@turbo/*", "esbuild", "sharp"],
+      "groupName": "build tools",
+      "groupSlug": "build-tools"
+    },
+    {
+      "description": "Testing",
+      "matchPackageNames": ["vitest", "@vitest/*"],
+      "groupName": "Vitest",
+      "groupSlug": "vitest"
+    },
+    {
+      "description": "VS Code publishing",
+      "matchPackageNames": ["@vscode/vsce", "ovsx", "@types/vscode"],
+      "groupName": "VS Code extension tooling",
+      "groupSlug": "vscode-extension"
+    },
+    {
+      "description": "Git hooks and commit tooling",
+      "matchPackageNames": ["husky", "lint-staged", "commitizen", "cz-*", "@commitlint/*"],
+      "groupName": "git hooks",
+      "groupSlug": "git-hooks"
+    },
+    {
+      "description": "Auto-merge non-breaking GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions"
+    },
+    {
+      "description": "Auto-merge patch-level devDependency updates when CI is green",
+      "matchUpdateTypes": ["patch"],
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ],
+  "pnpm": {
+    "enabled": true
+  }
+}

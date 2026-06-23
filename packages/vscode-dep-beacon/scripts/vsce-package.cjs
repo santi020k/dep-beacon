@@ -5,6 +5,7 @@ const { readFileSync, writeFileSync } = require('node:fs')
 const { resolve } = require('node:path')
 const PKG_PATH = resolve(__dirname, '../package.json')
 const WORKSPACE_PATH = resolve(__dirname, '../../../pnpm-workspace.yaml')
+const CORE_PKG_PATH = resolve(__dirname, '../../dep-beacon-core/package.json')
 const originalContent = readFileSync(PKG_PATH, 'utf8')
 const workspace = readFileSync(WORKSPACE_PATH, 'utf8')
 const pkg = JSON.parse(originalContent)
@@ -25,7 +26,13 @@ const resolveCatalogVersion = (packageName) => {
     }
   }
 
-  
+  return null
+}
+
+const resolveWorkspaceVersion = (packageName) => {
+  if (packageName !== '@santi020k/dep-beacon-core') return null
+
+  return JSON.parse(readFileSync(CORE_PKG_PATH, 'utf8')).version
 }
 
 const getDeps = (sectionName) => {
@@ -33,7 +40,7 @@ const getDeps = (sectionName) => {
 
   if (sectionName === 'devDependencies') return pkg.devDependencies
 
-  
+  return null
 }
 
 for (const section of ['dependencies', 'devDependencies']) {
@@ -49,7 +56,9 @@ for (const section of ['dependencies', 'devDependencies']) {
     }
 
     if (value === 'workspace:*') {
-      Object.assign(deps, { [name]: '0.0.0' })
+      const resolved = resolveWorkspaceVersion(name)
+
+      if (resolved) Object.assign(deps, { [name]: resolved })
     }
   }
 }

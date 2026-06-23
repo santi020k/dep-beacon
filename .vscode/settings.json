@@ -2,7 +2,12 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
+  "debug.javascript.autoAttachFilter": "disabled",
   "eslint.experimental.useFlatConfig": true,
   "eslint.validate": ["astro", "javascript", "javascriptreact", "json", "jsonc", "typescript", "typescriptreact", "yaml"],
+  "files.associations": {
+    ".env.example": "dotenv",
+    ".env.local": "dotenv"
+  },
   "typescript.tsdk": "node_modules/typescript/lib"
 }

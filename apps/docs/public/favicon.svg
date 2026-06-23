@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Dep Beacon favicon">
-  <rect width="32" height="32" rx="7" fill="#0f8b8d"/>
-  <path d="M8.2 13.1C10.2 8.7 13 6.8 16 6.8s5.8 1.9 7.8 6.3M11.8 15.9c1.1-2.3 2.5-3.4 4.2-3.4s3.1 1.1 4.2 3.4" fill="none" stroke="#f4fbf8" stroke-width="2.7" stroke-linecap="round"/>
-  <path d="M16 17.1 22.2 20.2 16 23.1 9.8 20.2 16 17.1ZM10.8 21.9l4.4 2.2v4.1L10.8 26v-4.1ZM16.8 24.1l4.4-2.2V26l-4.4 2.2v-4.1Z" fill="#f4fbf8"/>
+  <rect width="32" height="32" rx="8" fill="#111827"/>
+  <path d="M16 6.2 9.2 21.6h13.6L16 6.2Z" fill="#1f2a44"/>
+  <path d="M16 6.2 9.2 21.6M16 6.2l6.8 15.4M9.2 21.6h13.6M16 14.4l-6.8 7.2M16 14.4l6.8 7.2" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  <circle cx="16" cy="6.2" r="3.1" fill="#f8c65c"/>
+  <circle cx="16" cy="14.4" r="2.4" fill="#f8fafc"/>
+  <circle cx="9.2" cy="21.6" r="3" fill="#34d399"/>
+  <circle cx="22.8" cy="21.6" r="3" fill="#fb7185"/>
 </svg>

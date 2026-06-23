@@ -35,6 +35,7 @@ catalog:
   husky: ^9.1.7
   jsonc-parser: ^3.3.1
   knip: ^6.18.0
+  left-pad: 1.1.0
   lint-staged: ^17.0.8
   ovsx: ^1.0.1
   semver: ^7.8.5
@@ -47,3 +48,8 @@ catalog:
   vitest: ^4.1.9
   wrangler: ^4.103.0
   yaml: ^2.9.0
+
+catalogs:
+  react19:
+    react: ^19.0.0
+    react-dom: ^19.0.0

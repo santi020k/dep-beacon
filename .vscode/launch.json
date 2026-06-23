@@ -1,0 +1,76 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dep Beacon: Extension (Watch)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-dep-beacon",
+        "${workspaceFolder}/examples/sample-workspace"
+      ],
+      "env": {
+        "DEP_BEACON_EXTENSION_ENV": "local"
+      },
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
+      ]
+    },
+    {
+      "name": "Dep Beacon: Extension (Build Once)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-dep-beacon",
+        "${workspaceFolder}/examples/sample-workspace"
+      ],
+      "env": {
+        "DEP_BEACON_EXTENSION_ENV": "local"
+      },
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
+      ],
+      "preLaunchTask": "vscode-dep-beacon: build"
+    },
+    {
+      "name": "Dep Beacon: Extension (Current Workspace)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-dep-beacon",
+        "${workspaceFolder}"
+      ],
+      "env": {
+        "DEP_BEACON_EXTENSION_ENV": "local"
+      },
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
+      ],
+      "preLaunchTask": "vscode-dep-beacon: build"
+    },
+    {
+      "name": "Dep Beacon: Extension (Production Mode)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-dep-beacon",
+        "${workspaceFolder}/examples/sample-workspace"
+      ],
+      "env": {
+        "DEP_BEACON_EXTENSION_ENV": "production"
+      },
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode-dep-beacon/dist/**/*.js"
+      ],
+      "preLaunchTask": "vscode-dep-beacon: build"
+    }
+  ]
+}

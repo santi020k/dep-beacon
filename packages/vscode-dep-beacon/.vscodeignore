@@ -1,6 +1,9 @@
 .vscode/**
 .turbo/**
+.changeset/**
+.github/**
 .eslintcache
+.env*
 src/**
 scripts/**
 tests/**

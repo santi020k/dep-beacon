@@ -1,0 +1,133 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dep-beacon-core: build",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@santi020k/dep-beacon-core",
+        "run",
+        "build"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "dep-beacon-core: watch",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@santi020k/dep-beacon-core",
+        "run",
+        "dev"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "vscode-dep-beacon: build-extension",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "vscode-dep-beacon",
+        "run",
+        "build"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "vscode-dep-beacon: build",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "dep-beacon-core: build",
+        "vscode-dep-beacon: build-extension"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "vscode-dep-beacon: watch-extension",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "vscode-dep-beacon",
+        "run",
+        "dev"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "vscode-dep-beacon: dev",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "vscode-dep-beacon: build",
+        "vscode-dep-beacon: watch"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "vscode-dep-beacon: watch",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "dep-beacon-core: watch",
+        "vscode-dep-beacon: watch-extension"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "dep-beacon-docs: dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@santi020k/dep-beacon-docs",
+        "run",
+        "dev"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "dep-beacon: validate",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "validate"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "dep-beacon: package-extension",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "package:extension"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
