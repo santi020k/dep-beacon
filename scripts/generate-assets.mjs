@@ -81,7 +81,19 @@ const ogCards = [
   },
 ]
 
-const socialCardSvg = ({ accent, eyebrow, subtitle, title }) => `\
+const subtitleFontSize = (subtitle) => {
+  if (subtitle.length > 64) return 28
+
+  if (subtitle.length > 58) return 30
+
+  return 32
+}
+
+const socialCardSvg = ({ accent, eyebrow, subtitle, title }) => {
+  const titleSize = title.length > 20 ? 72 : 78
+  const subtitleSize = subtitleFontSize(subtitle)
+
+  return `\
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="${escapeXml(title)} social card">
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
@@ -92,27 +104,47 @@ const socialCardSvg = ({ accent, eyebrow, subtitle, title }) => `\
     <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
       <path d="M44 0H0v44" fill="none" stroke="#24343b" stroke-opacity="0.55"/>
     </pattern>
+    <clipPath id="inner-panel">
+      <rect x="90" y="90" width="1020" height="450" rx="18"/>
+    </clipPath>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect width="1200" height="630" fill="url(#grid)" opacity="0.48"/>
-  <path d="M64 476c162-72 310-74 444-6 142 72 300 70 474-8 62-28 112-45 154-51v155H64Z" fill="${accent}" opacity="0.12"/>
+  <path d="M64 476c162-72 310-74 444-6 142 72 300 70 474-8 62-28 112-45 154-51v155H64Z" fill="${accent}" opacity="0.13"/>
   <rect x="64" y="64" width="1072" height="502" rx="26" fill="#101820" fill-opacity="0.82" stroke="#2b424a" stroke-width="2"/>
-  <rect x="90" y="90" width="1020" height="450" rx="18" fill="#0b1115" fill-opacity="0.44" stroke="#20343d"/>
-  ${logoMark(104, 112, 3)}
-  <text x="238" y="154" fill="${accent}" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="850" letter-spacing="0">${escapeXml(eyebrow)}</text>
-  <text x="104" y="318" fill="#f4fbf8" font-family="Inter, Arial, sans-serif" font-size="78" font-weight="850" letter-spacing="0">${escapeXml(title)}</text>
-  <text x="108" y="382" fill="#b7c9c5" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="500" letter-spacing="0">${escapeXml(subtitle)}</text>
-  <g font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0">
-    <rect x="104" y="446" width="154" height="48" rx="8" fill="#102f26" stroke="#5bd67b"/>
-    <text x="128" y="478" fill="#5bd67b">up to date</text>
-    <rect x="278" y="446" width="188" height="48" rx="8" fill="#302913" stroke="#f2c14e"/>
-    <text x="302" y="478" fill="#f2c14e">update ready</text>
-    <rect x="486" y="446" width="182" height="48" rx="8" fill="#321b1c" stroke="#f05d5e"/>
-    <text x="510" y="478" fill="#f05d5e">security risk</text>
+  <rect x="90" y="90" width="1020" height="450" rx="18" fill="#0b1115" fill-opacity="0.58" stroke="#20343d"/>
+  <g clip-path="url(#inner-panel)">
+    <path d="M90 90h1020v6H90Z" fill="${accent}" opacity="0.62"/>
+    <path d="M708 90h402v450H780c70-56 88-125 54-207-30-73-72-141-126-243Z" fill="${accent}" opacity="0.08"/>
+    <g transform="translate(782 122)">
+      <rect width="286" height="124" rx="14" fill="#101820" fill-opacity="0.82" stroke="#29424c"/>
+      <rect x="18" y="20" width="96" height="10" rx="5" fill="#78908c" opacity="0.48"/>
+      <rect x="18" y="48" width="158" height="12" rx="6" fill="#75a7ff" opacity="0.38"/>
+      <rect x="190" y="47" width="72" height="14" rx="7" fill="${accent}" opacity="0.72"/>
+      <rect x="18" y="76" width="132" height="12" rx="6" fill="#f2c14e" opacity="0.42"/>
+      <rect x="164" y="75" width="98" height="14" rx="7" fill="#5bd67b" opacity="0.72"/>
+      <rect x="18" y="104" width="178" height="12" rx="6" fill="#fb7185" opacity="0.4"/>
+      <rect x="210" y="103" width="52" height="14" rx="7" fill="#f05d5e" opacity="0.72"/>
+    </g>
+    ${logoMark(104, 112, 3)}
+    <text x="238" y="154" fill="${accent}" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="850" letter-spacing="0">${escapeXml(eyebrow)}</text>
+    <rect x="238" y="174" width="92" height="4" rx="2" fill="${accent}" opacity="0.82"/>
+    <text x="104" y="318" fill="#f4fbf8" font-family="Inter, Arial, sans-serif" font-size="${titleSize}" font-weight="850" letter-spacing="0">${escapeXml(title)}</text>
+    <text x="108" y="382" fill="#b7c9c5" font-family="Inter, Arial, sans-serif" font-size="${subtitleSize}" font-weight="500" letter-spacing="0">${escapeXml(subtitle)}</text>
+    <path d="M104 426H1068" stroke="#20343d" stroke-width="1"/>
+    <g font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0">
+      <rect x="104" y="448" width="154" height="48" rx="8" fill="#102f26" stroke="#5bd67b"/>
+      <text x="128" y="480" fill="#5bd67b">up to date</text>
+      <rect x="278" y="448" width="188" height="48" rx="8" fill="#302913" stroke="#f2c14e"/>
+      <text x="302" y="480" fill="#f2c14e">update ready</text>
+      <rect x="486" y="448" width="182" height="48" rx="8" fill="#321b1c" stroke="#f05d5e"/>
+      <text x="510" y="480" fill="#f05d5e">security risk</text>
+    </g>
+    <text x="1068" y="480" text-anchor="end" fill="#8ba39f" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0">${escapeXml(siteHost)}</text>
   </g>
-  <text x="896" y="505" fill="#78908c" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">${escapeXml(siteHost)}</text>
 </svg>
 `
+}
 
 const heroPreviewSvg = `\
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Dep Beacon VS Code preview">

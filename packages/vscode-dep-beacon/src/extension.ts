@@ -28,6 +28,11 @@ interface CachedAnalysis {
   parseResult: ManifestParseResult
 }
 
+interface InflightAnalysis {
+  fingerprint: string
+  request: Promise<DependencyAnalysis[]>
+}
+
 interface UpdateDependencyArgs {
   targetSpec: string
   uri: string
@@ -140,6 +145,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   readonly #cache = new Map<string, CachedAnalysis>()
   readonly #decorationTypes: Record<DecorationTone, vscode.TextEditorDecorationType>
   readonly #diagnostics: vscode.DiagnosticCollection
+  readonly #inflightAnalyses = new Map<string, InflightAnalysis>()
   readonly #onDidChangeCodeLenses = new vscode.EventEmitter<void>()
   readonly #output: vscode.OutputChannel
   readonly #subscriptions: vscode.Disposable[] = []
@@ -316,6 +322,35 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
     const key = document.uri.toString()
     const fingerprint = createFingerprint(document, config)
+    const reusableAnalysis = this.getReusableAnalysis(document, key, fingerprint, force)
+
+    if (reusableAnalysis) return reusableAnalysis
+
+    const request = this.runAnalysis(document, config, fingerprint, force)
+
+    this.#inflightAnalyses.set(key, { fingerprint, request })
+
+    try {
+      return await request
+    } finally {
+      if (this.#inflightAnalyses.get(key)?.request === request) this.#inflightAnalyses.delete(key)
+    }
+  }
+
+  getReusableAnalysis(
+    document: vscode.TextDocument,
+    key: string,
+    fingerprint: string,
+    force: boolean,
+  ): DependencyAnalysis[] | Promise<DependencyAnalysis[]> | undefined {
+    const inflight = this.#inflightAnalyses.get(key)
+
+    if (inflight?.fingerprint === fingerprint) {
+      this.log(`Reusing in-flight analysis for ${describeDocument(document)}.`)
+
+      return inflight.request
+    }
+
     const cached = this.#cache.get(key)
 
     if (!force && cached?.fingerprint === fingerprint && cached.expiresAt > Date.now()) {
@@ -324,6 +359,10 @@ export class DepBeaconController implements vscode.CodeLensProvider {
       return cached.analyses
     }
 
+    return undefined
+  }
+
+  async runAnalysis(document: vscode.TextDocument, config: DepBeaconConfig, fingerprint: string, force: boolean): Promise<DependencyAnalysis[]> {
     this.log(`Analyzing ${describeDocument(document)}${force ? ' with cache bypass' : ''}.`)
 
     const parseResult = parseManifest(document.fileName, document.getText())
@@ -343,6 +382,14 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     })
 
     this.log(`Analyzed ${describeDocument(document)}: ${analyses.length} dependency signal(s).`)
+
+    if (createFingerprint(document, getDepBeaconConfig()) !== fingerprint) {
+      this.log(`Analysis result for ${describeDocument(document)} was superseded; skipped editor updates.`)
+
+      return []
+    }
+
+    const key = document.uri.toString()
 
     this.#cache.set(key, {
       analyses,
