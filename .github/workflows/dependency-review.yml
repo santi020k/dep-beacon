@@ -1,4 +1,4 @@
-name: Dependency Review
+name: Dependency Audit
 
 on:
   pull_request:
@@ -15,23 +15,41 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
 
 concurrency:
-  group: dependency-review-${{ github.event.pull_request.number || github.ref }}
+  group: dependency-audit-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  dependency-review:
-    name: Review dependency changes
+  dependency-audit:
+    name: Audit dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Dependency review
-        uses: actions/dependency-review-action@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          fail-on-severity: moderate
+          node-version: 24.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level=moderate --ignore-registry-errors
+
+      - name: Audit all dependencies for high risk
+        run: |
+          REPORT="${RUNNER_TEMP:-.}/pnpm-audit-high.json"
+          if ! pnpm audit --json --audit-level=high --ignore-registry-errors > "$REPORT"; then
+            cat "$REPORT"
+            exit 1
+          fi
+          node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const vulnerabilities = report.metadata?.vulnerabilities ?? {}; console.log(`No high or critical vulnerabilities found (${vulnerabilities.high ?? 0} high, ${vulnerabilities.critical ?? 0} critical).`)' "$REPORT"
