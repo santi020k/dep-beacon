@@ -130,6 +130,12 @@ const safeMinVersion = (spec: string): string | undefined => {
   }
 }
 
+const distTagSpecVersion = (spec: string, metadata: NpmPackageMetadata): string | undefined => {
+  const version = metadata.distTags[spec.trim()]
+
+  return version && valid(version) ? version : undefined
+}
+
 export const getVersionPrefix = (spec: string): string => {
   const prefix = VERSION_PREFIX_PATTERN.exec(spec.trim())?.groups?.prefix?.trim()
 
@@ -148,7 +154,7 @@ export const computeUpdateTargets = (
 ): DependencyUpdateTargets => {
   const range = validRange(spec)
   const candidates = versionCandidates(metadata, includePrerelease)
-  const floor = valid(spec) ?? safeMinVersion(spec)
+  const floor = valid(spec) ?? distTagSpecVersion(spec, metadata) ?? safeMinVersion(spec)
   const current = range ? maxSatisfying(candidates, range, { includePrerelease }) ?? floor : floor
 
   if (!current) return {}
@@ -182,7 +188,7 @@ export const getDependencyStatus = (
 }
 
 export const specLooksPublished = (spec: string, metadata: NpmPackageMetadata): boolean => {
-  const floor = clean(spec) ?? minVersion(spec)?.version
+  const floor = clean(spec) ?? distTagSpecVersion(spec, metadata) ?? safeMinVersion(spec)
 
   if (!floor || !isConcreteSpec(spec)) return true
 
@@ -193,7 +199,14 @@ export const specSatisfiesLatest = (
   spec: string,
   latest: string | undefined,
   includePrerelease: boolean,
-): boolean => Boolean(latest && validRange(spec) && satisfies(latest, spec, { includePrerelease }))
+  metadata?: NpmPackageMetadata,
+): boolean => {
+  if (!latest) return false
+
+  if (validRange(spec)) return satisfies(latest, spec, { includePrerelease })
+
+  return distTagSpecVersion(spec, metadata ?? { distTags: {}, name: '', versions: [] }) === latest
+}
 
 export const parseValidVersion = (version: string): string | undefined => parse(version)?.version
 

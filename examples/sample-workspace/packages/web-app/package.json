@@ -1,0 +1,24 @@
+{
+  "name": "@sample/web-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Modern web app — catalog refs (default + named), direct versions, vulnerable dep, peer deps",
+  "dependencies": {
+    "astro": "catalog:",
+    "axios": "catalog:",
+    "clsx": "catalog:",
+    "date-fns": "catalog:",
+    "left-pad": "catalog:",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "react-router": "catalog:react19"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}
