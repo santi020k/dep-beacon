@@ -2,7 +2,9 @@ version: "0.2"
 language: en
 words:
   - ACIP
+  - axios
   - astrojs
+  - clsx
   - codemod
   - CodeLens
   - codicon
@@ -12,12 +14,14 @@ words:
   - dep
   - depbeacon
   - esbuild
+  - expressjs
   - GHSA
   - jsonc
   - keytar
   - knip
   - linecap
   - linejoin
+  - lates
   - npmjs
   - OpenVSX
   - osv

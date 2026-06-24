@@ -2,7 +2,7 @@
   "name": "dep-beacon-sample-workspace",
   "version": "0.0.0",
   "private": true,
-  "descriptioœœn": "Sample pnpm workspace demonstrating dep-beacon analysis scenarios",
+  "description": "Sample pnpm workspace demonstrating dep-beacon analysis scenarios",
   "dependencies": {
     "astro": "catalog:",
     "left-pad": "catalog:",
