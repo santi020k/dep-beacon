@@ -77,6 +77,10 @@ describe('version helpers', () => {
       latest: '2.0.0',
       nextMajor: '2.0.0',
     })
+    expect(computeUpdateTargets('latest', packageMetadata, false)).toEqual({
+      current: '2.0.0',
+      latest: '2.0.0',
+    })
     expect(computeUpdateTargets('definitely-not-semver', packageMetadata, false)).toEqual({})
     expect(getVersionPrefix('  ~1.0.0')).toBe('~')
     expect(getVersionPrefix('>=1.0.0')).toBe('')
@@ -153,6 +157,7 @@ describe('version helpers', () => {
     expect(specLooksPublished('^9.0.0', packageMetadata)).toBe(false)
     expect(specLooksPublished('*', packageMetadata)).toBe(true)
     expect(specSatisfiesLatest('^1.0.0', '1.0.0', false)).toBe(true)
+    expect(specSatisfiesLatest('latest', '1.0.0', false, packageMetadata)).toBe(true)
     expect(specSatisfiesLatest('bad', '1.0.0', false)).toBe(false)
     expect(specSatisfiesLatest('^1.0.0', undefined, false)).toBe(false)
   })
@@ -198,6 +203,10 @@ describe('dependency analysis edge cases', () => {
       ...empty,
       spec: '^2.0.0',
     }
+    const distTag = {
+      ...empty,
+      spec: 'latest',
+    }
     const registryErrorClient = new NpmRegistryClient({
       fetch: () => Promise.resolve(new Response(JSON.stringify({ error: 'temporary' }), { status: 500 })),
     })
@@ -213,6 +222,15 @@ describe('dependency analysis edge cases', () => {
     await expect(analyzeDependency(invalid, { registryClient: registryClient() })).resolves.toMatchObject({
       message: 'The version range "not-a-version" is not a valid semver range.',
       status: 'invalid',
+    })
+    await expect(analyzeDependency(distTag, { registryClient: registryClient() })).resolves.toMatchObject({
+      isLatestSatisfied: true,
+      message: 'Current range accepts the latest published version. Latest is 2.0.0.',
+      status: 'up-to-date',
+      targets: {
+        current: '2.0.0',
+        latest: '2.0.0',
+      },
     })
     await expect(analyzeDependency(upToDate, { registryClient: registryClient() })).resolves.toMatchObject({
       isLatestSatisfied: true,
