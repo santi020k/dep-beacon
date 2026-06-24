@@ -278,6 +278,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   readonly #cache = new Map<string, CachedAnalysis>()
   readonly #decorationTypes: Record<DecorationTone, vscode.TextEditorDecorationType>
   readonly #diagnostics: vscode.DiagnosticCollection
+  readonly #catalogDiscoveryUris = new Set<string>()
   readonly #inflightAnalyses = new Map<string, InflightAnalysis>()
   readonly #logFilePath: string | undefined
   readonly #onDidChangeCodeLenses = new vscode.EventEmitter<void>()
@@ -285,6 +286,8 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   readonly #subscriptions: vscode.Disposable[] = []
   readonly #timers = new Map<string, ReturnType<typeof setTimeout>>()
   #catalogCache: CatalogWorkspaceData | undefined
+  #catalogGeneration = 0
+  #catalogLoad: Promise<CatalogWorkspaceData> | undefined
   #fileLoggingDisabled = false
   #osvClient: OsvClient | undefined
   #registryClient: NpmRegistryClient | undefined
@@ -322,17 +325,19 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     this.#subscriptions.push(
       vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, this),
       vscode.workspace.onDidChangeTextDocument((event) => {
-        if (isWorkspaceManifestDocument(event.document)) this.#catalogCache = undefined
+        if (isWorkspaceManifestDocument(event.document)) this.clearCatalogData()
 
         this.schedule(event.document, false, 'document changed')
       }),
       vscode.workspace.onDidOpenTextDocument((document) => {
-        if (isWorkspaceManifestDocument(document)) this.#catalogCache = undefined
+        if (this.#catalogDiscoveryUris.has(document.uri.toString())) return
+
+        if (isWorkspaceManifestDocument(document)) this.clearCatalogData()
 
         this.schedule(document, false, 'document opened')
       }),
       vscode.workspace.onDidSaveTextDocument((document) => {
-        if (isWorkspaceManifestDocument(document)) this.#catalogCache = undefined
+        if (isWorkspaceManifestDocument(document)) this.clearCatalogData()
 
         this.schedule(document, true, 'document saved')
 
@@ -529,7 +534,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   clearCache(): void {
     this.#cache.clear()
 
-    this.#catalogCache = undefined
+    this.clearCatalogData()
 
     this.#osvClient = undefined
 
@@ -544,6 +549,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
   refreshVisibleEditors(force = false, reason = 'visible editors changed'): void {
     const editors = vscode.window.visibleTextEditors
+    const scheduledUris = new Set<string>()
     let supportedCount = 0
 
     this.log(`Refresh requested for ${editors.length} visible editor(s) (${reason}).`)
@@ -557,7 +563,15 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     }
 
     for (const editor of editors) {
-      if (isSupportedDocument(editor.document)) supportedCount += 1
+      if (!isSupportedDocument(editor.document)) continue
+
+      supportedCount += 1
+
+      const key = editor.document.uri.toString()
+
+      if (scheduledUris.has(key)) continue
+
+      scheduledUris.add(key)
 
       this.schedule(editor.document, force, reason)
     }
@@ -781,12 +795,53 @@ export class DepBeaconController implements vscode.CodeLensProvider {
   }
 
   async loadCatalogWorkspaceData(currentDocument: vscode.TextDocument): Promise<CatalogWorkspaceData> {
-    if (this.#catalogCache && !isWorkspaceManifestDocument(currentDocument)) {
+    if (this.#catalogCache) {
       this.log('Catalog cache hit.')
 
       return this.#catalogCache
     }
 
+    if (this.#catalogLoad) {
+      this.log('Reusing in-flight pnpm catalog data load.')
+
+      return this.#catalogLoad
+    }
+
+    const generation = this.#catalogGeneration
+    const request = this.collectCatalogWorkspaceData(currentDocument, generation)
+
+    this.#catalogLoad = request
+
+    try {
+      return await request
+    } finally {
+      if (this.#catalogLoad === request) this.#catalogLoad = undefined
+    }
+  }
+
+  clearCatalogData(): void {
+    this.#catalogCache = undefined
+
+    this.#catalogLoad = undefined
+
+    this.#catalogGeneration += 1
+  }
+
+  async openCatalogDocument(uri: vscode.Uri): Promise<vscode.TextDocument> {
+    const key = uri.toString()
+
+    this.#catalogDiscoveryUris.add(key)
+
+    try {
+      return await vscode.workspace.openTextDocument(uri)
+    } finally {
+      setTimeout(() => {
+        this.#catalogDiscoveryUris.delete(key)
+      }, 0)
+    }
+  }
+
+  async collectCatalogWorkspaceData(currentDocument: vscode.TextDocument, generation: number): Promise<CatalogWorkspaceData> {
     const uris = [
       ...await vscode.workspace.findFiles('**/pnpm-workspace.yaml', '**/node_modules/**', 20),
       ...await vscode.workspace.findFiles('**/pnpm-workspace.yml', '**/node_modules/**', 20),
@@ -802,7 +857,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
       try {
         const document = uri.toString() === currentDocument.uri.toString()
           ? currentDocument
-          : await vscode.workspace.openTextDocument(uri)
+          : await this.openCatalogDocument(uri)
 
         const manifest = parseManifest(document.fileName, document.getText())
 
@@ -835,7 +890,7 @@ export class DepBeaconController implements vscode.CodeLensProvider {
       snapshot: catalogSnapshot,
     }
 
-    if (!isWorkspaceManifestDocument(currentDocument)) {
+    if (generation === this.#catalogGeneration) {
       this.#catalogCache = data
     }
 
