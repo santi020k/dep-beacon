@@ -46,22 +46,3 @@ catalog:
   vitest: ^4.1.9
   wrangler: ^4.103.0
   yaml: ^2.9.0
-catalogs:
-  "conflicts_wrangler_a:":
-    wrangler: "a:"
-  "conflicts_wrangler_:":
-    wrangler: ":"
-  "conflicts_wrangler_l:":
-    wrangler: "l:"
-  "conflicts_wrangler_la:":
-    wrangler: "la:"
-  "conflicts_wrangler_lat:":
-    wrangler: "lat:"
-  "conflicts_wrangler_late:":
-    wrangler: "late:"
-  "conflicts_wrangler_lates:":
-    wrangler: "lates:"
-  "conflicts_wrangler_latest:":
-    wrangler: "latest:"
-  "conflicts_conflicts_wrangler_a:_:":
-    wrangler: ":"
