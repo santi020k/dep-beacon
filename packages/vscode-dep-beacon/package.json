@@ -1,7 +1,7 @@
 {
   "name": "vscode-dep-beacon",
   "displayName": "Dep Beacon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "sponsor": {
     "url": "https://github.com/sponsors/santi020k"
