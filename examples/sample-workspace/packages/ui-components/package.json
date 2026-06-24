@@ -1,0 +1,23 @@
+{
+  "name": "@sample/ui-components",
+  "version": "1.0.0",
+  "description": "UI component library — npm alias, optionalDependencies, peerDependencies",
+  "dependencies": {
+    "clsx": "catalog:",
+    "helmet-alias": "catalog:",
+    "lodash": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "optionalDependencies": {
+    "canvas": "^2.11.2",
+    "sharp": "^0.33.5"
+  }
+}

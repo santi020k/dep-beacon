@@ -138,7 +138,7 @@ const createVersionAnalysis = (
   },
 ): DependencyAnalysis => {
   const exists = specLooksPublished(args.range, args.metadata)
-  const isLatestSatisfied = specSatisfiesLatest(args.range, args.targets.latest, args.includePrerelease)
+  const isLatestSatisfied = specSatisfiesLatest(args.range, args.targets.latest, args.includePrerelease, args.metadata)
 
   const status = getDependencyStatus({
     exists,

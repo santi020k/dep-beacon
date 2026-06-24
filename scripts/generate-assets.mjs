@@ -7,6 +7,7 @@ import sharp from 'sharp'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const publicDir = resolve(root, 'apps/docs/public')
 const ogDir = resolve(publicDir, 'og')
+const usagePreview = resolve(publicDir, 'usage-preview.png')
 const siteUrl = 'https://beacon.santi020k.com'
 const siteHost = new URL(siteUrl).host
 
@@ -239,8 +240,13 @@ await Promise.all([
     { height: 256, width: 256 },
   ),
   render(
-    resolve(publicDir, 'hero-preview.svg'),
+    usagePreview,
     resolve(publicDir, 'hero-preview.png'),
+    { height: 900, width: 1600 },
+  ),
+  render(
+    usagePreview,
+    resolve(root, 'packages/vscode-dep-beacon/resources/usage-preview.png'),
     { height: 900, width: 1600 },
   ),
   render(
