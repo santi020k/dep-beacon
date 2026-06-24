@@ -1,5 +1,14 @@
 # Dep Beacon
 
+## 1.0.1
+
+### Patch Changes
+
+- [`971471c`](https://github.com/santi020k/dep-beacon/commit/971471ccfea10d9ab17b5ad1bcc8ee440ab0dac3) Thanks [@santi020k](https://github.com/santi020k)! - Release the dist-tag version handling and catalog loading race fixes.
+
+- Updated dependencies [[`971471c`](https://github.com/santi020k/dep-beacon/commit/971471ccfea10d9ab17b5ad1bcc8ee440ab0dac3)]:
+  - @santi020k/dep-beacon-core@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
