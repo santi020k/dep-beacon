@@ -1,4 +1,6 @@
 ---
+import { Badge, ButtonLink, Callout, Card, Link } from '@santi020k/lumen-astro'
+
 import Docs from '../../layouts/Docs.astro'
 import { SITE } from '../../site.config'
 ---
@@ -12,8 +14,8 @@ import { SITE } from '../../site.config'
         Dep Beacon brings dependency status into VS Code manifests. It checks npm registry metadata, calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear status colors.
       </p>
       <div class="docs-actions">
-        <a class="button primary" href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Install extension</a>
-        <a class="button secondary" href="/docs/vscode-extension">Explore features</a>
+        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install extension</ButtonLink>
+        <ButtonLink class="button secondary" href="/docs/vscode-extension" variant="secondary">Explore features</ButtonLink>
       </div>
     </div>
 
@@ -25,75 +27,75 @@ import { SITE } from '../../site.config'
         <span class="dot red"></span>
       </div>
       <div class="signal-stack">
-        <span class="lens warning">latest 7.0.0</span>
-        <span class="lens ok">minor ^7.0.0</span>
-        <span class="lens catalog">catalog resolves ^19.0.0</span>
-        <span class="lens danger">high vulnerability reported</span>
+        <Badge class="lens warning" variant="warning">latest 7.0.0</Badge>
+        <Badge class="lens ok" variant="success">minor ^7.0.0</Badge>
+        <Badge class="lens catalog" variant="outline">catalog resolves ^19.0.0</Badge>
+        <Badge class="lens danger" variant="destructive">high vulnerability reported</Badge>
       </div>
     </figure>
   </div>
 
-  <div class="docs-callout">
+  <Callout class="docs-callout">
     <strong>Start here:</strong>
     <span>Install Dep Beacon from the marketplace, open `package.json` or `pnpm-workspace.yaml`, and review the inline signals beside each dependency range.</span>
-  </div>
+  </Callout>
 
   <div class="docs-link-grid" aria-label="Documentation shortcuts">
-    <a href="/docs/installation">
+    <Link href="/docs/installation">
       <span>01</span>
       <strong>Install</strong>
       <p>Add Dep Beacon from Marketplace or Open VSX and open a supported manifest.</p>
-    </a>
-    <a href="/docs/vscode-extension">
+    </Link>
+    <Link href="/docs/vscode-extension">
       <span>02</span>
       <strong>VS Code Extension</strong>
       <p>Understand inline labels, CodeLens actions, commands, and status colors.</p>
-    </a>
-    <a href="/docs/pnpm-workspaces">
+    </Link>
+    <Link href="/docs/pnpm-workspaces">
       <span>03</span>
       <strong>pnpm Workspaces</strong>
       <p>See how default and named catalogs resolve before dependency analysis.</p>
-    </a>
-    <a href="/docs/security">
+    </Link>
+    <Link href="/docs/security">
       <span>04</span>
       <strong>Security Signals</strong>
       <p>Use OSV severity signals to separate routine updates from advisory risk.</p>
-    </a>
+    </Link>
   </div>
 
   <h2>Core ideas</h2>
   <div class="docs-idea-grid">
-    <article>
+    <Card as="article">
       <strong>Stay on the line</strong>
       <p>Keep update decisions beside the dependency range instead of sending maintainers to another dashboard.</p>
-    </article>
-    <article>
+    </Card>
+    <Card as="article">
       <strong>Choose the next move</strong>
       <p>Show patch, minor, major, and latest targets instead of one vague update suggestion.</p>
-    </article>
-    <article>
+    </Card>
+    <Card as="article">
       <strong>Respect workspace policy</strong>
       <p>Resolve pnpm catalogs before analysis, so `catalog:` never looks like an unknown version.</p>
-    </article>
-    <article>
+    </Card>
+    <Card as="article">
       <strong>Separate risk from noise</strong>
       <p>Keep outdated packages, invalid ranges, and vulnerability severity visually distinct.</p>
-    </article>
+    </Card>
   </div>
 
   <h2>Supported files</h2>
   <div class="docs-file-grid">
-    <article>
+    <Card as="article">
       <strong>package.json</strong>
       <p>Dependency sections, npm overrides, Yarn resolutions, and pnpm-specific blocks.</p>
-    </article>
-    <article>
+    </Card>
+    <Card as="article">
       <strong>pnpm-workspace.yaml</strong>
       <p>Default catalogs, named catalogs, overrides, and package extensions.</p>
-    </article>
-    <article>
+    </Card>
+    <Card as="article">
       <strong>Command palette</strong>
       <p>Refresh signals, clear registry cache, sort manifests, toggle prereleases, and run installs.</p>
-    </article>
+    </Card>
   </div>
 </Docs>

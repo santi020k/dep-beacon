@@ -1,15 +1,17 @@
 ---
+import { Link } from '@santi020k/lumen-astro'
+
 import { SITE } from '../site.config'
 ---
 
 <footer class="site-footer" transition:name="site-footer" transition:persist>
   <p>{SITE.name} is built for maintainers who live in manifests.</p>
   <div>
-    <a href="/docs">Docs</a>
-    <a href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</a>
-    <a href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</a>
-    <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href={SITE.personalUrl} target="_blank" rel="noopener noreferrer">santi020k.com</a>
-    <a href="https://github.com/sponsors/santi020k" target="_blank" rel="noopener noreferrer">Sponsor</a>
+    <Link href="/docs">Docs</Link>
+    <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
+    <Link href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</Link>
+    <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
+    <Link href={SITE.personalUrl} target="_blank" rel="noopener noreferrer">santi020k.com</Link>
+    <Link href="https://github.com/sponsors/santi020k" target="_blank" rel="noopener noreferrer">Sponsor</Link>
   </div>
 </footer>

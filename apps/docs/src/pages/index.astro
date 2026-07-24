@@ -1,4 +1,6 @@
 ---
+import { Badge, ButtonLink, Card, Stat } from '@santi020k/lumen-astro'
+
 import Base from '../layouts/Base.astro'
 import { SITE } from '../site.config'
 ---
@@ -13,9 +15,9 @@ import { SITE } from '../site.config'
           See dependency update paths, pnpm catalog context, and OSV security risk beside the versions you already edit.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Install from Marketplace</a>
-          <a class="button secondary" href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</a>
-          <a class="button tertiary" href="/docs">Read docs</a>
+          <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install from Marketplace</ButtonLink>
+          <ButtonLink class="button secondary" href={SITE.openVsxUrl} newTab variant="secondary">Open VSX</ButtonLink>
+          <ButtonLink class="button tertiary" href="/docs" variant="ghost">Read docs</ButtonLink>
         </div>
         <div class="hero-proof" aria-label="Supported dependency surfaces">
           <span>package.json</span>
@@ -29,22 +31,22 @@ import { SITE } from '../site.config'
 
   <section class="signal-band" aria-label="Dep Beacon value summary">
     <div class="signal-band-inner">
-      <div class="signal-stat">
+      <Stat class="signal-stat">
         <strong>4 update paths</strong>
         <span>patch, minor, major, latest</span>
-      </div>
-      <div class="signal-stat">
+      </Stat>
+      <Stat class="signal-stat">
         <strong>Catalog aware</strong>
         <span>default and named pnpm catalogs</span>
-      </div>
-      <div class="signal-stat">
+      </Stat>
+      <Stat class="signal-stat">
         <strong>Risk visible</strong>
         <span>OSV severity mapped to editor signals</span>
-      </div>
-      <div class="signal-stat">
+      </Stat>
+      <Stat class="signal-stat">
         <strong>Editor native</strong>
         <span>CodeLens, diagnostics, and commands</span>
-      </div>
+      </Stat>
     </div>
   </section>
 
@@ -71,22 +73,22 @@ import { SITE } from '../site.config'
             <span class="key">"astro"</span>: <span class="version-value">"^6.4.0"</span>
           </code>
           <div class="lens-row">
-            <span class="lens warning">latest 7.0.0</span>
-            <span class="lens ok">minor ^7.0.0</span>
+            <Badge class="lens warning" variant="warning">latest 7.0.0</Badge>
+            <Badge class="lens ok" variant="success">minor ^7.0.0</Badge>
           </div>
           <code>
             <span class="line-no">4</span>
             <span class="key">"react"</span>: <span class="version-value">"catalog:react19"</span>
           </code>
           <div class="lens-row">
-            <span class="lens catalog">catalog resolves ^19.0.0</span>
+            <Badge class="lens catalog" variant="outline">catalog resolves ^19.0.0</Badge>
           </div>
           <code>
             <span class="line-no">5</span>
             <span class="key">"left-pad"</span>: <span class="version-value">"1.1.0"</span>
           </code>
           <div class="lens-row">
-            <span class="lens danger">high vulnerability reported</span>
+            <Badge class="lens danger" variant="destructive">high vulnerability reported</Badge>
           </div>
         </div>
       </figure>
@@ -102,26 +104,26 @@ import { SITE } from '../site.config'
         </p>
       </div>
       <div class="feature-grid">
-        <article class="feature-tile">
+        <Card as="article" class="feature-tile">
           <span class="feature-icon green"></span>
           <h3>Version status</h3>
           <p>Know when a range already accepts the latest stable release and when a newer target is available.</p>
-        </article>
-        <article class="feature-tile">
+        </Card>
+        <Card as="article" class="feature-tile">
           <span class="feature-icon yellow"></span>
           <h3>Semver choices</h3>
           <p>Apply patch, minor, major, or latest updates while preserving common `^` and `~` range style.</p>
-        </article>
-        <article class="feature-tile">
+        </Card>
+        <Card as="article" class="feature-tile">
           <span class="feature-icon blue"></span>
           <h3>pnpm catalogs</h3>
           <p>Resolve `catalog:` and `catalog:name` entries before showing status, diagnostics, and update context.</p>
-        </article>
-        <article class="feature-tile">
+        </Card>
+        <Card as="article" class="feature-tile">
           <span class="feature-icon red"></span>
           <h3>Security risk</h3>
           <p>Use OSV results to separate routine update work from low, medium, high, and critical advisory risk.</p>
-        </article>
+        </Card>
       </div>
     </div>
   </section>
@@ -135,18 +137,18 @@ import { SITE } from '../site.config'
         </p>
       </div>
       <div class="workflow-grid">
-        <article class="workflow-item">
+        <Card as="article" class="workflow-item">
           <strong>Open a manifest</strong>
           <span>`package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` activates the extension automatically.</span>
-        </article>
-        <article class="workflow-item">
+        </Card>
+        <Card as="article" class="workflow-item">
           <strong>Review the signal</strong>
           <span>Green, yellow, orange, and red labels distinguish healthy ranges, updates, warnings, and errors.</span>
-        </article>
-        <article class="workflow-item">
+        </Card>
+        <Card as="article" class="workflow-item">
           <strong>Apply the next move</strong>
           <span>Use CodeLens actions, sorting, cache refresh, prerelease toggles, and package page links from VS Code.</span>
-        </article>
+        </Card>
       </div>
     </div>
   </section>
@@ -158,8 +160,8 @@ import { SITE } from '../site.config'
         <h2>Make dependency reviews easier to scan.</h2>
       </div>
       <div class="cta-actions">
-        <a class="button primary" href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Install from Marketplace</a>
-        <a class="button secondary" href="/docs/vscode-extension">Explore features</a>
+        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install from Marketplace</ButtonLink>
+        <ButtonLink class="button secondary" href="/docs/vscode-extension" variant="secondary">Explore features</ButtonLink>
       </div>
     </div>
   </section>

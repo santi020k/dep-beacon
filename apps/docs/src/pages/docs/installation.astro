@@ -1,4 +1,6 @@
 ---
+import { Callout, Link } from '@santi020k/lumen-astro'
+
 import Docs from '../../layouts/Docs.astro'
 import { SITE } from '../../site.config'
 ---
@@ -9,13 +11,13 @@ import { SITE } from '../../site.config'
     Install Dep Beacon from the Visual Studio Marketplace or Open VSX, then open a supported npm manifest in VS Code.
   </p>
 
-  <div class="docs-callout">
+  <Callout class="docs-callout">
     <strong>Install links:</strong>
     <span>
-      <a href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Visual Studio Marketplace</a> or
-      <a href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</a>.
+      <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Visual Studio Marketplace</Link> or
+      <Link href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</Link>.
     </span>
-  </div>
+  </Callout>
 
   <h2>From VS Code</h2>
   <ol>

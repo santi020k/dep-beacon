@@ -1,4 +1,6 @@
 ---
+import { Link } from '@santi020k/lumen-astro'
+
 import { DOCS_NAV } from '../data/nav'
 
 const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/'
@@ -10,7 +12,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/'
       const href = item.href.replace(/\/$/u, '')
       const active = currentPath === href
 
-      return <a class:list={{ active }} href={item.href}>{item.label}</a>
+      return <Link class={active ? 'active' : undefined} href={item.href}>{item.label}</Link>
     })}
   </nav>
 </aside>

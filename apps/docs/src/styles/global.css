@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@santi020k/lumen-astro/styles.css";
 @import "./partials/tokens.css";
 @import "./partials/base.css";
 @import "./partials/components.css";

@@ -80,7 +80,7 @@
   animation: rise-in 540ms ease both;
   backdrop-filter: blur(18px);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--dep-line) 70%, transparent);
   display: flex;
   inset: 0 0 auto;
   justify-content: space-between;
@@ -117,7 +117,7 @@
 .top-nav a,
 .site-footer a,
 .docs-sidebar a {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   font-size: 0.94rem;
   transition:
     background-color 160ms ease,
@@ -150,7 +150,7 @@
 .site-footer a:hover,
 .docs-sidebar a:hover,
 .docs-sidebar a.active {
-  color: var(--ink);
+  color: var(--dep-ink);
 }
 
 .top-nav a:hover::after,
@@ -166,7 +166,7 @@
     url("/hero-preview.png");
   background-position: center;
   background-size: cover;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--dep-line);
   display: flex;
   min-height: min(660px, calc(100svh - 148px));
   padding: 5.5rem 1.25rem 3rem;
@@ -217,7 +217,7 @@
 
 .hero-summary,
 .hero p {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   font-size: 1.24rem;
   line-height: 1.65;
   margin: 1.5rem 0 0;
@@ -275,12 +275,12 @@
 
 .button.secondary,
 .button.tertiary {
-  border: 1px solid var(--line);
-  color: var(--ink);
+  border: 1px solid var(--dep-line);
+  color: var(--dep-ink);
 }
 
 .button.secondary {
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  background: color-mix(in srgb, var(--dep-surface) 78%, transparent);
 }
 
 .button.tertiary {
@@ -300,10 +300,10 @@
 .hero-proof span,
 .status-pill {
   align-items: center;
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
-  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  background: color-mix(in srgb, var(--dep-surface) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dep-line) 75%, transparent);
   border-radius: 8px;
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   display: inline-flex;
   font-size: 0.92rem;
   min-height: 2.15rem;
@@ -314,7 +314,7 @@
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--bg) 92%, var(--teal)), var(--bg-warm)),
     var(--bg);
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--dep-line) 70%, transparent);
   padding: 1rem 1.25rem;
 }
 
@@ -326,8 +326,8 @@
 
 .signal-stat {
   animation: rise-in 560ms ease both;
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  background: color-mix(in srgb, var(--dep-surface) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dep-line) 70%, transparent);
   min-height: 6.25rem;
   padding: 1rem;
 }
@@ -354,7 +354,7 @@
 
 .signal-stat strong,
 .workflow-item strong {
-  color: var(--ink);
+  color: var(--dep-ink);
   display: block;
   font-size: 1rem;
   margin-bottom: 0.45rem;
@@ -362,12 +362,12 @@
 
 .signal-stat span,
 .workflow-item span {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   line-height: 1.55;
 }
 
 .section {
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--dep-line) 60%, transparent);
   padding: 5rem 1.25rem;
 }
 
@@ -394,7 +394,7 @@
 }
 
 .section-heading p {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   line-height: 1.7;
   margin: 0;
 }
@@ -413,7 +413,7 @@
 .editor-demo {
   animation: rise-in 700ms 120ms ease both;
   background: #0b1115;
-  border: 1px solid var(--line);
+  border: 1px solid var(--dep-line);
   border-radius: 8px;
   box-shadow: var(--shadow);
   margin: 0;
@@ -422,8 +422,8 @@
 
 .editor-demo-bar {
   align-items: center;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  background: var(--dep-surface);
+  border-bottom: 1px solid var(--dep-line);
   display: flex;
   gap: 0.55rem;
   min-height: 3rem;
@@ -450,7 +450,7 @@
 }
 
 .editor-demo-bar strong {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   font-family: SFMono-Regular, Consolas, monospace;
   font-size: 0.9rem;
   font-weight: 600;
@@ -466,7 +466,7 @@
 .editor-demo code {
   background: transparent;
   border: 0;
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   display: block;
   font-family: SFMono-Regular, Consolas, monospace;
   font-size: 1rem;
@@ -475,7 +475,7 @@
 }
 
 .line-no {
-  color: var(--ink-muted);
+  color: var(--dep-ink-muted);
   display: inline-block;
   margin-right: 1rem;
   text-align: right;
@@ -498,7 +498,7 @@
 }
 
 .lens {
-  border: 1px solid var(--line);
+  border: 1px solid var(--dep-line);
   border-radius: 6px;
   display: inline-flex;
   font-size: 0.88rem;
@@ -545,8 +545,8 @@
 .quick-tile,
 .docs-callout,
 .workflow-item {
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--dep-surface);
+  border: 1px solid var(--dep-line);
   border-radius: 8px;
 }
 
@@ -582,7 +582,7 @@
 .feature-tile:hover,
 .quick-tile:hover,
 .workflow-item:hover {
-  border-color: color-mix(in srgb, var(--brand-bright) 48%, var(--line));
+  border-color: color-mix(in srgb, var(--brand-bright) 48%, var(--dep-line));
   box-shadow: 0 18px 42px rgb(0 0 0 / 0.24);
   transform: translateY(-2px);
 }
@@ -603,7 +603,7 @@
 
 .feature-tile p,
 .quick-tile p {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   line-height: 1.65;
   margin: 0;
 }
@@ -671,7 +671,7 @@
 
 .site-footer {
   align-items: center;
-  color: var(--ink-muted);
+  color: var(--dep-ink-muted);
   display: flex;
   justify-content: space-between;
   padding: 2rem 1.25rem;
@@ -688,14 +688,14 @@
 
 .docs-stage {
   background:
-    linear-gradient(color-mix(in srgb, var(--line) 28%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--dep-line) 28%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--dep-line) 22%, transparent) 1px, transparent 1px),
     linear-gradient(180deg, color-mix(in srgb, var(--bg-soft) 42%, var(--bg)), var(--bg) 22rem);
   background-size:
     5rem 5rem,
     5rem 5rem,
     auto;
-  border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--dep-line) 50%, transparent);
 }
 
 .docs-shell {
@@ -713,8 +713,8 @@
 }
 
 .docs-sidebar nav {
-  background: color-mix(in srgb, var(--surface) 52%, transparent);
-  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  background: color-mix(in srgb, var(--dep-surface) 52%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dep-line) 70%, transparent);
   border-radius: 8px;
   display: grid;
   gap: 0.35rem;
@@ -727,12 +727,12 @@
 }
 
 .docs-sidebar a:hover {
-  background: color-mix(in srgb, var(--surface-strong) 56%, transparent);
+  background: color-mix(in srgb, var(--dep-surface-strong) 56%, transparent);
   transform: translateX(2px);
 }
 
 .docs-sidebar a.active {
-  background: var(--surface-strong);
+  background: var(--dep-surface-strong);
   box-shadow: inset 3px 0 0 var(--brand-bright);
 }
 
@@ -764,23 +764,23 @@
   align-items: flex-start;
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--brand-bright) 9%, transparent), transparent),
-    color-mix(in srgb, var(--surface) 78%, transparent);
-  border-color: color-mix(in srgb, var(--brand-bright) 44%, var(--line));
-  color: var(--ink-soft);
+    color-mix(in srgb, var(--dep-surface) 78%, transparent);
+  border-color: color-mix(in srgb, var(--brand-bright) 44%, var(--dep-line));
+  color: var(--dep-ink-soft);
   margin: 1.5rem 0;
   padding: 1rem;
 }
 
 .docs-callout strong {
-  color: var(--ink);
+  color: var(--dep-ink);
 }
 
 .docs-hero-panel {
   align-items: center;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--surface-strong) 90%, transparent), color-mix(in srgb, var(--bg-warm) 62%, var(--surface))),
-    var(--surface);
-  border: 1px solid color-mix(in srgb, var(--brand-bright) 32%, var(--line));
+    linear-gradient(135deg, color-mix(in srgb, var(--dep-surface-strong) 90%, transparent), color-mix(in srgb, var(--bg-warm) 62%, var(--dep-surface))),
+    var(--dep-surface);
+  border: 1px solid color-mix(in srgb, var(--brand-bright) 32%, var(--dep-line));
   border-radius: 8px;
   box-shadow: var(--shadow);
   display: grid;
@@ -821,8 +821,8 @@
 .docs-signal-card {
   animation: signal-drift 5s ease-in-out infinite;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--bg) 60%, transparent), color-mix(in srgb, var(--surface) 86%, transparent));
-  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 60%, transparent), color-mix(in srgb, var(--dep-surface) 86%, transparent));
+  border: 1px solid color-mix(in srgb, var(--dep-line) 80%, transparent);
   border-radius: 8px;
   margin: 0;
   overflow: hidden;
@@ -831,7 +831,7 @@
 
 .signal-orbit {
   align-items: center;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--dep-line) 70%, transparent);
   display: flex;
   gap: 0.55rem;
   margin: -1rem -1rem 1rem;
@@ -882,8 +882,8 @@
 .docs-link-grid a,
 .docs-idea-grid article,
 .docs-file-grid article {
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  background: color-mix(in srgb, var(--dep-surface) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dep-line) 82%, transparent);
   border-radius: 8px;
   display: block;
   padding: 1rem;
@@ -896,7 +896,7 @@
 .docs-link-grid a:hover,
 .docs-idea-grid article:hover,
 .docs-file-grid article:hover {
-  border-color: color-mix(in srgb, var(--brand-bright) 48%, var(--line));
+  border-color: color-mix(in srgb, var(--brand-bright) 48%, var(--dep-line));
   box-shadow: 0 18px 42px rgb(0 0 0 / 0.22);
   transform: translateY(-2px);
 }
@@ -913,7 +913,7 @@
 .docs-link-grid strong,
 .docs-idea-grid strong,
 .docs-file-grid strong {
-  color: var(--ink);
+  color: var(--dep-ink);
   display: block;
   margin-bottom: 0.55rem;
 }
@@ -921,7 +921,7 @@
 .docs-link-grid p,
 .docs-idea-grid p,
 .docs-file-grid p {
-  color: var(--ink-soft);
+  color: var(--dep-ink-soft);
   line-height: 1.62;
   margin: 0;
 }

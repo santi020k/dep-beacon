@@ -1,19 +1,21 @@
 ---
+import { Link } from '@santi020k/lumen-astro'
+
 import { SITE } from '../site.config'
 
 import LogoMark from './LogoMark.astro'
 ---
 
 <header class="site-header" transition:name="site-header" transition:persist>
-  <a class="brand-link" href="/" aria-label="Dep Beacon home">
+  <Link class="brand-link" href="/" aria-label="Dep Beacon home">
     <LogoMark class="brand-mark" />
     <span>{SITE.name}</span>
-  </a>
+  </Link>
   <nav class="top-nav" aria-label="Primary navigation">
-    <a href="/docs">Docs</a>
-    <a href="/docs/vscode-extension">Extension</a>
-    <a href="/docs/pnpm-workspaces">pnpm</a>
-    <a href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</a>
-    <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
+    <Link href="/docs">Docs</Link>
+    <Link href="/docs/vscode-extension">Extension</Link>
+    <Link href="/docs/pnpm-workspaces">pnpm</Link>
+    <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
+    <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
   </nav>
 </header>
