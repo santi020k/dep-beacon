@@ -30,6 +30,9 @@ catalogs:
     '@santi020k/eslint-config-basic':
       specifier: ^2.1.1
       version: 2.1.1
+    '@santi020k/lumen-astro':
+      specifier: ^0.2.0
+      version: 0.2.0
     '@tailwindcss/vite':
       specifier: ^4.3.1
       version: 4.3.1
@@ -181,7 +184,7 @@ importers:
         version: 3.7.3
       '@santi020k/lumen-astro':
         specifier: 'catalog:'
-        version: 0.1.0(astro@7.0.0(@astrojs/markdown-remark@7.2.0)(@azure/identity@4.13.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.0)(jiti@2.7.0)(yaml@2.9.0))
+        version: 0.2.0(astro@7.0.0(@astrojs/markdown-remark@7.2.0)(@azure/identity@4.13.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.0)(jiti@2.7.0)(yaml@2.9.0))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.1(vite@8.0.16(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -2964,19 +2967,19 @@ packages:
     peerDependencies:
       eslint: ^10.0.0
 
-  '@santi020k/lumen-astro@0.1.0':
-    resolution: {integrity: sha512-8Ce0muPws4mmI4YEDllJbDekHov78ka3+n5b1TdqdQGx2lxgXZauwesajpMNVCYqbWufA4a9K/pGjxMnzjTHig==}
-    engines: {node: '>=22.18.0'}
+  '@santi020k/lumen-astro@0.2.0':
+    resolution: {integrity: sha512-sWbDvZinDdWX6FyWe/mGgkjaOzvmf7SPxzo5H9S3T56onxtXiCI45MW27eQBRsakida/v9EIW/qNRpOoVeoRAA==}
+    engines: {node: '>=22.12.0'}
     peerDependencies:
       astro: '>=5'
 
-  '@santi020k/lumen-core@0.1.0':
-    resolution: {integrity: sha512-D21rFQ5EoqZG+zcypGq2rDaZKjHvRMmC7uykfovrxkZn1587kk/UxmgGiFiuG4GUHIOdYcmpwTnmZam79XYzuA==}
-    engines: {node: '>=22.18.0'}
+  '@santi020k/lumen-core@0.2.0':
+    resolution: {integrity: sha512-5ScF3nD2n1xhSzT67nFi3pYqtzyYXavMd4N8p0UEm83/o94x+tE2oYk6RAEx3VckYbpklE9SORfVz9QBtq7MCQ==}
+    engines: {node: '>=22.12.0'}
 
-  '@santi020k/lumen@0.1.0':
-    resolution: {integrity: sha512-LmLbKFZXpzYhHF4CbHDRbmvenYp9NegqSgXAhqA670WRarglcq5lHXp/OVUeZc+a2C7hF8QY+ohrmJEEgiyYgA==}
-    engines: {node: '>=22.18.0'}
+  '@santi020k/lumen@0.2.0':
+    resolution: {integrity: sha512-7rBXYUyJMQla3Ua4QgsKuwKv6687aWX6JLth5F93f13dVFCi9mO776QNMoiyVu+d6H7QD61x8CB8uNjy7QeVgg==}
+    engines: {node: '>=22.12.0'}
     hasBin: true
 
   '@secretlint/config-creator@10.2.2':
@@ -6473,8 +6476,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libphonenumber-js@1.13.7:
-    resolution: {integrity: sha512-rvr3HIMdOgzhz1RFGjftji+wjoAFlzhqCNqJOU/MKTZQ8d9NZxAR/tI+0weDicyoucqVR0U1GCniqHJ0f8aM2A==}
+  libphonenumber-js@1.13.9:
+    resolution: {integrity: sha512-VNS5vWMM7r0P66BYv+TQJATxExEgLxN+34hfHDVhDkUsGAE4cRg0shCNSLTXNKm7nIUscC7AfB51TjxEeF7msQ==}
 
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
@@ -12092,20 +12095,20 @@ snapshots:
       - supports-color
       - typescript
 
-  '@santi020k/lumen-astro@0.1.0(astro@7.0.0(@astrojs/markdown-remark@7.2.0)(@azure/identity@4.13.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.0)(jiti@2.7.0)(yaml@2.9.0))':
+  '@santi020k/lumen-astro@0.2.0(astro@7.0.0(@astrojs/markdown-remark@7.2.0)(@azure/identity@4.13.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.0)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
-      '@santi020k/lumen': 0.1.0
-      '@santi020k/lumen-core': 0.1.0
+      '@santi020k/lumen': 0.2.0
+      '@santi020k/lumen-core': 0.2.0
       astro: 7.0.0(@astrojs/markdown-remark@7.2.0)(@azure/identity@4.13.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.0)(jiti@2.7.0)(yaml@2.9.0)
       uqr: 0.1.3
 
-  '@santi020k/lumen-core@0.1.0':
+  '@santi020k/lumen-core@0.2.0':
     dependencies:
       '@lucide/icons': 1.26.0
 
-  '@santi020k/lumen@0.1.0':
+  '@santi020k/lumen@0.2.0':
     dependencies:
-      '@santi020k/lumen-core': 0.1.0
+      '@santi020k/lumen-core': 0.2.0
 
   '@secretlint/config-creator@10.2.2':
     dependencies:
@@ -13603,7 +13606,7 @@ snapshots:
   class-validator@0.15.1:
     dependencies:
       '@types/validator': 13.15.10
-      libphonenumber-js: 1.13.7
+      libphonenumber-js: 1.13.9
       validator: 13.15.35
 
   cli-cursor@3.1.0:
@@ -16344,7 +16347,7 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libphonenumber-js@1.13.7: {}
+  libphonenumber-js@1.13.9: {}
 
   lightningcss-android-arm64@1.32.0:
     optional: true
