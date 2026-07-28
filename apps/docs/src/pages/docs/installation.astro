@@ -5,10 +5,10 @@ import Docs from '../../layouts/Docs.astro'
 import { SITE } from '../../site.config'
 ---
 
-<Docs title="Install" description="Install Dep Beacon from a VS Code marketplace.">
+<Docs title="Install" description="Install Dep Beacon for VS Code or Zed.">
   <h1>Install Dep Beacon</h1>
   <p>
-    Install Dep Beacon from the Visual Studio Marketplace or Open VSX, then open a supported npm manifest in VS Code.
+    Add Dep Beacon to VS Code or Zed, then open a supported npm manifest.
   </p>
 
   <Callout class="docs-callout">
@@ -27,12 +27,23 @@ import { SITE } from '../../site.config'
     <li>Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.</li>
   </ol>
 
-  <h2>What happens next</h2>
+  <h2>From Zed</h2>
+  <ol>
+    <li>Open the command palette.</li>
+    <li>Run `zed: extensions`.</li>
+    <li>Search for `Dep Beacon` and select Install.</li>
+    <li>Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.</li>
+  </ol>
   <p>
-    Dep Beacon activates automatically for JSON, JSONC, and YAML dependency files. It adds inline status labels, diagnostics, and CodeLens actions when it finds supported dependency entries.
+    See the <Link href="/docs/zed-extension">Zed extension guide</Link> for supported actions, settings, and editor-specific limitations.
   </p>
 
-  <h2>Useful first settings</h2>
+  <h2>What happens next</h2>
+  <p>
+    Dep Beacon activates automatically for JSON, JSONC, and YAML dependency files. Both editors show diagnostics and CodeLens actions for supported dependency entries; VS Code also provides inline status labels.
+  </p>
+
+  <h2>Useful first VS Code settings</h2>
   <ul>
     <li>Use `depBeacon.showInlineStatus` to show or hide the inline labels.</li>
     <li>Use `depBeacon.checkVulnerabilities` to enable or disable OSV vulnerability checks.</li>

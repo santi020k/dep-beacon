@@ -5,17 +5,17 @@ import Docs from '../../layouts/Docs.astro'
 import { SITE } from '../../site.config'
 ---
 
-<Docs title="Docs" description="Dep Beacon documentation for VS Code users.">
+<Docs title="Docs" description="Dep Beacon documentation for VS Code and Zed users.">
   <div class="docs-hero-panel">
     <div>
       <p class="eyebrow">Documentation</p>
       <h1>Dep Beacon Docs</h1>
       <p>
-        Dep Beacon brings dependency status into VS Code manifests. It checks npm registry metadata, calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear status colors.
+        Dep Beacon brings dependency status into VS Code and Zed manifests. It checks npm registry metadata, calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear editor signals.
       </p>
       <div class="docs-actions">
-        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install extension</ButtonLink>
-        <ButtonLink class="button secondary" href="/docs/vscode-extension" variant="secondary">Explore features</ButtonLink>
+        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install for VS Code</ButtonLink>
+        <ButtonLink class="button secondary" href="/docs/zed-extension" variant="secondary">Use in Zed</ButtonLink>
       </div>
     </div>
 
@@ -37,27 +37,32 @@ import { SITE } from '../../site.config'
 
   <Callout class="docs-callout">
     <strong>Start here:</strong>
-    <span>Install Dep Beacon from the marketplace, open `package.json` or `pnpm-workspace.yaml`, and review the inline signals beside each dependency range.</span>
+    <span>Install Dep Beacon in VS Code or Zed, open `package.json` or `pnpm-workspace.yaml`, and review the dependency signals in your editor.</span>
   </Callout>
 
   <div class="docs-link-grid" aria-label="Documentation shortcuts">
     <Link href="/docs/installation">
       <span>01</span>
       <strong>Install</strong>
-      <p>Add Dep Beacon from Marketplace or Open VSX and open a supported manifest.</p>
+      <p>Add Dep Beacon to VS Code or Zed and open a supported manifest.</p>
     </Link>
     <Link href="/docs/vscode-extension">
       <span>02</span>
       <strong>VS Code Extension</strong>
       <p>Understand inline labels, CodeLens actions, commands, and status colors.</p>
     </Link>
-    <Link href="/docs/pnpm-workspaces">
+    <Link href="/docs/zed-extension">
       <span>03</span>
+      <strong>Zed Extension</strong>
+      <p>Use CodeLens, diagnostics, update actions, and npm links through the language server.</p>
+    </Link>
+    <Link href="/docs/pnpm-workspaces">
+      <span>04</span>
       <strong>pnpm Workspaces</strong>
       <p>See how default and named catalogs resolve before dependency analysis.</p>
     </Link>
     <Link href="/docs/security">
-      <span>04</span>
+      <span>05</span>
       <strong>Security Signals</strong>
       <p>Use OSV severity signals to separate routine updates from advisory risk.</p>
     </Link>

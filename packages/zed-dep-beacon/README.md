@@ -31,11 +31,15 @@ The Zed adapter is in `src/lib.rs`; the bundled Node language server is written 
 3. Make `dep-beacon-lsp` available in the environment used to launch Zed, or publish this package to npm so the adapter can install it automatically.
 4. Run `zed: install dev extension` and select `packages/zed-dep-beacon`.
 
-For local server debugging, launch Zed from a shell where the workspace bin directory is on `PATH`:
+For local server debugging before the npm package is published, expose the built executable through a temporary bin directory and launch Zed from the same shell:
 
 ```sh
-PATH="$PWD/node_modules/.bin:$PATH" zed .
+mkdir -p /tmp/dep-beacon-zed-bin
+ln -sf "$PWD/packages/zed-dep-beacon/dist/server.cjs" /tmp/dep-beacon-zed-bin/dep-beacon-lsp
+PATH="/tmp/dep-beacon-zed-bin:$PATH" zed examples/sample-workspace
 ```
+
+The adapter checks `PATH` before attempting to download the published npm package.
 
 ## Settings
 

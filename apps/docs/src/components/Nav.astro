@@ -1,5 +1,5 @@
 ---
-import { Link } from '@santi020k/lumen-astro'
+import { Link, ThemeToggle } from '@santi020k/lumen-astro'
 
 import { SITE } from '../site.config'
 
@@ -11,11 +11,15 @@ import LogoMark from './LogoMark.astro'
     <LogoMark class="brand-mark" />
     <span>{SITE.name}</span>
   </Link>
-  <nav class="top-nav" aria-label="Primary navigation">
-    <Link href="/docs">Docs</Link>
-    <Link href="/docs/vscode-extension">Extension</Link>
-    <Link href="/docs/pnpm-workspaces">pnpm</Link>
-    <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
-    <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
-  </nav>
+  <div class="header-actions">
+    <nav class="top-nav" aria-label="Primary navigation">
+      <Link href="/docs">Docs</Link>
+      <Link href="/docs/vscode-extension">VS Code</Link>
+      <Link href="/docs/zed-extension">Zed</Link>
+      <Link href="/docs/pnpm-workspaces">pnpm</Link>
+      <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
+      <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
+    </nav>
+    <ThemeToggle storageKey="dep-beacon-theme" />
+  </div>
 </header>

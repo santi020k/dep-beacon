@@ -9,14 +9,14 @@ import { SITE } from '../site.config'
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-copy">
-        <p class="eyebrow">VS Code extension for npm manifests</p>
+        <p class="eyebrow">VS Code and Zed extensions for npm manifests</p>
         <h1>Dep Beacon</h1>
         <p class="hero-summary">
           See dependency update paths, pnpm catalog context, and OSV security risk beside the versions you already edit.
         </p>
         <div class="hero-actions">
           <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install from Marketplace</ButtonLink>
-          <ButtonLink class="button secondary" href={SITE.openVsxUrl} newTab variant="secondary">Open VSX</ButtonLink>
+          <ButtonLink class="button secondary" href="/docs/zed-extension" variant="secondary">Use in Zed</ButtonLink>
           <ButtonLink class="button tertiary" href="/docs" variant="ghost">Read docs</ButtonLink>
         </div>
         <div class="hero-proof" aria-label="Supported dependency surfaces">
@@ -45,7 +45,7 @@ import { SITE } from '../site.config'
       </Stat>
       <Stat class="signal-stat">
         <strong>Editor native</strong>
-        <span>CodeLens, diagnostics, and commands</span>
+        <span>CodeLens, diagnostics, and update actions</span>
       </Stat>
     </div>
   </section>
@@ -56,7 +56,7 @@ import { SITE } from '../site.config'
         <p class="eyebrow">The moment it helps</p>
         <h2>Turn a dependency line into a decision.</h2>
         <p>
-          Dep Beacon keeps version status where the change happens. You can compare the next safe move, spot security risk, and understand catalog-managed ranges without leaving VS Code.
+          Dep Beacon keeps version status where the change happens. You can compare the next safe move, spot security risk, and understand catalog-managed ranges without leaving your editor.
         </p>
       </div>
 
@@ -100,7 +100,7 @@ import { SITE } from '../site.config'
       <div class="section-heading">
         <h2>Useful signals, not another dashboard.</h2>
         <p>
-          The extension focuses on maintainers who review manifests all day: clear status colors, practical update targets, and commands that fit the VS Code workflow.
+          The extensions focus on maintainers who review manifests all day: clear status signals, practical update targets, and actions that fit each editor.
         </p>
       </div>
       <div class="feature-grid">
@@ -147,7 +147,7 @@ import { SITE } from '../site.config'
         </Card>
         <Card as="article" class="workflow-item">
           <strong>Apply the next move</strong>
-          <span>Use CodeLens actions, sorting, cache refresh, prerelease toggles, and package page links from VS Code.</span>
+          <span>Use CodeLens, diagnostics, update actions, and package links in VS Code or Zed.</span>
         </Card>
       </div>
     </div>
@@ -160,8 +160,8 @@ import { SITE } from '../site.config'
         <h2>Make dependency reviews easier to scan.</h2>
       </div>
       <div class="cta-actions">
-        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install from Marketplace</ButtonLink>
-        <ButtonLink class="button secondary" href="/docs/vscode-extension" variant="secondary">Explore features</ButtonLink>
+        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install for VS Code</ButtonLink>
+        <ButtonLink class="button secondary" href="/docs/zed-extension" variant="secondary">Use in Zed</ButtonLink>
       </div>
     </div>
   </section>

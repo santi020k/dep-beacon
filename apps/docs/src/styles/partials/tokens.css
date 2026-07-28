@@ -1,4 +1,5 @@
-:root {
+:root,
+:root[data-theme="dark"] {
   color-scheme: dark;
   --canvas: 204 31.25% 6.27%;
   --surface: 202.11 32.2% 11.57%;
@@ -15,27 +16,51 @@
   --success: 135.61 60% 59.8%;
   --warning: 42.07 86.32% 62.75%;
   --danger: 359.59 83.05% 65.29%;
-  --bg: #0b1115;
-  --bg-warm: #17140f;
-  --bg-soft: #101820;
-  --dep-surface: #142027;
-  --dep-surface-strong: #1a2a33;
-  --dep-ink: #f4fbf8;
-  --dep-ink-soft: #b7c9c5;
-  --dep-ink-muted: #78908c;
-  --dep-line: #27414a;
-  --dep-brand: #2f80ed;
-  --brand-bright: #7dd3fc;
-  --green: #5bd67b;
-  --yellow: #f2c14e;
-  --orange: #f59e4c;
-  --red: #f05d5e;
-  --blue: #75a7ff;
-  --teal: #3dd6b3;
-  --warm: #f8c65c;
+  --brand-bright: hsl(var(--brand-soft));
+  --shadow: 0 24px 80px rgb(0 0 0 / 0.35);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --canvas: 204 33% 97%;
+  --surface: 0 0% 100%;
+  --surface-muted: 200 30% 94%;
+  --surface-strong: 200 28% 90%;
+  --line: 197 22% 79%;
+  --ink: 202 35% 12%;
+  --ink-soft: 199 20% 28%;
+  --ink-muted: 198 14% 44%;
+  --brand: 214.42 78% 46%;
+  --brand-solid: 214.42 78% 46%;
+  --brand-soft: 205 88% 90%;
+  --accent: 166 64% 31%;
+  --success: 139 58% 34%;
+  --warning: 38 85% 39%;
+  --danger: 359 68% 48%;
+  --brand-bright: hsl(var(--brand));
+  --shadow: 0 24px 70px rgb(30 55 70 / 0.16);
+}
+
+:root {
+  --bg: hsl(var(--canvas));
+  --bg-warm: color-mix(in srgb, hsl(var(--canvas)) 94%, hsl(var(--warning)));
+  --bg-soft: hsl(var(--surface-muted));
+  --dep-surface: hsl(var(--surface));
+  --dep-surface-strong: hsl(var(--surface-strong));
+  --dep-ink: hsl(var(--ink));
+  --dep-ink-soft: hsl(var(--ink-soft));
+  --dep-ink-muted: hsl(var(--ink-muted));
+  --dep-line: hsl(var(--line));
+  --dep-brand: hsl(var(--brand-solid));
+  --green: hsl(var(--success));
+  --yellow: hsl(var(--warning));
+  --orange: hsl(var(--warning));
+  --red: hsl(var(--danger));
+  --blue: hsl(var(--brand));
+  --teal: hsl(var(--accent));
+  --warm: hsl(var(--warning));
   --motion-fast: 160ms;
   --motion-medium: 260ms;
   --motion-slow: 560ms;
   --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow: 0 24px 80px rgb(0 0 0 / 0.35);
 }

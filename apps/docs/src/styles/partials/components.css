@@ -93,6 +93,7 @@
 }
 
 .brand-link,
+.header-actions,
 .top-nav,
 .site-footer div {
   align-items: center;
@@ -157,6 +158,26 @@
 .site-footer a:hover::after {
   opacity: 1;
   transform: scaleX(1);
+}
+
+.hero,
+.cta-section,
+.editor-demo {
+  --bg: #0b1115;
+  --dep-surface: #142027;
+  --dep-surface-strong: #1a2a33;
+  --dep-ink: #f4fbf8;
+  --dep-ink-soft: #b7c9c5;
+  --dep-ink-muted: #78908c;
+  --dep-line: #27414a;
+  --brand-bright: #7dd3fc;
+  --green: #5bd67b;
+  --yellow: #f2c14e;
+  --red: #f05d5e;
+  --blue: #75a7ff;
+  --teal: #3dd6b3;
+  --warm: #f8c65c;
+  color: var(--dep-ink);
 }
 
 .hero {
@@ -968,6 +989,10 @@
 @media (max-width: 720px) {
   .top-nav {
     display: none;
+  }
+
+  .header-actions {
+    gap: 0;
   }
 
   .hero {

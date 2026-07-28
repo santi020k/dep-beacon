@@ -14,8 +14,8 @@ html {
 
 body {
   background:
-    linear-gradient(180deg, rgb(12 24 28 / 0.7), transparent 28rem),
-    linear-gradient(90deg, rgb(18 38 37 / 0.18), rgb(23 20 15 / 0.16) 48%, transparent),
+    linear-gradient(180deg, color-mix(in srgb, var(--teal) 10%, transparent), transparent 28rem),
+    linear-gradient(90deg, color-mix(in srgb, var(--teal) 5%, transparent), color-mix(in srgb, var(--warm) 5%, transparent) 48%, transparent),
     var(--bg);
   margin: 0;
   min-width: 320px;

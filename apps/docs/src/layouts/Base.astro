@@ -3,6 +3,8 @@ import { ClientRouter } from 'astro:transitions'
 
 import '../styles/global.css'
 
+import { UIPrimitives } from '@santi020k/lumen-astro'
+
 import Footer from '../components/Footer.astro'
 import Nav from '../components/Nav.astro'
 import { SITE } from '../site.config'
@@ -61,7 +63,7 @@ const structuredData = [
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark" class="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -69,6 +71,33 @@ const structuredData = [
     <meta name="keywords" content={keywordContent} />
     <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#0b1115" />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement
+        let theme = 'dark'
+
+        try {
+          const storedTheme = localStorage.getItem('dep-beacon-theme')
+
+          if (storedTheme === 'light' || storedTheme === 'dark') {
+            theme = storedTheme
+          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light'
+          }
+        } catch {
+          // Keep the dark default when storage is unavailable.
+        }
+
+        root.dataset.theme = theme
+
+        root.classList.toggle('dark', theme === 'dark')
+
+        document.querySelector('meta[name="theme-color"]')?.setAttribute(
+          'content',
+          theme === 'dark' ? '#0b1115' : '#f5f8fa',
+        )
+      })()
+    </script>
     <title>{pageTitle}</title>
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -91,10 +120,19 @@ const structuredData = [
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
   <body>
+    <UIPrimitives />
     <Nav />
     <main transition:name="page-content">
       <slot />
     </main>
     <Footer />
+    <script>
+      document.addEventListener('ui:theme-change', () => {
+        const themeColor = document.querySelector('meta[name="theme-color"]')
+        const isDark = document.documentElement.dataset.theme === 'dark'
+
+        themeColor?.setAttribute('content', isDark ? '#0b1115' : '#f5f8fa')
+      })
+    </script>
   </body>
 </html>
