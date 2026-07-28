@@ -5,7 +5,8 @@ on:
     branches:
       - main
     paths:
-      - "packages/zed-dep-beacon/**"
+      - "packages/dep-beacon-lsp/**"
+      - "extensions/zed-dep-beacon/**"
       - ".github/workflows/zed-release.yml"
   workflow_dispatch: {}
 
@@ -53,8 +54,8 @@ jobs:
       - name: Read Zed extension version
         id: zed-version
         run: |
-          version="$(node -p "require('./packages/zed-dep-beacon/package.json').version")"
-          manifest_version="$(node -e "const fs=require('node:fs'); const toml=fs.readFileSync('packages/zed-dep-beacon/extension.toml','utf8'); console.log(toml.match(/^version = \"([^\"]+)\"$/m)[1])")"
+          version="$(node -p "require('./packages/dep-beacon-lsp/package.json').version")"
+          manifest_version="$(node -e "const fs=require('node:fs'); const toml=fs.readFileSync('extensions/zed-dep-beacon/extension.toml','utf8'); console.log(toml.match(/^version = \"([^\"]+)\"$/m)[1])")"
           if [ "$version" != "$manifest_version" ]; then
             echo "package.json version ($version) does not match extension.toml version ($manifest_version)."
             exit 1

@@ -44,7 +44,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/santi020k/dep-beacon.git",
-    "directory": "packages/zed-dep-beacon"
+    "directory": "packages/dep-beacon-lsp"
   },
   "homepage": "https://beacon.santi020k.com",
   "bugs": {

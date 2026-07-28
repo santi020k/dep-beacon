@@ -42,7 +42,7 @@
         "tests/**/*.ts"
       ]
     },
-    "packages/zed-dep-beacon": {
+    "packages/dep-beacon-lsp": {
       "entry": [
         "scripts/*.{cjs,mjs}",
         "src/server.ts"
