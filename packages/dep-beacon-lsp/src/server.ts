@@ -1,11 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import {
   analyzeDependencies,
   collectCatalogSnapshot,
   type DependencyAnalysis,
+  type DependencyEntry,
   type ManifestParseError,
   type ManifestParseResult,
   parseManifest,
@@ -18,7 +19,9 @@ import {
   type Diagnostic,
   DiagnosticSeverity,
   type DocumentLink,
+  type Hover,
   type InitializeResult,
+  MarkupKind,
   Position,
   ProposedFeatures,
   Range,
@@ -29,7 +32,7 @@ import {
 } from 'vscode-languageserver/node.js'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { diagnosticSeverity, statusTitle, updateTargets } from './presentation.js'
+import { diagnosticSeverity, hoverMarkdown, statusTitle, updateTargets } from './presentation.js'
 
 declare const DEP_BEACON_VERSION: string
 
@@ -39,9 +42,20 @@ interface DepBeaconSettings {
   registryUrl: string
 }
 
+interface CatalogLocation {
+  dependency: DependencyEntry
+  uri: string
+}
+
 interface DocumentAnalysis {
   analyses: DependencyAnalysis[]
+  catalogLocations: CatalogLocation[]
   manifest: ManifestParseResult
+}
+
+interface WorkspaceManifest {
+  manifest: ManifestParseResult
+  uri: string
 }
 
 const DEFAULT_SETTINGS: DepBeaconSettings = {
@@ -61,6 +75,16 @@ const toRange = (range: { endPosition: Position, startPosition: Position }): Ran
   end: range.endPosition,
   start: range.startPosition,
 })
+
+const containsPosition = (range: Range, position: Position): boolean => {
+  const afterStart = position.line > range.start.line
+    || (position.line === range.start.line && position.character >= range.start.character)
+
+  const beforeEnd = position.line < range.end.line
+    || (position.line === range.end.line && position.character <= range.end.character)
+
+  return afterStart && beforeEnd
+}
 
 const emptyRange: Range = {
   end: Position.create(0, 1),
@@ -116,15 +140,41 @@ const analysisDiagnostic = (analysis: DependencyAnalysis): Diagnostic | undefine
   }
 }
 
-const readWorkspaceManifests = (): ManifestParseResult[] => workspaceRoots.flatMap((root) => {
+const readWorkspaceManifests = (): WorkspaceManifest[] => workspaceRoots.flatMap((root) => {
   for (const name of ['pnpm-workspace.yaml', 'pnpm-workspace.yml']) {
     const path = join(root, name)
 
-    if (existsSync(path)) return [parseManifest(path, readFileSync(path, 'utf8'))]
+    if (existsSync(path)) {
+      return [{
+        manifest: parseManifest(path, readFileSync(path, 'utf8')),
+        uri: pathToFileURL(path).toString(),
+      }]
+    }
   }
 
   return []
 })
+
+const catalogLocation = (analysis: DependencyAnalysis, locations: readonly CatalogLocation[]): CatalogLocation | undefined => {
+  const spec = analysis.dependency.spec
+
+  if (!spec.startsWith('catalog:')) return undefined
+
+  const expectedCatalogName = spec === 'catalog:' ? undefined : spec.slice('catalog:'.length)
+
+  // Catalog snapshots use later workspace manifests as overrides, so search in the same order.
+  for (let index = locations.length - 1; index >= 0; index -= 1) {
+    const location = locations[index]
+
+    if (location?.dependency.packageName !== analysis.dependency.packageName) continue
+
+    if (expectedCatalogName === undefined && location.dependency.section === 'catalog') return location
+
+    if (location.dependency.section === 'catalogs' && location.dependency.catalogName === expectedCatalogName) return location
+  }
+
+  return undefined
+}
 
 const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis | undefined> => {
   const path = manifestPath(document)
@@ -133,7 +183,11 @@ const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis
 
   const manifest = parseManifest(path, document.getText())
   const workspaceManifests = readWorkspaceManifests()
-  const catalogs = collectCatalogSnapshot([...workspaceManifests, manifest])
+  const catalogs = collectCatalogSnapshot([...workspaceManifests.map(({ manifest }) => manifest), manifest])
+
+  const catalogLocations = workspaceManifests.flatMap(({ manifest, uri }) => manifest.dependencies
+    .filter(({ section }) => section === 'catalog' || section === 'catalogs')
+    .map(dependency => ({ dependency, uri })))
 
   const analyses = await analyzeDependencies(manifest.dependencies, {
     catalogSnapshot: catalogs,
@@ -142,7 +196,7 @@ const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis
     vulnerabilities: settings.checkVulnerabilities,
   })
 
-  return { analyses, manifest }
+  return { analyses, catalogLocations, manifest }
 }
 
 const refreshDocument = async (document: TextDocument): Promise<void> => {
@@ -221,6 +275,7 @@ connection.onInitialize((params): InitializeResult => {
       codeActionProvider: true,
       codeLensProvider: { resolveProvider: false },
       documentLinkProvider: { resolveProvider: false },
+      hoverProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
       workspace: { workspaceFolders: { supported: true } },
     },
@@ -259,6 +314,27 @@ connection.onCodeLens(async ({ textDocument }): Promise<CodeLens[]> => {
   })) ?? []
 })
 
+connection.onHover(async ({ position, textDocument }): Promise<Hover | undefined> => {
+  const document = documents.get(textDocument.uri)
+
+  if (!document) return undefined
+
+  const result = results.get(document.uri) ?? await analyzeDocument(document)
+
+  const analysis = result?.analyses.find((candidate) => containsPosition(toRange(candidate.dependency.nameRange), position)
+      || containsPosition(toRange(candidate.dependency.specRange), position))
+
+  if (!analysis) return undefined
+
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: hoverMarkdown(analysis),
+    },
+    range: Range.create(analysis.dependency.nameRange.startPosition, analysis.dependency.specRange.endPosition),
+  }
+})
+
 connection.onDocumentLinks(async ({ textDocument }): Promise<DocumentLink[]> => {
   const document = documents.get(textDocument.uri)
 
@@ -288,19 +364,25 @@ connection.onCodeAction(async ({ range, textDocument }) => {
 
     if (outsideSelection) return []
 
-    return updateTargets(analysis).map((target) => {
+    const catalog = catalogLocation(analysis, result.catalogLocations)
+    const editableDependency = catalog?.dependency ?? analysis.dependency
+    const editableUri = catalog?.uri ?? document.uri
+    const editableRange = toRange(editableDependency.specRange)
+    const diagnostic = analysisDiagnostic(analysis)
+
+    return updateTargets(analysis, editableDependency.spec).map((target) => {
       const edit: WorkspaceEdit = {
         changes: {
-          [document.uri]: [TextEdit.replace(dependencyRange, target.spec)],
+          [editableUri]: [TextEdit.replace(editableRange, target.spec)],
         },
       }
 
       return {
-        diagnostics: [],
+        diagnostics: diagnostic ? [diagnostic] : undefined,
         edit,
         isPreferred: target.kind === 'latest',
         kind: CodeActionKind.QuickFix,
-        title: target.title,
+        title: catalog ? `${target.title} in pnpm catalog` : target.title,
       }
     })
   })

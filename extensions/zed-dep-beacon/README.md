@@ -41,6 +41,16 @@ PATH="/tmp/dep-beacon-zed-bin:$PATH" zed examples/sample-workspace
 
 The adapter checks `PATH` before attempting to download `@santi020k/dep-beacon-lsp`.
 
+## Zed UI
+
+Keep Zed's `code_lens` setting at its default (`"off"`) for the most compact experience. Zed renders CodeLens above each dependency rather than as VS Code-style inline decorations, so enabling it can add substantial vertical clutter.
+
+Update choices are available from Zed's code-action indicator on an outdated dependency line or with `cmd-.` on macOS (`ctrl-.` on Linux and Windows). Dep Beacon offers patch, minor, major, and latest targets while preserving the existing range prefix.
+
+For `catalog:` and named `catalog:<name>` references, actions update the owning entry in `pnpm-workspace.yaml` rather than replacing the reference in `package.json`.
+
+CodeLens remains available as an opt-in status view with `"code_lens": "on"`, but it is not recommended for large manifests.
+
 ## Settings
 
 Configure the server under Zed's `lsp.dep-beacon.settings` key:

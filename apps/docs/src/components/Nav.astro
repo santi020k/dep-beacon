@@ -1,25 +1,68 @@
 ---
-import { Link, ThemeToggle } from '@santi020k/lumen-astro'
+import { Button, Link, NavigationMenu, Sheet, ThemeToggle } from '@santi020k/lumen-astro'
 
+import { DOCS_NAV } from '../data/nav'
 import { SITE } from '../site.config'
 
 import LogoMark from './LogoMark.astro'
+
+const pathname = Astro.url.pathname.replace(/\/$/u, '') || '/'
+const pageLinks = [{ href: '/', label: 'Home' }, ...DOCS_NAV]
+
+const primaryLinks = [
+  { href: '/docs', label: 'Docs' },
+  { href: '/docs/vscode-extension', label: 'VS Code' },
+  { href: '/docs/zed-extension', label: 'Zed' },
+]
 ---
 
 <header class="site-header" transition:name="site-header" transition:persist>
-  <Link class="brand-link" href="/" aria-label="Dep Beacon home">
-    <LogoMark class="brand-mark" />
-    <span>{SITE.name}</span>
-  </Link>
-  <div class="header-actions">
-    <nav class="top-nav" aria-label="Primary navigation">
-      <Link href="/docs">Docs</Link>
-      <Link href="/docs/vscode-extension">VS Code</Link>
-      <Link href="/docs/zed-extension">Zed</Link>
-      <Link href="/docs/pnpm-workspaces">pnpm</Link>
-      <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
-      <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
-    </nav>
-    <ThemeToggle storageKey="dep-beacon-theme" />
+  <div class="site-header-inner">
+    <Link class="brand-link" href="/" aria-label="Dep Beacon home">
+      <LogoMark class="brand-mark" />
+      <span>{SITE.name}</span>
+    </Link>
+    <div class="header-actions">
+      <NavigationMenu class="top-nav" aria-label="Primary navigation" variant="unstyled">
+        {primaryLinks.map((item) => (
+          <Link href={item.href} aria-current={pathname === item.href ? 'page' : undefined}>
+            {item.label}
+          </Link>
+        ))}
+        <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
+      </NavigationMenu>
+      <Button
+        class="mobile-menu-trigger"
+        variant="ghost"
+        type="button"
+        aria-label="Open page navigation"
+        data-ui-sheet-trigger="site-navigation"
+      >
+        Menu
+      </Button>
+      <ThemeToggle storageKey="dep-beacon-theme" />
+    </div>
   </div>
 </header>
+
+<Sheet id="site-navigation" class="mobile-menu" aria-label="Page navigation">
+  <div class="mobile-menu-heading">
+    <h2>Pages</h2>
+    <Button variant="ghost" type="button" data-ui-sheet-close>Close</Button>
+  </div>
+  <NavigationMenu class="mobile-nav" aria-label="Mobile primary navigation" variant="unstyled">
+    {pageLinks.map((item) => (
+      <Link
+        href={item.href}
+        aria-current={pathname === item.href ? 'page' : undefined}
+        data-ui-sheet-close
+      >
+        {item.label}
+      </Link>
+    ))}
+  </NavigationMenu>
+  <div class="mobile-menu-links">
+    <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
+    <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
+  </div>
+</Sheet>

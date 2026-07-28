@@ -5,15 +5,16 @@ import { SITE } from '../site.config'
 ---
 
 <footer class="site-footer" transition:name="site-footer" transition:persist>
-  <p>{SITE.name} is built for maintainers who live in manifests.</p>
+  <p>
+    Made by <Link href={SITE.personalUrl} target="_blank" rel="noopener noreferrer">santi020k</Link>
+    with <Link href={SITE.lumenUrl} target="_blank" rel="noopener noreferrer">Lumen</Link>.
+  </p>
   <div>
     <Link href="/docs">Docs</Link>
     <Link href="/docs/zed-extension">Zed</Link>
     <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
     <Link href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</Link>
     <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
-    <Link href={SITE.personalUrl} target="_blank" rel="noopener noreferrer">santi020k</Link>
-    <Link href={SITE.lumenUrl} target="_blank" rel="noopener noreferrer">Lumen</Link>
     <Link href="https://github.com/sponsors/santi020k" target="_blank" rel="noopener noreferrer">Sponsor</Link>
   </div>
 </footer>

@@ -2,7 +2,7 @@ import type { DependencyAnalysis } from '@santi020k/dep-beacon-core'
 
 import { describe, expect, test } from 'vitest'
 
-import { diagnosticSeverity, statusTitle, updateTargets } from '../src/presentation.js'
+import { diagnosticSeverity, hoverMarkdown, statusTitle, updateTargets } from '../src/presentation.js'
 
 const analysis = (overrides: Partial<DependencyAnalysis> = {}): DependencyAnalysis => ({
   dependency: {
@@ -60,6 +60,29 @@ describe('statusTitle', () => {
   })
 })
 
+describe('hoverMarkdown', () => {
+  test('shows dependency status and every available update target', () => {
+    const markdown = hoverMarkdown(analysis({
+      dependency: { ...analysis().dependency, spec: 'catalog:' },
+      displaySpec: 'catalog: (^18.0.0)',
+    }))
+
+    expect(markdown).toContain('Dep Beacon — Update available')
+    expect(markdown).toContain('Current: `18.3.1` · Latest: `19.1.0`')
+    expect(markdown).toContain('- Patch: `18.3.2`')
+    expect(markdown).toContain('- Minor: `18.4.0`')
+    expect(markdown).toContain('- Major: `19.1.0`')
+    expect(markdown).toContain('code actions')
+  })
+
+  test('includes vulnerability details', () => {
+    expect(hoverMarkdown(analysis({
+      status: 'vulnerable',
+      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
+    }))).toContain('high severity · GHSA-demo')
+  })
+})
+
 describe('updateTargets', () => {
   test('creates unique semver-preserving update actions', () => {
     expect(updateTargets(analysis()).map(({ kind, spec }) => [kind, spec])).toEqual([
@@ -70,7 +93,14 @@ describe('updateTargets', () => {
   })
 
   test('does not directly edit catalog references', () => {
-    expect(updateTargets(analysis({ dependency: { ...analysis().dependency, spec: 'catalog:' } }))).toEqual([])
+    const catalogAnalysis = analysis({ dependency: { ...analysis().dependency, spec: 'catalog:' } })
+
+    expect(updateTargets(catalogAnalysis)).toEqual([])
+    expect(updateTargets(catalogAnalysis, '~18.0.0').map(({ kind, spec }) => [kind, spec])).toEqual([
+      ['patch', '~18.3.2'],
+      ['minor', '~18.4.0'],
+      ['major', '~19.1.0'],
+    ])
   })
 
   test('skips missing, duplicate, and unchanged targets', () => {

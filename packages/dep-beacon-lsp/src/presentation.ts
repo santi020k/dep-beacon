@@ -8,6 +8,15 @@ export interface UpdateTarget {
   title: string
 }
 
+const STATUS_LABELS: Record<DependencyAnalysis['status'], string> = {
+  invalid: 'Invalid dependency range',
+  missing: 'Package or version not found',
+  outdated: 'Update available',
+  protocol: 'Locally managed dependency',
+  'up-to-date': 'Up to date',
+  vulnerable: 'Security update recommended',
+}
+
 export const diagnosticSeverity = (analysis: DependencyAnalysis): BeaconDiagnosticSeverity | undefined => {
   switch (analysis.status) {
     case 'invalid':
@@ -50,17 +59,50 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
   return STATUS_TITLES[analysis.status](analysis, versions)
 }
 
-export const updateTargets = (analysis: DependencyAnalysis, spec = analysis.dependency.spec): UpdateTarget[] => {
-  if (spec.startsWith('catalog:')) return []
+export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
+  const versions: [string, string | undefined][] = [
+    ['Patch', analysis.targets.nextPatch],
+    ['Minor', analysis.targets.nextMinor],
+    ['Major', analysis.targets.nextMajor],
+    ['Latest', analysis.targets.latest],
+  ].filter((target): target is [string, string] => Boolean(target[1]))
 
-  const currentSpec = spec.trim()
+  const lines = [
+    `### Dep Beacon — ${STATUS_LABELS[analysis.status]}`,
+    '',
+    `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`,
+  ]
+
+  if (analysis.targets.current || analysis.targets.latest) {
+    lines.push('', `Current: \`${analysis.targets.current ?? 'unknown'}\` · Latest: \`${analysis.targets.latest ?? 'unknown'}\``)
+  }
+
+  if (versions.length > 0 && !analysis.isLatestSatisfied) {
+    lines.push('', '**Available targets**', '')
+
+    for (const [label, version] of versions) lines.push(`- ${label}: \`${version}\``)
+
+    lines.push('', 'Use Zed’s code actions (`cmd-.` / `ctrl-.`) to apply an update.')
+  }
+
+  if (analysis.vulnerability) {
+    lines.push('', `**Security:** ${analysis.vulnerability.severity} severity · ${analysis.vulnerability.ids.join(', ') || 'known vulnerability'}`)
+  }
+
+  return lines.join('\n')
+}
+
+export const updateTargets = (analysis: DependencyAnalysis, editableSpec = analysis.dependency.spec): UpdateTarget[] => {
+  if (editableSpec.startsWith('catalog:')) return []
+
+  const currentSpec = editableSpec.trim()
   const seen = new Set<string>()
   const targets: UpdateTarget[] = []
 
   const add = (kind: UpdateTarget['kind'], label: string, version: string | undefined): void => {
     if (!version) return
 
-    const targetSpec = createTargetSpec(spec, version)
+    const targetSpec = createTargetSpec(editableSpec, version)
 
     if (targetSpec === currentSpec || seen.has(targetSpec)) return
 

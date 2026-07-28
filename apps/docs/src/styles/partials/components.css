@@ -76,25 +76,32 @@
 }
 
 .site-header {
-  align-items: center;
   animation: rise-in 540ms ease both;
   backdrop-filter: blur(18px);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--dep-line) 70%, transparent);
-  display: flex;
   inset: 0 0 auto;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 20;
+}
+
+.site-header-inner {
+  align-items: center;
+  display: flex;
   justify-content: space-between;
   margin: 0 auto;
   max-width: 1180px;
   padding: 1rem 1.25rem;
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  width: 100%;
 }
 
 .brand-link,
 .header-actions,
 .top-nav,
+.mobile-menu-heading,
+.mobile-menu-links,
 .site-footer div {
   align-items: center;
   display: flex;
@@ -116,6 +123,8 @@
 }
 
 .top-nav a,
+.mobile-nav a,
+.mobile-menu-links a,
 .site-footer a,
 .docs-sidebar a {
   color: var(--dep-ink-soft);
@@ -129,6 +138,49 @@
 .top-nav a,
 .site-footer a {
   position: relative;
+}
+
+.top-nav a[aria-current="page"],
+.mobile-nav a[aria-current="page"] {
+  color: var(--dep-ink);
+  font-weight: 700;
+}
+
+.mobile-menu-trigger {
+  display: none;
+}
+
+.mobile-menu-heading {
+  justify-content: space-between;
+}
+
+.mobile-menu-heading h2 {
+  margin: 0;
+}
+
+.mobile-nav {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 1.5rem;
+}
+
+.mobile-nav a {
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+}
+
+.mobile-nav a:hover,
+.mobile-nav a[aria-current="page"] {
+  background: var(--bg-soft);
+}
+
+.mobile-menu-links {
+  border-top: 1px solid var(--dep-line);
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
 }
 
 .top-nav a::after,
@@ -986,13 +1038,23 @@
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 960px) {
   .top-nav {
     display: none;
   }
 
+  .mobile-menu-trigger {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header-inner {
+    padding-block: 0.75rem;
+  }
+
   .header-actions {
-    gap: 0;
+    gap: 0.25rem;
   }
 
   .hero {
