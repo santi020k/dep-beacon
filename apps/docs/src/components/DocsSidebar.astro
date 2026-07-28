@@ -12,7 +12,15 @@ const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/'
       const href = item.href.replace(/\/$/u, '')
       const active = currentPath === href
 
-      return <Link class={active ? 'active' : undefined} href={item.href}>{item.label}</Link>
+      return (
+        <Link
+          aria-current={active ? 'page' : undefined}
+          class={active ? 'active' : undefined}
+          href={item.href}
+        >
+          {item.label}
+        </Link>
+      )
     })}
   </nav>
 </aside>

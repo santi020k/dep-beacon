@@ -1,0 +1,63 @@
+---
+import { Callout, Link } from '@santi020k/lumen-astro'
+
+import Docs from '../../layouts/Docs.astro'
+
+const settingsExample = `{
+  "lsp": {
+    "dep-beacon": {
+      "settings": {
+        "checkVulnerabilities": true,
+        "includePrerelease": false,
+        "registryUrl": "https://registry.npmjs.org"
+      }
+    }
+  }
+}`
+---
+
+<Docs title="Zed Extension" description="Zed features provided by Dep Beacon through the Language Server Protocol.">
+  <h1>Dep Beacon for Zed</h1>
+  <p>
+    Dep Beacon brings npm dependency intelligence to Zed through the Language Server Protocol. Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` to see dependency signals in your editor.
+  </p>
+
+  <h2>Install</h2>
+  <ol>
+    <li>Open the command palette in Zed.</li>
+    <li>Run `zed: extensions`.</li>
+    <li>Search for `Dep Beacon` and select Install.</li>
+    <li>Open a supported manifest.</li>
+  </ol>
+
+  <h2>Features</h2>
+  <ul>
+    <li>CodeLens shows the current dependency status above supported entries.</li>
+    <li>Diagnostics identify outdated, invalid, missing, and vulnerable packages.</li>
+    <li>Quick fixes apply patch, minor, major, and latest update targets.</li>
+    <li>Document links open dependency names on npm.</li>
+    <li>Default and named pnpm catalogs resolve before dependency analysis.</li>
+    <li>Optional OSV.dev checks add vulnerability severity to dependency diagnostics.</li>
+  </ul>
+
+  <h2>Settings</h2>
+  <p>
+    Configure the language server under `lsp.dep-beacon.settings` in your Zed settings file.
+  </p>
+  <pre><code>{settingsExample}</code></pre>
+  <ul>
+    <li>`checkVulnerabilities` defaults to `true`.</li>
+    <li>`includePrerelease` defaults to `false`.</li>
+    <li>`registryUrl` defaults to the public npm registry.</li>
+  </ul>
+
+  <Callout class="docs-callout">
+    <strong>Editor differences:</strong>
+    <span>Zed does not currently expose APIs equivalent to VS Code inline decorations or install-on-save, so those features remain VS Code-only.</span>
+  </Callout>
+
+  <h2>Source</h2>
+  <p>
+    The Zed adapter and language server are available in the <Link href="https://github.com/santi020k/dep-beacon/tree/main/packages/zed-dep-beacon" target="_blank" rel="noopener noreferrer">Dep Beacon repository</Link>.
+  </p>
+</Docs>
