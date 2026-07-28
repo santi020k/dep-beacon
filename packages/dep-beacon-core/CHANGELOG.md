@@ -1,5 +1,7 @@
 # @santi020k/dep-beacon-core
 
+## 1.1.0
+
 ## 1.0.1
 
 ### Patch Changes
