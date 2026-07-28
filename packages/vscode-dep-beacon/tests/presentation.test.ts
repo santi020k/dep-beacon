@@ -3,7 +3,9 @@ import type { DependencyAnalysis } from '@santi020k/dep-beacon-core'
 import { describe, expect, test } from 'vitest'
 
 import {
+  bulkUpdateSpec,
   decorationText,
+  hoverMarkdown,
   packageLensTitle,
   resolvedUpdateActions,
   statusTitle,
@@ -118,6 +120,33 @@ describe('presentation helpers', () => {
 
   test('creates compact package lens labels', () => {
     expect(packageLensTitle(baseAnalysis('outdated'))).toBe('$(link-external)\u00A0open demo')
+  })
+
+  test('creates detailed hover content with update and security signals', () => {
+    const analysis = baseAnalysis('vulnerable')
+
+    analysis.vulnerability = {
+      aliases: [],
+      ids: ['GHSA-demo'],
+      severity: 'high',
+      source: 'osv',
+    }
+
+    const markdown = hoverMarkdown(analysis)
+
+    expect(markdown).toContain('Dep Beacon — Security update recommended')
+    expect(markdown).toContain('Range resolves: `1.0.0` · Latest: `2.0.0`')
+    expect(markdown).toContain('- Patch: `1.0.1`')
+    expect(markdown).toContain('VS Code’s quick fixes')
+    expect(markdown).toContain('high severity · GHSA-demo')
+  })
+
+  test('creates compatible and latest bulk update specs', () => {
+    const analysis = baseAnalysis('outdated')
+
+    expect(bulkUpdateSpec(analysis, '^1.0.0', 'compatible')).toBe('^1.1.0')
+    expect(bulkUpdateSpec(analysis, '~1.0.0', 'latest')).toBe('~2.0.0')
+    expect(bulkUpdateSpec(baseAnalysis('up-to-date'), '^2.0.0', 'latest')).toBeUndefined()
   })
 
   test('resolves update actions with manifest target specs', () => {

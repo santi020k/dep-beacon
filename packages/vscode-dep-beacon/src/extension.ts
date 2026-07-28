@@ -20,8 +20,11 @@ import * as vscode from 'vscode'
 
 import { type DepBeaconConfig, getDepBeaconConfig, type PackageManagerPreference } from './config.js'
 import {
+  bulkUpdateSpec,
+  type BulkUpdateStrategy,
   decorationText,
   type DecorationTone,
+  hoverMarkdown,
   packageLensTitle,
   type ResolvedUpdateAction,
   resolvedUpdateActions,
@@ -78,6 +81,11 @@ interface DependencyUpdateTarget {
   range: UpdateDependencyArgs['range']
   spec: string
   uri: string
+}
+
+interface BulkUpdateEdit {
+  count: number
+  edit: vscode.WorkspaceEdit
 }
 
 const DOCUMENT_SELECTOR: vscode.DocumentSelector = [
@@ -274,7 +282,7 @@ const resolvePackageManager = async (folder: vscode.Uri, preference: PackageMana
   return 'npm'
 }
 
-export class DepBeaconController implements vscode.CodeLensProvider {
+export class DepBeaconController implements vscode.CodeActionProvider, vscode.CodeLensProvider, vscode.HoverProvider {
   readonly #cache = new Map<string, CachedAnalysis>()
   readonly #decorationTypes: Record<DecorationTone, vscode.TextEditorDecorationType>
   readonly #diagnostics: vscode.DiagnosticCollection
@@ -323,7 +331,11 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     context.subscriptions.push(this.#diagnostics, this.#output, this.#onDidChangeCodeLenses, ...Object.values(this.#decorationTypes))
 
     this.#subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(DOCUMENT_SELECTOR, this, {
+        providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
+      }),
       vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, this),
+      vscode.languages.registerHoverProvider(DOCUMENT_SELECTOR, this),
       vscode.workspace.onDidChangeTextDocument((event) => {
         if (isWorkspaceManifestDocument(event.document)) this.clearCatalogData()
 
@@ -491,6 +503,121 @@ export class DepBeaconController implements vscode.CodeLensProvider {
 
       return []
     }
+  }
+
+  async provideHover(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | undefined> {
+    const config = getDepBeaconConfig()
+
+    if (!config.enable || !isSupportedDocument(document)) return undefined
+
+    try {
+      const analyses = await this.analyzeDocument(document)
+
+      const analysis = analyses.find((candidate) =>
+        toVscodeRange(candidate.dependency.nameRange).contains(position)
+        || toVscodeRange(candidate.dependency.specRange).contains(position))
+
+      if (!analysis) return undefined
+
+      const range = new vscode.Range(
+        analysis.dependency.nameRange.startPosition.line,
+        analysis.dependency.nameRange.startPosition.character,
+        analysis.dependency.specRange.endPosition.line,
+        analysis.dependency.specRange.endPosition.character,
+      )
+
+      return new vscode.Hover(new vscode.MarkdownString(hoverMarkdown(analysis)), range)
+    } catch (error) {
+      this.logError(error, `Failed to provide hover details for ${describeDocument(document)}.`)
+
+      return undefined
+    }
+  }
+
+  async provideCodeActions(
+    document: vscode.TextDocument,
+    range: vscode.Range,
+  ): Promise<vscode.CodeAction[]> {
+    const config = getDepBeaconConfig()
+
+    if (!config.enable || !isSupportedDocument(document)) return []
+
+    try {
+      const analyses = await this.analyzeDocument(document)
+      const catalogTargets = this.#cache.get(document.uri.toString())?.catalogEditTargets ?? []
+
+      const selectedAnalyses = analyses.filter((analysis) =>
+        toVscodeRange(analysis.dependency.nameRange).intersection(range) !== undefined
+        || toVscodeRange(analysis.dependency.specRange).intersection(range) !== undefined)
+
+      const bulkActions = selectedAnalyses.some((analysis) => analysis.status === 'outdated' || analysis.status === 'vulnerable')
+        ? await this.createBulkCodeActions(document, analyses, catalogTargets)
+        : []
+
+      const dependencyActions = await this.createDependencyCodeActions(document, selectedAnalyses, catalogTargets)
+
+      return [...bulkActions, ...dependencyActions]
+    } catch (error) {
+      this.logError(error, `Failed to provide code actions for ${describeDocument(document)}.`)
+
+      return []
+    }
+  }
+
+  async createBulkCodeActions(
+    document: vscode.TextDocument,
+    analyses: readonly DependencyAnalysis[],
+    catalogTargets: readonly CatalogEditTarget[],
+  ): Promise<vscode.CodeAction[]> {
+    const actions: vscode.CodeAction[] = []
+
+    for (const [strategy, title] of [
+      ['compatible', 'Update all compatible dependencies'],
+      ['latest', 'Update all dependencies to latest'],
+    ] as const) {
+      const update = await this.createBulkUpdateEdit(document, analyses, catalogTargets, strategy)
+
+      if (!update) continue
+
+      const action = new vscode.CodeAction(`Dep Beacon: ${title} (${update.count})`, vscode.CodeActionKind.QuickFix)
+
+      action.edit = update.edit
+
+      actions.push(action)
+    }
+
+    return actions
+  }
+
+  async createDependencyCodeActions(
+    document: vscode.TextDocument,
+    analyses: readonly DependencyAnalysis[],
+    catalogTargets: readonly CatalogEditTarget[],
+  ): Promise<vscode.CodeAction[]> {
+    const actions: vscode.CodeAction[] = []
+
+    for (const analysis of analyses) {
+      const updateTarget = this.getDependencyUpdateTarget(document, analysis, catalogTargets)
+
+      if (!updateTarget) continue
+
+      for (const update of resolvedUpdateActions(analysis, updateTarget.spec)) {
+        const catalogSuffix = isCatalogReference(analysis) ? ' in pnpm catalog' : ''
+
+        const action = new vscode.CodeAction(
+          `Dep Beacon: Update ${analysis.dependency.packageName} to ${update.title.toLowerCase()} (${update.targetSpec})${catalogSuffix}`,
+          vscode.CodeActionKind.QuickFix,
+        )
+
+        action.edit = await this.createUpdateEdit(document, updateTarget, update.targetSpec)
+
+        action.isPreferred = update.kind === 'latest'
+
+        actions.push(action)
+      }
+    }
+
+    return actions
   }
 
   schedule(document: vscode.TextDocument, force = false, reason = 'scheduled refresh'): void {
@@ -730,6 +857,87 @@ export class DepBeaconController implements vscode.CodeLensProvider {
     }
 
     return lenses
+  }
+
+  async createUpdateEdit(
+    currentDocument: vscode.TextDocument,
+    target: DependencyUpdateTarget,
+    targetSpec: string,
+  ): Promise<vscode.WorkspaceEdit> {
+    const uri = vscode.Uri.parse(target.uri)
+
+    const targetDocument = uri.toString() === currentDocument.uri.toString()
+      ? currentDocument
+      : await this.openCatalogDocument(uri)
+
+    const range = new vscode.Range(
+      target.range.start.line,
+      target.range.start.character,
+      target.range.end.line,
+      target.range.end.character,
+    )
+
+    const edit = new vscode.WorkspaceEdit()
+
+    edit.replace(uri, range, formatReplacement(targetDocument.getText(range), targetSpec))
+
+    return edit
+  }
+
+  async createBulkUpdateEdit(
+    document: vscode.TextDocument,
+    analyses: readonly DependencyAnalysis[],
+    catalogTargets: readonly CatalogEditTarget[],
+    strategy: BulkUpdateStrategy,
+  ): Promise<BulkUpdateEdit | undefined> {
+    const edit = new vscode.WorkspaceEdit()
+    const editedRanges = new Set<string>()
+    const documents = new Map<string, vscode.TextDocument>([[document.uri.toString(), document]])
+    let count = 0
+
+    for (const analysis of analyses) {
+      const target = this.getDependencyUpdateTarget(document, analysis, catalogTargets)
+
+      if (!target) continue
+
+      const targetSpec = bulkUpdateSpec(analysis, target.spec, strategy)
+
+      if (!targetSpec) continue
+
+      const key = [
+        target.uri,
+        target.range.start.line,
+        target.range.start.character,
+        target.range.end.line,
+        target.range.end.character,
+      ].join(':')
+
+      if (editedRanges.has(key)) continue
+
+      editedRanges.add(key)
+
+      const uri = vscode.Uri.parse(target.uri)
+      let targetDocument = documents.get(target.uri)
+
+      if (!targetDocument) {
+        targetDocument = await this.openCatalogDocument(uri)
+
+        documents.set(target.uri, targetDocument)
+      }
+
+      const range = new vscode.Range(
+        target.range.start.line,
+        target.range.start.character,
+        target.range.end.line,
+        target.range.end.character,
+      )
+
+      edit.replace(uri, range, formatReplacement(targetDocument.getText(range), targetSpec))
+
+      count += 1
+    }
+
+    return count > 0 ? { count, edit } : undefined
   }
 
   getDependencyUpdateTarget(

@@ -182,7 +182,8 @@
     "onLanguage:jsonc",
     "onLanguage:yaml",
     "workspaceContains:package.json",
-    "workspaceContains:pnpm-workspace.yaml"
+    "workspaceContains:pnpm-workspace.yaml",
+    "workspaceContains:pnpm-workspace.yml"
   ],
   "engines": {
     "node": "^20.19.0 || >=22.13.0",

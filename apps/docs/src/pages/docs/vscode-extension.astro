@@ -5,7 +5,7 @@ import Docs from '../../layouts/Docs.astro'
 <Docs title="VS Code Extension" description="VS Code features provided by Dep Beacon.">
   <h1>VS Code Extension</h1>
   <p>
-    Open `package.json` or `pnpm-workspace.yaml`. Dep Beacon adds CodeLens actions above supported dependency entries and inline status text after each range.
+    Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`. Dep Beacon adds CodeLens and quick-fix actions, dependency hovers, and inline status text to supported entries.
   </p>
 
   <figure class="docs-media">
@@ -27,6 +27,13 @@ import Docs from '../../layouts/Docs.astro'
     <li>`major` updates to the nearest higher major.</li>
     <li>`latest` updates to npm's latest dist-tag or the newest stable version.</li>
   </ul>
+
+  <h2>Hovers and quick fixes</h2>
+  <p>
+    Hover a dependency name or range to see resolved and latest versions, available update targets, npm links, and vulnerability details.
+    Open VS Code's quick-fix menu to update one dependency or update all compatible or latest dependencies in the current manifest.
+    Catalog-backed actions edit the matching pnpm catalog entry.
+  </p>
 
   <h2>Commands</h2>
   <ul>

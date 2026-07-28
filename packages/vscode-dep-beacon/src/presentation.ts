@@ -1,5 +1,6 @@
 import { createTargetSpec, type DependencyAnalysis, type DependencyStatus } from '@santi020k/dep-beacon-core'
 
+export type BulkUpdateStrategy = 'compatible' | 'latest'
 export type DecorationTone = 'green' | 'muted' | 'orange' | 'red' | 'yellow'
 
 export interface UpdateAction {
@@ -88,6 +89,88 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
 
 export const packageLensTitle = (analysis: DependencyAnalysis): string =>
   `$(link-external)\u00A0open ${analysis.dependency.packageName}`
+
+const hoverVersionLine = (analysis: DependencyAnalysis): string | undefined => {
+  const current = analysis.targets.current
+  const latest = analysis.targets.latest
+
+  if (analysis.isLatestSatisfied && current && latest && current !== latest) {
+    return `Range resolves up to \`${current}\` · npm \`latest\` tag: \`${latest}\``
+  }
+
+  if (current || latest) {
+    return `Range resolves: \`${current ?? 'unknown'}\` · Latest: \`${latest ?? 'unknown'}\``
+  }
+
+  return undefined
+}
+
+const STATUS_LABELS: Record<DependencyStatus, string> = {
+  invalid: 'Invalid dependency range',
+  missing: 'Package or version not found',
+  outdated: 'Update available',
+  protocol: 'Locally managed dependency',
+  'up-to-date': 'Up to date',
+  vulnerable: 'Security update recommended',
+}
+
+export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
+  const versions: [string, string][] = []
+
+  const addVersion = (label: string, version: string | undefined): void => {
+    if (version) versions.push([label, version])
+  }
+
+  addVersion('Patch', analysis.targets.nextPatch)
+
+  addVersion('Minor', analysis.targets.nextMinor)
+
+  addVersion('Major', analysis.targets.nextMajor)
+
+  addVersion('Latest', analysis.targets.latest)
+
+  const lines = [
+    `### Dep Beacon — ${STATUS_LABELS[analysis.status]}`,
+    '',
+    `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`,
+  ]
+
+  const versionLine = hoverVersionLine(analysis)
+
+  if (versionLine) lines.push('', versionLine)
+
+  if (versions.length > 0 && !analysis.isLatestSatisfied) {
+    lines.push('', '**Available targets**', '')
+
+    for (const [label, version] of versions) lines.push(`- ${label}: \`${version}\``)
+
+    lines.push('', 'Use VS Code’s quick fixes (`⌘.` / `Ctrl+.`) to apply an update.')
+  }
+
+  if (analysis.vulnerability) {
+    lines.push('', `**Security:** ${analysis.vulnerability.severity} severity · ${analysis.vulnerability.ids.join(', ') || 'known vulnerability'}`)
+  }
+
+  return lines.join('\n')
+}
+
+export const bulkUpdateSpec = (
+  analysis: DependencyAnalysis,
+  editableSpec: string,
+  strategy: BulkUpdateStrategy,
+): string | undefined => {
+  if (analysis.status !== 'outdated' && analysis.status !== 'vulnerable') return undefined
+
+  const version = strategy === 'latest'
+    ? analysis.targets.latest
+    : analysis.targets.nextMinor ?? analysis.targets.nextPatch
+
+  if (!version) return undefined
+
+  const targetSpec = createTargetSpec(editableSpec, version)
+
+  return targetSpec === editableSpec.trim() ? undefined : targetSpec
+}
 
 export const decorationText = (analysis: DependencyAnalysis): string => {
   const signal = versionSignal(analysis)

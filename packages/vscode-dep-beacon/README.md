@@ -8,7 +8,9 @@ Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` and the exte
 
 ## What You Get
 
-- CodeLens actions for next patch, next minor, next major, and latest dependency updates.
+- CodeLens and quick-fix actions for next patch, next minor, next major, and latest dependency updates.
+- Bulk quick fixes for compatible updates or the latest available versions.
+- Dependency hovers with resolved versions, available targets, npm links, and vulnerability details.
 - Colored inline status for up-to-date, outdated, vulnerable, invalid, and missing ranges.
 - Diagnostics for unpublished versions, missing packages, outdated ranges, and OSV vulnerabilities.
 - pnpm workspace catalog support for default and named catalogs.
@@ -35,6 +37,8 @@ Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` and the exte
 - `latest`: move to npm's latest dist-tag or newest stable version.
 
 Dep Beacon preserves common range prefixes like `^` and `~` when it applies an update.
+Use VS Code's quick-fix menu to update one dependency or apply compatible/latest updates across the current manifest.
+Catalog-backed updates edit the matching entry in `pnpm-workspace.yaml` or `pnpm-workspace.yml`.
 Up-to-date ranges can still show a `latest` action when the written range can be synced to the latest version, such as `^19.0.0` to `^19.2.7`.
 
 ## Commands
@@ -59,6 +63,7 @@ Manual refreshes also write activation, scheduling, cache, parse, analysis, and 
 - `depBeacon.showInlineStatus`: show or hide inline status labels.
 - `depBeacon.runInstallOnSave`: start dependency installs after supported manifest saves.
 - `depBeacon.packageManager`: choose `auto`, `npm`, `pnpm`, or `yarn`.
+- `depBeacon.docsUrl`: choose the documentation URL opened by Dep Beacon commands.
 
 ## Privacy
 
