@@ -1,6 +1,6 @@
 [package]
 name = "dep-beacon-zed"
-version = "0.0.3"
+version = "1.0.0"
 edition = "2024"
 rust-version = "1.85"
 authors = ["Santiago Molina <hi@santi020k.com>"]
