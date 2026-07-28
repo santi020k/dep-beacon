@@ -9,7 +9,8 @@ const settingsExample = `{
       "settings": {
         "checkVulnerabilities": true,
         "includePrerelease": false,
-        "registryUrl": "https://registry.npmjs.org"
+        "registryUrl": "https://registry.npmjs.org",
+        "showUpdateDiagnostics": true
       }
     }
   }
@@ -93,7 +94,11 @@ const settingsExample = `{
     <li>`checkVulnerabilities` defaults to `true`.</li>
     <li>`includePrerelease` defaults to `false`.</li>
     <li>`registryUrl` defaults to the public npm registry.</li>
+    <li>`showUpdateDiagnostics` defaults to `true`. Set it to `false` to hide dependency update warnings while keeping security and manifest errors visible.</li>
   </ul>
+  <p>
+    Disabling update diagnostics does not disable dependency analysis. Hover details, code actions, and individual or bulk dependency upgrades remain available.
+  </p>
 
   <Callout class="docs-callout">
     <strong>Editor differences:</strong>

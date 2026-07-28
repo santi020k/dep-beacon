@@ -35,6 +35,17 @@ In Zed, the server publishes default-visible diagnostics for dependency updates,
 
 No action is returned when the selected dependency already has the correct manifest range. This includes packages whose range accepts a version published under `next` while npm's `latest` tag is older.
 
+## Settings
+
+LSP clients can send these values under `depBeacon`:
+
+- `checkVulnerabilities` enables OSV.dev checks and defaults to `true`.
+- `includePrerelease` includes prerelease versions and defaults to `false`.
+- `registryUrl` selects the npm-compatible registry and defaults to `https://registry.npmjs.org`.
+- `showUpdateDiagnostics` publishes available updates as warnings and defaults to `true`.
+
+Set `showUpdateDiagnostics` to `false` to keep update details and code actions available without adding a warning for every outdated dependency. Security findings, invalid ranges, and missing packages continue to publish diagnostics.
+
 ## Development
 
 From the repository root:

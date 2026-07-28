@@ -108,14 +108,31 @@ Configure the server under Zed's `lsp.dep-beacon.settings` key:
       "settings": {
         "checkVulnerabilities": true,
         "includePrerelease": false,
-        "registryUrl": "https://registry.npmjs.org"
+        "registryUrl": "https://registry.npmjs.org",
+        "showUpdateDiagnostics": true
       }
     }
   }
 }
 ```
 
-`checkVulnerabilities` defaults to `true`, `includePrerelease` defaults to `false`, and `registryUrl` defaults to the public npm registry.
+`checkVulnerabilities` defaults to `true`, `includePrerelease` defaults to `false`, `registryUrl` defaults to the public npm registry, and `showUpdateDiagnostics` defaults to `true`.
+
+Set `showUpdateDiagnostics` to `false` if you do not want every available dependency update to appear as a Zed warning:
+
+```json
+{
+  "lsp": {
+    "dep-beacon": {
+      "settings": {
+        "showUpdateDiagnostics": false
+      }
+    }
+  }
+}
+```
+
+This hides only update warnings. Security findings, invalid ranges, and missing packages remain visible, while dependency hovers and all individual and bulk update actions continue to work.
 
 ## Publishing
 

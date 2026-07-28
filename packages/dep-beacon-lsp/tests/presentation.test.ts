@@ -50,6 +50,15 @@ describe('diagnosticSeverity', () => {
     expect(diagnosticSeverity(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: ['A'], severity: 'high', source: 'osv' } }))).toBe('error')
     expect(diagnosticSeverity(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: ['B'], severity: 'low', source: 'osv' } }))).toBe('warning')
   })
+
+  test('can hide update warnings without hiding errors or security diagnostics', () => {
+    expect(diagnosticSeverity(analysis(), { showUpdates: false })).toBeUndefined()
+    expect(diagnosticSeverity(analysis({ status: 'invalid' }), { showUpdates: false })).toBe('error')
+    expect(diagnosticSeverity(analysis({
+      status: 'vulnerable',
+      vulnerability: { aliases: [], ids: ['A'], severity: 'low', source: 'osv' },
+    }), { showUpdates: false })).toBe('warning')
+  })
 })
 
 describe('editSpec', () => {

@@ -3,6 +3,10 @@ import { createTargetSpec, type DependencyAnalysis, type DependencyEntry, isHigh
 export type BeaconDiagnosticSeverity = 'error' | 'information' | 'warning'
 export type BulkUpdateStrategy = 'compatible' | 'latest'
 
+export interface DiagnosticOptions {
+  showUpdates?: boolean
+}
+
 export interface UpdateTarget {
   kind: 'latest' | 'major' | 'minor' | 'patch'
   spec: string
@@ -29,7 +33,10 @@ const STATUS_LABELS: Record<DependencyAnalysis['status'], string> = {
   vulnerable: 'Security update recommended',
 }
 
-export const diagnosticSeverity = (analysis: DependencyAnalysis): BeaconDiagnosticSeverity | undefined => {
+export const diagnosticSeverity = (
+  analysis: DependencyAnalysis,
+  { showUpdates = true }: DiagnosticOptions = {},
+): BeaconDiagnosticSeverity | undefined => {
   switch (analysis.status) {
     case 'invalid':
       return 'error'
@@ -38,7 +45,7 @@ export const diagnosticSeverity = (analysis: DependencyAnalysis): BeaconDiagnost
       return 'error'
 
     case 'outdated':
-      return 'warning'
+      return showUpdates ? 'warning' : undefined
 
     case 'vulnerable':
       return isHighRiskSeverity(analysis.vulnerability?.severity) ? 'error' : 'warning'

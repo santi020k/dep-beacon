@@ -51,6 +51,7 @@ interface DepBeaconSettings {
   checkVulnerabilities: boolean
   includePrerelease: boolean
   registryUrl: string
+  showUpdateDiagnostics: boolean
 }
 
 interface CatalogLocation {
@@ -78,6 +79,7 @@ const DEFAULT_SETTINGS: DepBeaconSettings = {
   checkVulnerabilities: true,
   includePrerelease: false,
   registryUrl: 'https://registry.npmjs.org',
+  showUpdateDiagnostics: true,
 }
 
 const connection = createConnection(ProposedFeatures.all)
@@ -126,7 +128,7 @@ const parseErrorDiagnostic = (error: ManifestParseError): Diagnostic => ({
 })
 
 const lspSeverity = (analysis: DependencyAnalysis): DiagnosticSeverity | undefined => {
-  switch (diagnosticSeverity(analysis)) {
+  switch (diagnosticSeverity(analysis, { showUpdates: settings.showUpdateDiagnostics })) {
     case 'error':
       return DiagnosticSeverity.Error
 
@@ -334,6 +336,7 @@ const updateSettings = (value: unknown): void => {
     checkVulnerabilities: configured.checkVulnerabilities ?? DEFAULT_SETTINGS.checkVulnerabilities,
     includePrerelease: configured.includePrerelease ?? DEFAULT_SETTINGS.includePrerelease,
     registryUrl: configured.registryUrl?.trim() || DEFAULT_SETTINGS.registryUrl,
+    showUpdateDiagnostics: configured.showUpdateDiagnostics ?? DEFAULT_SETTINGS.showUpdateDiagnostics,
   }
 }
 
