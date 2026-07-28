@@ -169,9 +169,15 @@ jobs:
         if: steps.registry-update.outputs.changed == 'true'
         working-directory: zed-extensions
         run: |
-          existing_pr="$(gh pr list --repo zed-industries/extensions --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" --state open --json number --jq '.[0].number')"
+          existing_pr="$(gh api --method GET repos/zed-industries/extensions/pulls \
+            -f state=open \
+            -f "head=${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
+            --jq '.[0].number // empty')"
           if [ -n "$existing_pr" ]; then
             echo "Zed registry pull request #${existing_pr} already exists."
+            gh pr comment "$existing_pr" \
+              --repo zed-industries/extensions \
+              --body '@cla-bot check'
             exit 0
           fi
           gh pr create \
