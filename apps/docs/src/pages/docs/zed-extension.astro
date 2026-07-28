@@ -32,14 +32,34 @@ const settingsExample = `{
 
   <h2>Features</h2>
   <ul>
-    <li>CodeLens shows the current dependency status above supported entries.</li>
-    <li>Diagnostics identify outdated, invalid, missing, and vulnerable packages.</li>
+    <li>No settings are required after installation.</li>
+    <li>Zed's diagnostics multi-buffer acts as an actionable dependency and security dashboard.</li>
+    <li>Updates and security issues are visible through default Zed warnings and errors.</li>
     <li>Quick fixes apply patch, minor, major, and latest update targets.</li>
+    <li>Bulk actions update all compatible dependencies or move the manifest to latest.</li>
     <li>Document links open dependency names on npm.</li>
     <li>Default and named pnpm catalogs resolve before dependency analysis.</li>
     <li>Optional OSV.dev checks add vulnerability severity to dependency diagnostics.</li>
   </ul>
 
+  <h2>Dependency dashboard</h2>
+  <p>
+    Open a supported manifest and Dep Beacon starts automatically. Click the error and warning indicator in Zed's status bar or run `diagnostics: deploy` (`cmd-shift-m` on macOS or `ctrl-shift-m` on Linux and Windows) to see actionable dependencies from your open manifests in one editable multi-buffer.
+  </p>
+  <p>
+    Place the cursor on a dependency and open code actions with `cmd-.` or `ctrl-.`. Alongside individual update targets, Dep Beacon offers bulk actions for compatible updates and latest versions.
+  </p>
+
+  <h2>Optional inline status</h2>
+  <p>
+    No visual settings are required for the dashboard. If you also want compact signals such as `↑ 18.3.1 → 19.1.0`, `⚠ high risk`, and `✓ 19.1.0` beside every dependency, enable Zed's inlay hints.
+  </p>
+  <pre><code>{`{
+  "inlay_hints": {
+    "enabled": true,
+    "show_other_hints": true
+  }
+}`}</code></pre>
   <h2>Settings</h2>
   <p>
     Configure the language server under `lsp.dep-beacon.settings` in your Zed settings file.

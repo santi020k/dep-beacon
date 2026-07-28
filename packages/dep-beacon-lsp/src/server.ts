@@ -21,6 +21,7 @@ import {
   type DocumentLink,
   type Hover,
   type InitializeResult,
+  type InlayHint,
   MarkupKind,
   Position,
   ProposedFeatures,
@@ -32,7 +33,16 @@ import {
 } from 'vscode-languageserver/node.js'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { diagnosticSeverity, hoverMarkdown, statusTitle, updateTargets } from './presentation.js'
+import {
+  bulkUpdateSpec,
+  type BulkUpdateStrategy,
+  diagnosticMessage,
+  diagnosticSeverity,
+  hoverMarkdown,
+  inlayHintLabel,
+  statusTitle,
+  updateTargets,
+} from './presentation.js'
 
 declare const DEP_BEACON_VERSION: string
 
@@ -56,6 +66,11 @@ interface DocumentAnalysis {
 interface WorkspaceManifest {
   manifest: ManifestParseResult
   uri: string
+}
+
+interface BulkWorkspaceEdit {
+  count: number
+  edit: WorkspaceEdit
 }
 
 const DEFAULT_SETTINGS: DepBeaconSettings = {
@@ -133,7 +148,7 @@ const analysisDiagnostic = (analysis: DependencyAnalysis): Diagnostic | undefine
   return {
     code: analysis.status,
     codeDescription: { href: analysis.packageUrl },
-    message: analysis.message,
+    message: diagnosticMessage(analysis),
     range: toRange(analysis.dependency.specRange),
     severity,
     source: 'Dep Beacon',
@@ -174,6 +189,48 @@ const catalogLocation = (analysis: DependencyAnalysis, locations: readonly Catal
   }
 
   return undefined
+}
+
+const bulkWorkspaceEdit = (
+  documentUri: string,
+  result: DocumentAnalysis,
+  strategy: BulkUpdateStrategy,
+): BulkWorkspaceEdit | undefined => {
+  const changes: Record<string, TextEdit[]> = {}
+  const editedRanges = new Set<string>()
+  let count = 0
+
+  for (const analysis of result.analyses) {
+    const catalog = catalogLocation(analysis, result.catalogLocations)
+    const editableDependency = catalog?.dependency ?? analysis.dependency
+    const editableUri = catalog?.uri ?? documentUri
+    const editableRange = toRange(editableDependency.specRange)
+    const targetSpec = bulkUpdateSpec(analysis, editableDependency.spec, strategy)
+
+    if (!targetSpec) continue
+
+    const rangeKey = [
+      editableUri,
+      editableRange.start.line,
+      editableRange.start.character,
+      editableRange.end.line,
+      editableRange.end.character,
+    ].join(':')
+
+    if (editedRanges.has(rangeKey)) continue
+
+    editedRanges.add(rangeKey)
+
+    const edits = changes[editableUri] ?? []
+
+    edits.push(TextEdit.replace(editableRange, targetSpec))
+
+    changes[editableUri] = edits
+
+    count += 1
+  }
+
+  return count > 0 ? { count, edit: { changes } } : undefined
 }
 
 const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis | undefined> => {
@@ -276,6 +333,7 @@ connection.onInitialize((params): InitializeResult => {
       codeLensProvider: { resolveProvider: false },
       documentLinkProvider: { resolveProvider: false },
       hoverProvider: true,
+      inlayHintProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
       workspace: { workspaceFolders: { supported: true } },
     },
@@ -335,6 +393,30 @@ connection.onHover(async ({ position, textDocument }): Promise<Hover | undefined
   }
 })
 
+connection.languages.inlayHint.on(async ({ range, textDocument }): Promise<InlayHint[]> => {
+  const document = documents.get(textDocument.uri)
+
+  if (!document) return []
+
+  const result = results.get(document.uri) ?? await analyzeDocument(document)
+
+  return result?.analyses.flatMap((analysis) => {
+    const position = analysis.dependency.specRange.endPosition
+
+    if (!containsPosition(range, position)) return []
+
+    return [{
+      label: inlayHintLabel(analysis),
+      paddingLeft: true,
+      position,
+      tooltip: {
+        kind: MarkupKind.Markdown,
+        value: hoverMarkdown(analysis),
+      },
+    }]
+  }) ?? []
+})
+
 connection.onDocumentLinks(async ({ textDocument }): Promise<DocumentLink[]> => {
   const document = documents.get(textDocument.uri)
 
@@ -358,12 +440,31 @@ connection.onCodeAction(async ({ range, textDocument }) => {
 
   if (!result) return []
 
-  return result.analyses.flatMap((analysis) => {
+  const selectedAnalyses = result.analyses.filter((analysis) => {
     const dependencyRange = toRange(analysis.dependency.specRange)
     const outsideSelection = range.end.line < dependencyRange.start.line || range.start.line > dependencyRange.end.line
 
-    if (outsideSelection) return []
+    return !outsideSelection
+  })
 
+  const bulkActions = selectedAnalyses.length === 0
+    ? []
+    : ([
+        ['compatible', 'Update all compatible dependencies'],
+        ['latest', 'Update all dependencies to latest'],
+      ] as const).flatMap(([strategy, title]) => {
+        const update = bulkWorkspaceEdit(document.uri, result, strategy)
+
+        if (!update) return []
+
+        return [{
+          edit: update.edit,
+          kind: CodeActionKind.QuickFix,
+          title: `Dep Beacon: ${title} (${update.count})`,
+        }]
+      })
+
+  const dependencyActions = selectedAnalyses.flatMap((analysis) => {
     const catalog = catalogLocation(analysis, result.catalogLocations)
     const editableDependency = catalog?.dependency ?? analysis.dependency
     const editableUri = catalog?.uri ?? document.uri
@@ -386,6 +487,8 @@ connection.onCodeAction(async ({ range, textDocument }) => {
       }
     })
   })
+
+  return [...bulkActions, ...dependencyActions]
 })
 
 documents.onDidOpen(async ({ document }) => refreshDocument(document))

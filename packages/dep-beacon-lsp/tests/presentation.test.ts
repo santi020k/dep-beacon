@@ -2,7 +2,15 @@ import type { DependencyAnalysis } from '@santi020k/dep-beacon-core'
 
 import { describe, expect, test } from 'vitest'
 
-import { diagnosticSeverity, hoverMarkdown, statusTitle, updateTargets } from '../src/presentation.js'
+import {
+  bulkUpdateSpec,
+  diagnosticMessage,
+  diagnosticSeverity,
+  hoverMarkdown,
+  inlayHintLabel,
+  statusTitle,
+  updateTargets,
+} from '../src/presentation.js'
 
 const analysis = (overrides: Partial<DependencyAnalysis> = {}): DependencyAnalysis => ({
   dependency: {
@@ -30,7 +38,7 @@ describe('diagnosticSeverity', () => {
   test.each([
     ['invalid', 'error'],
     ['missing', 'error'],
-    ['outdated', 'information'],
+    ['outdated', 'warning'],
     ['protocol', undefined],
     ['up-to-date', undefined],
   ] as const)('maps %s to %s', (status, expected) => {
@@ -40,6 +48,27 @@ describe('diagnosticSeverity', () => {
   test('uses vulnerability risk for severity', () => {
     expect(diagnosticSeverity(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: ['A'], severity: 'high', source: 'osv' } }))).toBe('error')
     expect(diagnosticSeverity(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: ['B'], severity: 'low', source: 'osv' } }))).toBe('warning')
+  })
+})
+
+describe('bulkUpdateSpec', () => {
+  test('selects the highest compatible target without crossing a major', () => {
+    expect(bulkUpdateSpec(analysis(), '^18.0.0', 'compatible')).toBe('^18.4.0')
+  })
+
+  test('selects latest when major updates are allowed', () => {
+    expect(bulkUpdateSpec(analysis(), '~18.0.0', 'latest')).toBe('~19.1.0')
+  })
+
+  test('supports resolved catalog specs', () => {
+    const catalogAnalysis = analysis({ dependency: { ...analysis().dependency, spec: 'catalog:' } })
+
+    expect(bulkUpdateSpec(catalogAnalysis, '^18.0.0', 'compatible')).toBe('^18.4.0')
+  })
+
+  test('skips dependencies without actionable targets', () => {
+    expect(bulkUpdateSpec(analysis({ status: 'up-to-date' }), '^19.1.0', 'latest')).toBeUndefined()
+    expect(bulkUpdateSpec(analysis({ targets: { current: '18.3.1' } }), '^18.3.1', 'compatible')).toBeUndefined()
   })
 })
 
@@ -57,6 +86,37 @@ describe('statusTitle', () => {
     expect(statusTitle(analysis({ status: 'up-to-date', targets: {} }))).toBe('✓ up to date')
     expect(statusTitle(analysis({ status: 'outdated', targets: {} }))).toBe('↑ update available')
     expect(statusTitle(analysis({ status: 'vulnerable', targets: {} }))).toBe('⚠ known risk')
+  })
+})
+
+describe('inlayHintLabel', () => {
+  test('keeps every dependency state compact and scannable', () => {
+    expect(inlayHintLabel(analysis())).toBe('↑ 18.3.1 → 19.1.0')
+    expect(inlayHintLabel(analysis({ status: 'up-to-date', targets: { current: '19.1.0', latest: '19.1.0' } }))).toBe('✓ 19.1.0')
+    expect(inlayHintLabel(analysis({
+      status: 'vulnerable',
+      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
+    }))).toBe('⚠ high risk · 18.3.1 → 19.1.0')
+    expect(inlayHintLabel(analysis({ status: 'missing', targets: {} }))).toBe('✕ missing')
+    expect(inlayHintLabel(analysis({ status: 'invalid', targets: {} }))).toBe('✕ invalid')
+    expect(inlayHintLabel(analysis({ status: 'protocol', targets: {} }))).toBe('◆ managed')
+  })
+})
+
+describe('diagnosticMessage', () => {
+  test('formats updates for the project diagnostics dashboard', () => {
+    expect(diagnosticMessage(analysis())).toBe('Update available: react 18.3.1 → 19.1.0.')
+  })
+
+  test('puts security severity, package, advisory, and target first', () => {
+    expect(diagnosticMessage(analysis({
+      status: 'vulnerable',
+      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
+    }))).toBe('Security · HIGH: react@18.3.1 · GHSA-demo. Update target: 19.1.0.')
+  })
+
+  test('prefixes invalid and missing details with the package name', () => {
+    expect(diagnosticMessage(analysis({ message: 'The version is invalid.', status: 'invalid' }))).toBe('react: The version is invalid.')
   })
 })
 

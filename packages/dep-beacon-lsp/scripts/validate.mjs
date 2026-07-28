@@ -17,6 +17,20 @@ for (const path of ['LICENSE', 'README.md', 'dist/server.cjs']) {
   if (!existsSync(resolve(packageRoot, path))) throw new Error(`Missing required language server file: ${path}`)
 }
 
+const bundledServer = readFileSync(resolve(packageRoot, 'dist/server.cjs'), 'utf8')
+
+const requiredServerFeatures = [
+  ['code actions', 'codeActionProvider: true'],
+  ['Dep Beacon hover', 'hoverProvider: true'],
+  ['inline dependency status', 'inlayHintProvider: true'],
+  ['bulk dependency updates', 'Update all compatible dependencies'],
+  ['pnpm catalog updates', 'in pnpm catalog'],
+]
+
+for (const [feature, marker] of requiredServerFeatures) {
+  if (!bundledServer.includes(marker)) throw new Error(`Bundled language server is missing ${feature}.`)
+}
+
 for (const path of ['Cargo.toml', 'LICENSE', 'README.md', 'extension.toml', 'src/lib.rs']) {
   if (!existsSync(resolve(extensionRoot, path))) throw new Error(`Missing required Zed extension file: ${path}`)
 }
