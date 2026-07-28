@@ -28,6 +28,9 @@ import { SITE } from '../../site.config'
   </ol>
 
   <h2>From Zed</h2>
+  <p>
+    The zero-configuration workflow requires Dep Beacon `0.0.3` or newer.
+  </p>
   <ol>
     <li>Open the command palette.</li>
     <li>Run `zed: extensions`.</li>
@@ -35,12 +38,15 @@ import { SITE } from '../../site.config'
     <li>Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.</li>
   </ol>
   <p>
+    If that manifest was already open during installation or an update, run `editor: restart language server` once.
+  </p>
+  <p>
     See the <Link href="/docs/zed-extension">Zed extension guide</Link> for supported actions, settings, and editor-specific limitations.
   </p>
 
   <h2>What happens next</h2>
   <p>
-    Dep Beacon activates automatically for JSON, JSONC, and YAML dependency files. Both editors show diagnostics and CodeLens actions for supported dependency entries; VS Code also provides inline status labels.
+    Dep Beacon activates automatically for JSON, JSONC, and YAML dependency files. Both editors show dependency diagnostics and update actions. VS Code also provides inline decorations; Zed uses its diagnostics multi-buffer and code-action menu without requiring settings.
   </p>
 
   <h2>Useful first VS Code settings</h2>

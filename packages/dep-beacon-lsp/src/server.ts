@@ -447,9 +447,16 @@ connection.onCodeAction(async ({ range, textDocument }) => {
     return !outsideSelection
   })
 
-  const bulkActions = selectedAnalyses.length === 0
-    ? []
-    : ([
+  const selectedDependencyHasUpdate = selectedAnalyses.some((analysis) => {
+    const catalog = catalogLocation(analysis, result.catalogLocations)
+    const editableSpec = catalog?.dependency.spec ?? analysis.dependency.spec
+
+    return bulkUpdateSpec(analysis, editableSpec, 'compatible') !== undefined
+      || bulkUpdateSpec(analysis, editableSpec, 'latest') !== undefined
+  })
+
+  const bulkActions = selectedDependencyHasUpdate
+    ? ([
         ['compatible', 'Update all compatible dependencies'],
         ['latest', 'Update all dependencies to latest'],
       ] as const).flatMap(([strategy, title]) => {
@@ -463,6 +470,7 @@ connection.onCodeAction(async ({ range, textDocument }) => {
           title: `Dep Beacon: ${title} (${update.count})`,
         }]
       })
+    : []
 
   const dependencyActions = selectedAnalyses.flatMap((analysis) => {
     const catalog = catalogLocation(analysis, result.catalogLocations)

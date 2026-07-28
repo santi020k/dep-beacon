@@ -2,6 +2,8 @@
 
 `@santi020k/dep-beacon-lsp` provides dependency intelligence over the Language Server Protocol. It powers the Dep Beacon extension for Zed and reuses `@santi020k/dep-beacon-core` for manifest analysis, npm metadata, pnpm workspace catalogs, and OSV vulnerability checks.
 
+Dep Beacon for Zed `0.0.3` requires language server `0.0.3` or newer. The Zed adapter installs it automatically unless a `dep-beacon-lsp` executable already exists on `PATH`.
+
 ## Features
 
 - `package.json`, `pnpm-workspace.yaml`, and `pnpm-workspace.yml` support.
@@ -22,6 +24,16 @@ dep-beacon-lsp --stdio
 ```
 
 Zed users do not need to install this package manually. The Zed adapter installs it through Zed's managed npm APIs when no `dep-beacon-lsp` executable is available on `PATH`.
+
+In Zed, the server publishes default-visible diagnostics for dependency updates, invalid ranges, missing packages, and OSV findings. It also provides:
+
+- hover details for range resolution, npm tags, targets, and security findings;
+- per-dependency patch, minor, major, and latest edits;
+- manifest-wide compatible and latest edits;
+- catalog-aware workspace edits that update `pnpm-workspace.yaml`;
+- optional compact inlay hints.
+
+No action is returned when the selected dependency already has the correct manifest range. This includes packages whose range accepts a version published under `next` while npm's `latest` tag is older.
 
 ## Development
 

@@ -9,11 +9,12 @@ words:
   - CodeLens
   - codicon
   - cdylib
-  - commitizen
   - commitlint
   - Consolas
+  - czg
   - dep
   - depbeacon
+  - domexception
   - esbuild
   - expressjs
   - GHSA
@@ -31,6 +32,7 @@ words:
   - OVSX_PAT
   - packument
   - pathlib
+  - prebuild
   - prerelease
   - rollup
   - rstrip
@@ -45,6 +47,7 @@ words:
   - vsce
   - VSIX
   - wasip
+  - whatwg
   - workerd
   - workspaces
   - worktree

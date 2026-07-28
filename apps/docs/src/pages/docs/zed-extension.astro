@@ -22,6 +22,11 @@ const settingsExample = `{
     Dep Beacon brings npm dependency intelligence to Zed through the Language Server Protocol. Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` to see dependency signals in your editor.
   </p>
 
+  <Callout class="docs-callout">
+    <strong>Required version:</strong>
+    <span>Use Dep Beacon for Zed `0.0.3` or newer. Version `0.0.3` is the first release with the zero-configuration diagnostics workflow and bulk update actions described below.</span>
+  </Callout>
+
   <h2>Install</h2>
   <ol>
     <li>Open the command palette in Zed.</li>
@@ -29,6 +34,9 @@ const settingsExample = `{
     <li>Search for `Dep Beacon` and select Install.</li>
     <li>Open a supported manifest.</li>
   </ol>
+  <p>
+    If the manifest was already open during installation or an extension update, focus it and run `editor: restart language server` once. Closing and reopening the manifest works too.
+  </p>
 
   <h2>Features</h2>
   <ul>
@@ -46,8 +54,24 @@ const settingsExample = `{
   <p>
     Open a supported manifest and Dep Beacon starts automatically. Click the error and warning indicator in Zed's status bar or run `diagnostics: deploy` (`cmd-shift-m` on macOS or `ctrl-shift-m` on Linux and Windows) to see actionable dependencies from your open manifests in one editable multi-buffer.
   </p>
+
+  <h2>Update dependencies</h2>
   <p>
-    Place the cursor on a dependency and open code actions with `cmd-.` or `ctrl-.`. Alongside individual update targets, Dep Beacon offers bulk actions for compatible updates and latest versions.
+    Place the cursor on an actionable dependency and open code actions with `cmd-.` or `ctrl-.`.
+  </p>
+  <ul>
+    <li>Patch, minor, major, and latest actions update only the selected dependency.</li>
+    <li>`Update all compatible dependencies` applies the highest available patch or minor targets without crossing a major version.</li>
+    <li>`Update all dependencies to latest` may include breaking major-version updates.</li>
+    <li>Bulk actions appear only when the selected dependency has an applicable manifest edit.</li>
+  </ul>
+  <p>
+    For a `catalog:` or named `catalog:&lt;name&gt;` dependency in `package.json`, the action edits its owning entry in `pnpm-workspace.yaml`.
+  </p>
+
+  <h2>Understand npm tags</h2>
+  <p>
+    npm can publish a version under another tag such as `next` while its `latest` tag still points to an older version. If the existing semver range already accepts that newer version, Dep Beacon explains the range and tag difference without offering a no-op edit or downgrade.
   </p>
 
   <h2>Optional inline status</h2>
@@ -62,7 +86,7 @@ const settingsExample = `{
 }`}</code></pre>
   <h2>Settings</h2>
   <p>
-    Configure the language server under `lsp.dep-beacon.settings` in your Zed settings file.
+    Settings are optional. To override the defaults, configure the language server under `lsp.dep-beacon.settings` in your Zed settings file.
   </p>
   <pre><code>{settingsExample}</code></pre>
   <ul>
@@ -73,7 +97,7 @@ const settingsExample = `{
 
   <Callout class="docs-callout">
     <strong>Editor differences:</strong>
-    <span>Zed does not currently expose APIs equivalent to VS Code inline decorations or install-on-save, so those features remain VS Code-only.</span>
+    <span>Zed does not currently expose custom extension panels or APIs equivalent to VS Code inline decorations. Dep Beacon therefore uses Zed's native diagnostics multi-buffer, hover, and code-action surfaces.</span>
   </Callout>
 
   <h2>Source</h2>

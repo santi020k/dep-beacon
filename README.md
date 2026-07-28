@@ -6,7 +6,7 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 
 - `@santi020k/dep-beacon-core` analyzes package manifests, npm registry metadata, semver ranges, and OSV advisories.
 - `vscode-dep-beacon` adds CodeLens, inline status decorations, diagnostics, update commands, sorting, cache control, and install-on-save workflows to VS Code.
-- `@santi020k/dep-beacon-lsp` provides the language server that powers status CodeLens, diagnostics, npm links, and update quick fixes in Zed.
+- `@santi020k/dep-beacon-lsp` provides the language server that powers dependency diagnostics, hovers, npm links, and individual or bulk update actions in Zed.
 - `extensions/zed-dep-beacon` contains the thin Rust/WASM adapter distributed through the Zed extension registry.
 - `@santi020k/dep-beacon-docs` is the Astro documentation site.
 
@@ -19,6 +19,18 @@ pnpm run typecheck
 pnpm run test
 pnpm run lint
 ```
+
+## Use in Zed
+
+The zero-configuration Zed workflow requires Dep Beacon `0.0.3` or newer. Install the extension, then open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.
+
+- Outdated dependencies appear as warnings.
+- Security findings appear as warnings or errors based on severity.
+- Click Zed's error and warning indicator or run `diagnostics: deploy` to review actionable dependencies from open manifests.
+- Place the cursor on an actionable dependency and use `cmd-.` on macOS or `ctrl-.` on Linux and Windows for patch, minor, major, latest, or bulk updates.
+- Hover a dependency for its resolved range, npm `latest` tag, available targets, and vulnerability details.
+
+No Zed settings are required. Optional inlay hints can add compact status beside every dependency. See the [Zed extension guide](https://beacon.santi020k.com/docs/zed-extension) for the complete workflow and pnpm catalog behavior.
 
 To package the extension locally:
 

@@ -75,7 +75,7 @@ describe('bulkUpdateSpec', () => {
 describe('statusTitle', () => {
   test('formats every dependency state', () => {
     expect(statusTitle(analysis())).toBe('↑ 18.3.1 → 19.1.0')
-    expect(statusTitle(analysis({ status: 'up-to-date' }))).toBe('✓ 18.3.1 → 19.1.0')
+    expect(statusTitle(analysis({ isLatestSatisfied: true, status: 'up-to-date' }))).toBe('✓ 18.3.1')
     expect(statusTitle(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: [], severity: 'medium', source: 'osv' } }))).toContain('medium risk')
     expect(statusTitle(analysis({ status: 'missing', targets: {} }))).toContain('missing')
     expect(statusTitle(analysis({ status: 'invalid', targets: {} }))).toContain('invalid')
@@ -92,7 +92,8 @@ describe('statusTitle', () => {
 describe('inlayHintLabel', () => {
   test('keeps every dependency state compact and scannable', () => {
     expect(inlayHintLabel(analysis())).toBe('↑ 18.3.1 → 19.1.0')
-    expect(inlayHintLabel(analysis({ status: 'up-to-date', targets: { current: '19.1.0', latest: '19.1.0' } }))).toBe('✓ 19.1.0')
+    expect(inlayHintLabel(analysis({ isLatestSatisfied: true, status: 'up-to-date', targets: { current: '19.1.0', latest: '19.1.0' } }))).toBe('✓ 19.1.0')
+    expect(inlayHintLabel(analysis({ isLatestSatisfied: true, status: 'up-to-date' }))).toBe('✓ 18.3.1')
     expect(inlayHintLabel(analysis({
       status: 'vulnerable',
       vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
@@ -128,11 +129,22 @@ describe('hoverMarkdown', () => {
     }))
 
     expect(markdown).toContain('Dep Beacon — Update available')
-    expect(markdown).toContain('Current: `18.3.1` · Latest: `19.1.0`')
+    expect(markdown).toContain('Range resolves: `18.3.1` · Latest: `19.1.0`')
     expect(markdown).toContain('- Patch: `18.3.2`')
     expect(markdown).toContain('- Minor: `18.4.0`')
     expect(markdown).toContain('- Major: `19.1.0`')
     expect(markdown).toContain('code actions')
+  })
+
+  test('explains when a range resolves beyond the npm latest tag without suggesting a downgrade', () => {
+    const markdown = hoverMarkdown(analysis({
+      isLatestSatisfied: true,
+      status: 'up-to-date',
+      targets: { current: '1.0.13', latest: '1.0.12' },
+    }))
+
+    expect(markdown).toContain('Range resolves up to `1.0.13` · npm `latest` tag: `1.0.12`')
+    expect(markdown).not.toContain('Available targets')
   })
 
   test('includes vulnerability details', () => {

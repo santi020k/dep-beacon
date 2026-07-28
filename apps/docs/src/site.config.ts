@@ -3,7 +3,7 @@ import { normalizeSiteUrl } from './site-url'
 const siteUrl = normalizeSiteUrl(import.meta.env.DEP_BEACON_DOCS_URL)
 
 export const SITE = {
-  description: 'Dependency version CodeLens, pnpm workspace catalogs, update actions, and OSV security signals for npm projects in VS Code and Zed.',
+  description: 'Dependency diagnostics, pnpm workspace catalogs, update actions, and OSV security signals for npm projects in VS Code and Zed.',
   docsUrl: `${siteUrl}/docs`,
   githubUrl: 'https://github.com/santi020k/dep-beacon',
   keywords: [

@@ -13,6 +13,8 @@ const versionTransition = (analysis: DependencyAnalysis): string | undefined => 
   const current = analysis.targets.current
   const latest = analysis.targets.latest
 
+  if (analysis.isLatestSatisfied) return current ?? latest
+
   if (current && latest && current !== latest) return `${current} → ${latest}`
 
   return latest ?? current
@@ -140,6 +142,21 @@ export const bulkUpdateSpec = (
   return targetSpec === editableSpec.trim() ? undefined : targetSpec
 }
 
+const hoverVersionLine = (analysis: DependencyAnalysis): string | undefined => {
+  const current = analysis.targets.current
+  const latest = analysis.targets.latest
+
+  if (analysis.isLatestSatisfied && current && latest && current !== latest) {
+    return `Range resolves up to \`${current}\` · npm \`latest\` tag: \`${latest}\``
+  }
+
+  if (current || latest) {
+    return `Range resolves: \`${current ?? 'unknown'}\` · Latest: \`${latest ?? 'unknown'}\``
+  }
+
+  return undefined
+}
+
 export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
   const versions: [string, string][] = []
 
@@ -161,9 +178,9 @@ export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
     `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`,
   ]
 
-  if (analysis.targets.current || analysis.targets.latest) {
-    lines.push('', `Current: \`${analysis.targets.current ?? 'unknown'}\` · Latest: \`${analysis.targets.latest ?? 'unknown'}\``)
-  }
+  const versionLine = hoverVersionLine(analysis)
+
+  if (versionLine) lines.push('', versionLine)
 
   if (versions.length > 0 && !analysis.isLatestSatisfied) {
     lines.push('', '**Available targets**', '')

@@ -32,7 +32,7 @@
     "prepare": "husky",
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run check:astro && pnpm run typecheck && pnpm run test && pnpm run lint",
-    "commit": "cz"
+    "commit": "czg"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
@@ -41,9 +41,8 @@
     "@commitlint/config-conventional": "catalog:",
     "@santi020k/eslint-config-basic": "catalog:",
     "@types/node": "catalog:",
-    "commitizen": "catalog:",
     "cspell": "catalog:",
-    "cz-conventional-changelog": "catalog:",
+    "czg": "catalog:",
     "eslint": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
@@ -62,11 +61,6 @@
     "*.{json,jsonc,md,yml,yaml}": [
       "eslint --fix --no-warn-ignored"
     ]
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   },
   "engines": {
     "node": "^20.19.0 || >=22.13.0"
