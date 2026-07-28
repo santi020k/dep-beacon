@@ -1,4 +1,4 @@
-import { createTargetSpec, type DependencyAnalysis, isHighRiskSeverity } from '@santi020k/dep-beacon-core'
+import { createTargetSpec, type DependencyAnalysis, type DependencyEntry, isHighRiskSeverity } from '@santi020k/dep-beacon-core'
 
 export type BeaconDiagnosticSeverity = 'error' | 'information' | 'warning'
 export type BulkUpdateStrategy = 'compatible' | 'latest'
@@ -123,6 +123,9 @@ const DIAGNOSTIC_MESSAGES: Record<DependencyAnalysis['status'], DiagnosticMessag
 
 export const diagnosticMessage = (analysis: DependencyAnalysis): string =>
   DIAGNOSTIC_MESSAGES[analysis.status](analysis)
+
+export const editSpec = (dependency: DependencyEntry, targetSpec: string): string =>
+  dependency.source === 'package-json' ? JSON.stringify(targetSpec) : targetSpec
 
 export const bulkUpdateSpec = (
   analysis: DependencyAnalysis,

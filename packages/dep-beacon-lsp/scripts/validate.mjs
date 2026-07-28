@@ -6,11 +6,13 @@ const extensionRoot = resolve(packageRoot, '../../extensions/zed-dep-beacon')
 const packageJson = JSON.parse(readFileSync(resolve(packageRoot, 'package.json'), 'utf8'))
 const manifest = readFileSync(resolve(extensionRoot, 'extension.toml'), 'utf8')
 const cargo = readFileSync(resolve(extensionRoot, 'Cargo.toml'), 'utf8')
+const cargoLock = readFileSync(resolve(extensionRoot, 'Cargo.lock'), 'utf8')
 const manifestVersion = /^version = "([^"]+)"$/m.exec(manifest)?.[1]
 const cargoVersion = /^version = "([^"]+)"$/m.exec(cargo)?.[1]
+const cargoLockVersion = /\[\[package\]\]\nname = "dep-beacon-zed"\nversion = "([^"]+)"\n/.exec(cargoLock)?.[1]
 
-if (manifestVersion !== packageJson.version || cargoVersion !== packageJson.version) {
-  throw new Error(`Version mismatch: package=${packageJson.version}, extension=${manifestVersion}, cargo=${cargoVersion}.`)
+if (manifestVersion !== packageJson.version || cargoVersion !== packageJson.version || cargoLockVersion !== packageJson.version) {
+  throw new Error(`Version mismatch: package=${packageJson.version}, extension=${manifestVersion}, cargo=${cargoVersion}, lock=${cargoLockVersion}.`)
 }
 
 for (const path of ['LICENSE', 'README.md', 'dist/server.cjs']) {

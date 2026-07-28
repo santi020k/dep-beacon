@@ -337,19 +337,31 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, this),
       vscode.languages.registerHoverProvider(DOCUMENT_SELECTOR, this),
       vscode.workspace.onDidChangeTextDocument((event) => {
-        if (isWorkspaceManifestDocument(event.document)) this.clearCatalogData()
+        if (isWorkspaceManifestDocument(event.document)) {
+          this.clearCatalogData()
+
+          this.refreshVisibleEditors(false, 'pnpm catalog changed')
+        }
 
         this.schedule(event.document, false, 'document changed')
       }),
       vscode.workspace.onDidOpenTextDocument((document) => {
         if (this.#catalogDiscoveryUris.has(document.uri.toString())) return
 
-        if (isWorkspaceManifestDocument(document)) this.clearCatalogData()
+        if (isWorkspaceManifestDocument(document)) {
+          this.clearCatalogData()
+
+          this.refreshVisibleEditors(false, 'pnpm catalog opened')
+        }
 
         this.schedule(document, false, 'document opened')
       }),
       vscode.workspace.onDidSaveTextDocument((document) => {
-        if (isWorkspaceManifestDocument(document)) this.clearCatalogData()
+        if (isWorkspaceManifestDocument(document)) {
+          this.clearCatalogData()
+
+          this.refreshVisibleEditors(false, 'pnpm catalog saved')
+        }
 
         this.schedule(document, true, 'document saved')
 
@@ -1028,11 +1040,15 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
   }
 
   clearCatalogData(): void {
+    this.#cache.clear()
+
     this.#catalogCache = undefined
 
     this.#catalogLoad = undefined
 
     this.#catalogGeneration += 1
+
+    this.#onDidChangeCodeLenses.fire()
   }
 
   async openCatalogDocument(uri: vscode.Uri): Promise<vscode.TextDocument> {

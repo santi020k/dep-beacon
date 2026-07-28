@@ -14,6 +14,7 @@ interface Props {
   image?: string
   imageAlt?: string
   keywords?: readonly string[] | string
+  noindex?: boolean
   title?: string
 }
 
@@ -22,6 +23,7 @@ const {
   image = SITE.ogImage,
   imageAlt = `${SITE.name} social preview`,
   keywords = SITE.keywords,
+  noindex = false,
   title = SITE.name,
 } = Astro.props
 
@@ -69,7 +71,7 @@ const structuredData = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="keywords" content={keywordContent} />
-    <meta name="robots" content="index,follow" />
+    <meta name="robots" content={noindex ? 'noindex,follow' : 'index,follow'} />
     <meta name="theme-color" content="#0b1115" />
     <script is:inline>
       (() => {
@@ -99,7 +101,7 @@ const structuredData = [
       })()
     </script>
     <title>{pageTitle}</title>
-    <link rel="canonical" href={canonicalUrl} />
+    {!noindex && <link rel="canonical" href={canonicalUrl} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:type" content="website" />
@@ -117,7 +119,7 @@ const structuredData = [
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:image:alt" content={imageAlt} />
     <ClientRouter />
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    {!noindex && <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
   </head>
   <body>
     <UIPrimitives />

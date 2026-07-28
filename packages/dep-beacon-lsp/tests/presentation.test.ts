@@ -6,6 +6,7 @@ import {
   bulkUpdateSpec,
   diagnosticMessage,
   diagnosticSeverity,
+  editSpec,
   hoverMarkdown,
   inlayHintLabel,
   statusTitle,
@@ -48,6 +49,16 @@ describe('diagnosticSeverity', () => {
   test('uses vulnerability risk for severity', () => {
     expect(diagnosticSeverity(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: ['A'], severity: 'high', source: 'osv' } }))).toBe('error')
     expect(diagnosticSeverity(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: ['B'], severity: 'low', source: 'osv' } }))).toBe('warning')
+  })
+})
+
+describe('editSpec', () => {
+  test('keeps package.json replacements valid JSON strings', () => {
+    expect(editSpec(analysis().dependency, '^19.1.0')).toBe('"^19.1.0"')
+  })
+
+  test('keeps pnpm workspace replacements as YAML scalars', () => {
+    expect(editSpec({ ...analysis().dependency, source: 'pnpm-workspace' }, '^19.1.0')).toBe('^19.1.0')
   })
 })
 

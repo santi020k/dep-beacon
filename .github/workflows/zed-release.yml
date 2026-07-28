@@ -1,13 +1,10 @@
 name: Publish Zed Extension
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "packages/dep-beacon-lsp/**"
-      - "extensions/zed-dep-beacon/**"
-      - ".github/workflows/zed-release.yml"
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+    branches: [main]
   workflow_dispatch: {}
 
 concurrency:
@@ -16,6 +13,7 @@ concurrency:
 
 jobs:
   publish-zed-extension:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     name: Open Zed extensions registry PR
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -24,12 +22,15 @@ jobs:
       url: https://zed.dev/extensions
     permissions:
       contents: read
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ env.SOURCE_SHA }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -60,10 +61,31 @@ jobs:
             echo "package.json version ($version) does not match extension.toml version ($manifest_version)."
             exit 1
           fi
+          previous_version="$(git show "${SOURCE_SHA}^:packages/dep-beacon-lsp/package.json" 2>/dev/null | node -e "let input=''; process.stdin.on('data', chunk => input += chunk); process.stdin.on('end', () => console.log(JSON.parse(input).version))" 2>/dev/null || true)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$version" != "$previous_version" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Language server version is unchanged; skipping Zed registry publication."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify matching language server is published
+        id: npm-version
+        if: steps.zed-version.outputs.version != '0.0.0' && steps.zed-version.outputs.changed == 'true'
+        run: |
+          published_version="$(npm view "@santi020k/dep-beacon-lsp@${ZED_VERSION}" version 2>/dev/null || true)"
+          if [ "$published_version" != "$ZED_VERSION" ]; then
+            echo "Matching language server ${ZED_VERSION} is not available on npm; skipping Zed registry publication."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+        env:
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
 
       - name: Validate Zed publishing configuration
-        if: steps.zed-version.outputs.version != '0.0.0'
+        if: steps.npm-version.outputs.available == 'true'
         run: |
           if [ -z "${ZED_EXTENSIONS_TOKEN}" ]; then
             echo 'ZED_EXTENSIONS_TOKEN is required to push to your fork and open the registry PR.'
@@ -78,7 +100,7 @@ jobs:
           ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
 
       - name: Check out Zed extensions fork
-        if: steps.zed-version.outputs.version != '0.0.0'
+        if: steps.npm-version.outputs.available == 'true'
         run: |
           git clone "https://x-access-token:${ZED_EXTENSIONS_TOKEN}@github.com/${ZED_EXTENSIONS_FORK}.git" zed-extensions
           cd zed-extensions
@@ -91,7 +113,8 @@ jobs:
           ZED_VERSION: ${{ steps.zed-version.outputs.version }}
 
       - name: Update registry entry
-        if: steps.zed-version.outputs.version != '0.0.0'
+        id: registry-update
+        if: steps.npm-version.outputs.available == 'true'
         working-directory: zed-extensions
         run: |
           git config user.name "github-actions[bot]"
@@ -101,8 +124,8 @@ jobs:
             git submodule add https://github.com/santi020k/dep-beacon extensions/dep-beacon
           fi
 
-          git -C extensions/dep-beacon fetch origin "${GITHUB_SHA}"
-          git -C extensions/dep-beacon checkout "${GITHUB_SHA}"
+          git -C extensions/dep-beacon fetch origin "${SOURCE_SHA}"
+          git -C extensions/dep-beacon checkout "${SOURCE_SHA}"
 
           python - <<'PY'
           from pathlib import Path
@@ -133,23 +156,30 @@ jobs:
           git add .gitmodules extensions.toml extensions/dep-beacon
           if git diff --cached --quiet; then
             echo 'Zed registry entry is already up to date.'
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "dep-beacon ${ZED_VERSION}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
           git push --force-with-lease origin "dep-beacon-${ZED_VERSION}"
         env:
           ZED_VERSION: ${{ steps.zed-version.outputs.version }}
 
       - name: Open Zed registry pull request
-        if: steps.zed-version.outputs.version != '0.0.0'
+        if: steps.registry-update.outputs.changed == 'true'
         working-directory: zed-extensions
         run: |
+          existing_pr="$(gh pr list --repo zed-industries/extensions --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" --state open --json number --jq '.[0].number')"
+          if [ -n "$existing_pr" ]; then
+            echo "Zed registry pull request #${existing_pr} already exists."
+            exit 0
+          fi
           gh pr create \
             --repo zed-industries/extensions \
             --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
             --base main \
             --title "Add dep-beacon ${ZED_VERSION}" \
-            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${GITHUB_SHA}/extensions/zed-dep-beacon"
+            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/zed-dep-beacon"
         env:
           GH_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
           ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}

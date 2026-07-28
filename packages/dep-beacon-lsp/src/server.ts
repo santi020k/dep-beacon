@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import {
@@ -38,6 +38,7 @@ import {
   type BulkUpdateStrategy,
   diagnosticMessage,
   diagnosticSeverity,
+  editSpec,
   hoverMarkdown,
   inlayHintLabel,
   statusTitle,
@@ -155,20 +156,34 @@ const analysisDiagnostic = (analysis: DependencyAnalysis): Diagnostic | undefine
   }
 }
 
-const readWorkspaceManifests = (): WorkspaceManifest[] => workspaceRoots.flatMap((root) => {
+const workspaceRootForPath = (path: string): string | undefined => workspaceRoots
+  .filter((root) => {
+    const relativePath = relative(root, path)
+
+    return relativePath === '' || (!relativePath.startsWith('..') && !relativePath.startsWith('/'))
+  })
+  .sort((left, right) => right.length - left.length)[0]
+
+const readWorkspaceManifests = (documentPath: string): WorkspaceManifest[] => {
+  const root = workspaceRootForPath(documentPath)
+
+  if (!root) return []
+
   for (const name of ['pnpm-workspace.yaml', 'pnpm-workspace.yml']) {
     const path = join(root, name)
+    const uri = pathToFileURL(path).toString()
+    const openDocument = documents.get(uri)
 
-    if (existsSync(path)) {
+    if (openDocument || existsSync(path)) {
       return [{
-        manifest: parseManifest(path, readFileSync(path, 'utf8')),
-        uri: pathToFileURL(path).toString(),
+        manifest: parseManifest(path, openDocument?.getText() ?? readFileSync(path, 'utf8')),
+        uri,
       }]
     }
   }
 
   return []
-})
+}
 
 const catalogLocation = (analysis: DependencyAnalysis, locations: readonly CatalogLocation[]): CatalogLocation | undefined => {
   const spec = analysis.dependency.spec
@@ -223,7 +238,7 @@ const bulkWorkspaceEdit = (
 
     const edits = changes[editableUri] ?? []
 
-    edits.push(TextEdit.replace(editableRange, targetSpec))
+    edits.push(TextEdit.replace(editableRange, editSpec(editableDependency, targetSpec)))
 
     changes[editableUri] = edits
 
@@ -239,7 +254,7 @@ const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis
   if (!path) return undefined
 
   const manifest = parseManifest(path, document.getText())
-  const workspaceManifests = readWorkspaceManifests()
+  const workspaceManifests = readWorkspaceManifests(path)
   const catalogs = collectCatalogSnapshot([...workspaceManifests.map(({ manifest }) => manifest), manifest])
 
   const catalogLocations = workspaceManifests.flatMap(({ manifest, uri }) => manifest.dependencies
@@ -482,7 +497,7 @@ connection.onCodeAction(async ({ range, textDocument }) => {
     return updateTargets(analysis, editableDependency.spec).map((target) => {
       const edit: WorkspaceEdit = {
         changes: {
-          [editableUri]: [TextEdit.replace(editableRange, target.spec)],
+          [editableUri]: [TextEdit.replace(editableRange, editSpec(editableDependency, target.spec))],
         },
       }
 
@@ -499,11 +514,25 @@ connection.onCodeAction(async ({ range, textDocument }) => {
   return [...bulkActions, ...dependencyActions]
 })
 
-documents.onDidOpen(async ({ document }) => refreshDocument(document))
+const refreshAffectedDocuments = async (document: TextDocument): Promise<void> => {
+  const path = manifestPath(document)
 
-documents.onDidChangeContent(async ({ document }) => refreshDocument(document))
+  if (path && basename(path).startsWith('pnpm-workspace.')) {
+    results.clear()
 
-documents.onDidSave(async ({ document }) => refreshDocument(document))
+    await refreshAllDocuments()
+
+    return
+  }
+
+  await refreshDocument(document)
+}
+
+documents.onDidOpen(async ({ document }) => refreshAffectedDocuments(document))
+
+documents.onDidChangeContent(async ({ document }) => refreshAffectedDocuments(document))
+
+documents.onDidSave(async ({ document }) => refreshAffectedDocuments(document))
 
 documents.onDidClose(async ({ document }) => {
   results.delete(document.uri)

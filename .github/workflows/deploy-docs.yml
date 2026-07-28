@@ -6,10 +6,12 @@ on:
     paths:
       - "apps/docs/**"
       - "packages/**"
+      - "scripts/generate-assets.mjs"
       - ".github/workflows/deploy-docs.yml"
   pull_request:
     paths:
       - "apps/docs/**"
+      - "scripts/generate-assets.mjs"
 
 permissions:
   contents: read
@@ -36,6 +38,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate assets
+        run: pnpm run assets
 
       - name: Build docs
         run: pnpm --filter @santi020k/dep-beacon-docs build
