@@ -69,6 +69,7 @@ describe('bulkUpdateSpec', () => {
   test('skips dependencies without actionable targets', () => {
     expect(bulkUpdateSpec(analysis({ status: 'up-to-date' }), '^19.1.0', 'latest')).toBeUndefined()
     expect(bulkUpdateSpec(analysis({ targets: { current: '18.3.1' } }), '^18.3.1', 'compatible')).toBeUndefined()
+    expect(bulkUpdateSpec(analysis({ targets: { latest: '18.3.1' } }), '^18.3.1', 'latest')).toBeUndefined()
   })
 })
 
@@ -76,6 +77,7 @@ describe('statusTitle', () => {
   test('formats every dependency state', () => {
     expect(statusTitle(analysis())).toBe('↑ 18.3.1 → 19.1.0')
     expect(statusTitle(analysis({ isLatestSatisfied: true, status: 'up-to-date' }))).toBe('✓ 18.3.1')
+    expect(statusTitle(analysis({ isLatestSatisfied: true, status: 'up-to-date', targets: { latest: '19.1.0' } }))).toBe('✓ 19.1.0')
     expect(statusTitle(analysis({ status: 'vulnerable', vulnerability: { aliases: [], ids: [], severity: 'medium', source: 'osv' } }))).toContain('medium risk')
     expect(statusTitle(analysis({ status: 'missing', targets: {} }))).toContain('missing')
     expect(statusTitle(analysis({ status: 'invalid', targets: {} }))).toContain('invalid')
@@ -116,6 +118,14 @@ describe('diagnosticMessage', () => {
     }))).toBe('Security · HIGH: react@18.3.1 · GHSA-demo. Update target: 19.1.0.')
   })
 
+  test('uses security fallbacks when advisory details are unavailable', () => {
+    expect(diagnosticMessage(analysis({
+      status: 'vulnerable',
+      targets: {},
+      vulnerability: { aliases: [], ids: [], severity: 'unknown', source: 'osv' },
+    }))).toBe('Security · UNKNOWN: react.')
+  })
+
   test('prefixes invalid and missing details with the package name', () => {
     expect(diagnosticMessage(analysis({ message: 'The version is invalid.', status: 'invalid' }))).toBe('react: The version is invalid.')
   })
@@ -152,6 +162,25 @@ describe('hoverMarkdown', () => {
       status: 'vulnerable',
       vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
     }))).toContain('high severity · GHSA-demo')
+  })
+
+  test('handles partial or unavailable registry version data', () => {
+    expect(hoverMarkdown(analysis({ targets: { latest: '19.1.0' } })))
+      .toContain('Range resolves: `unknown` · Latest: `19.1.0`')
+    expect(hoverMarkdown(analysis({ targets: { current: '18.3.1' } })))
+      .toContain('Range resolves: `18.3.1` · Latest: `unknown`')
+
+    const markdown = hoverMarkdown(analysis({ status: 'missing', targets: {} }))
+
+    expect(markdown).not.toContain('Range resolves')
+    expect(markdown).not.toContain('Available targets')
+  })
+
+  test('uses a fallback label for vulnerabilities without advisory IDs', () => {
+    expect(hoverMarkdown(analysis({
+      status: 'vulnerable',
+      vulnerability: { aliases: [], ids: [], severity: 'unknown', source: 'osv' },
+    }))).toContain('unknown severity · known vulnerability')
   })
 })
 
