@@ -45,10 +45,10 @@ jobs:
       - name: Validate Zed package
         run: |
           pnpm --filter @santi020k/dep-beacon-core build
-          pnpm --filter @santi020k/zed-dep-beacon build
-          pnpm --filter @santi020k/zed-dep-beacon typecheck
-          pnpm --filter @santi020k/zed-dep-beacon test
-          pnpm --filter @santi020k/zed-dep-beacon validate:extension
+          pnpm --filter @santi020k/dep-beacon-lsp build
+          pnpm --filter @santi020k/dep-beacon-lsp typecheck
+          pnpm --filter @santi020k/dep-beacon-lsp test
+          pnpm --filter @santi020k/dep-beacon-lsp validate:extension
 
       - name: Read Zed extension version
         id: zed-version

@@ -16,10 +16,10 @@ Zed does not currently expose APIs equivalent to VS Code inline decorations or i
 
 ```sh
 pnpm --filter @santi020k/dep-beacon-core build
-pnpm --filter @santi020k/zed-dep-beacon build
-pnpm --filter @santi020k/zed-dep-beacon typecheck
-pnpm --filter @santi020k/zed-dep-beacon test
-pnpm --filter @santi020k/zed-dep-beacon validate:extension
+pnpm --filter @santi020k/dep-beacon-lsp build
+pnpm --filter @santi020k/dep-beacon-lsp typecheck
+pnpm --filter @santi020k/dep-beacon-lsp test
+pnpm --filter @santi020k/dep-beacon-lsp validate:extension
 ```
 
 The Zed adapter is in `src/lib.rs`; the bundled Node language server is written to `dist/server.cjs`.
@@ -63,7 +63,7 @@ Configure the server under Zed's `lsp.dep-beacon.settings` key:
 
 ## Publishing
 
-The package is published to npm for the Zed adapter to download. Publishing the editor adapter itself requires a PR to `zed-industries/extensions` with this repository as a submodule and `path = "packages/zed-dep-beacon"`.
+The `@santi020k/dep-beacon-lsp` package is published to npm for the Zed adapter to download. Publishing the editor adapter itself requires a PR to `zed-industries/extensions` with this repository as a submodule and `path = "packages/zed-dep-beacon"`.
 
 The same Zed registry environment used by `santi020k-theme` can be reused:
 

@@ -1,10 +1,10 @@
 {
-  "name": "@santi020k/zed-dep-beacon",
+  "name": "@santi020k/dep-beacon-lsp",
   "version": "0.0.0",
   "publishConfig": {
     "access": "public"
   },
-  "description": "Dep Beacon language server and Zed adapter for npm dependency intelligence.",
+  "description": "Dep Beacon language server for npm dependency intelligence in Zed.",
   "type": "module",
   "files": [
     "dist",

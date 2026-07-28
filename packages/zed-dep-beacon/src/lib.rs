@@ -1,8 +1,8 @@
 use zed_extension_api::{self as zed, LanguageServerId, Result};
 
 const BINARY_NAME: &str = "dep-beacon-lsp";
-const PACKAGE_NAME: &str = "@santi020k/zed-dep-beacon";
-const SERVER_PATH: &str = "node_modules/@santi020k/zed-dep-beacon/dist/server.cjs";
+const PACKAGE_NAME: &str = "@santi020k/dep-beacon-lsp";
+const SERVER_PATH: &str = "node_modules/@santi020k/dep-beacon-lsp/dist/server.cjs";
 
 struct DepBeaconExtension;
 

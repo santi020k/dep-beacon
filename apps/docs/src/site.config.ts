@@ -25,5 +25,5 @@ export const SITE = {
   shortDescription: 'Dependency signals for npm manifests in VS Code and Zed.',
   url: siteUrl,
   vscodePackage: 'vscode-dep-beacon',
-  zedPackage: '@santi020k/zed-dep-beacon',
+  zedPackage: '@santi020k/dep-beacon-lsp',
 }
