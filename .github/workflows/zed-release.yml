@@ -117,8 +117,8 @@ jobs:
         if: steps.npm-version.outputs.available == 'true'
         working-directory: zed-extensions
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Santiago Molina"
+          git config user.email "17752391+santi020k@users.noreply.github.com"
 
           if [ ! -d extensions/dep-beacon ]; then
             git submodule add https://github.com/santi020k/dep-beacon extensions/dep-beacon
