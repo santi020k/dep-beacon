@@ -1,0 +1,155 @@
+name: Publish Zed Extension
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/zed-dep-beacon/**"
+      - ".github/workflows/zed-release.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: zed-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish-zed-extension:
+    name: Open Zed extensions registry PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: zed
+      url: https://zed.dev/extensions
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Zed package
+        run: |
+          pnpm --filter @santi020k/dep-beacon-core build
+          pnpm --filter @santi020k/zed-dep-beacon build
+          pnpm --filter @santi020k/zed-dep-beacon typecheck
+          pnpm --filter @santi020k/zed-dep-beacon test
+          pnpm --filter @santi020k/zed-dep-beacon validate:extension
+
+      - name: Read Zed extension version
+        id: zed-version
+        run: |
+          version="$(node -p "require('./packages/zed-dep-beacon/package.json').version")"
+          manifest_version="$(node -e "const fs=require('node:fs'); const toml=fs.readFileSync('packages/zed-dep-beacon/extension.toml','utf8'); console.log(toml.match(/^version = \"([^\"]+)\"$/m)[1])")"
+          if [ "$version" != "$manifest_version" ]; then
+            echo "package.json version ($version) does not match extension.toml version ($manifest_version)."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Zed publishing configuration
+        if: steps.zed-version.outputs.version != '0.0.0'
+        run: |
+          if [ -z "${ZED_EXTENSIONS_TOKEN}" ]; then
+            echo 'ZED_EXTENSIONS_TOKEN is required to push to your fork and open the registry PR.'
+            exit 1
+          fi
+          if [ -z "${ZED_EXTENSIONS_FORK}" ]; then
+            echo 'ZED_EXTENSIONS_FORK is required, for example: santi020k/extensions.'
+            exit 1
+          fi
+        env:
+          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
+          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
+
+      - name: Check out Zed extensions fork
+        if: steps.zed-version.outputs.version != '0.0.0'
+        run: |
+          git clone "https://x-access-token:${ZED_EXTENSIONS_TOKEN}@github.com/${ZED_EXTENSIONS_FORK}.git" zed-extensions
+          cd zed-extensions
+          git remote add upstream https://github.com/zed-industries/extensions.git
+          git fetch upstream main
+          git checkout -B "dep-beacon-${ZED_VERSION}" upstream/main
+        env:
+          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
+          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
+
+      - name: Update registry entry
+        if: steps.zed-version.outputs.version != '0.0.0'
+        working-directory: zed-extensions
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [ ! -d extensions/dep-beacon ]; then
+            git submodule add https://github.com/santi020k/dep-beacon extensions/dep-beacon
+          fi
+
+          git -C extensions/dep-beacon fetch origin "${GITHUB_SHA}"
+          git -C extensions/dep-beacon checkout "${GITHUB_SHA}"
+
+          python - <<'PY'
+          from pathlib import Path
+          import os
+
+          path = Path('extensions.toml')
+          text = path.read_text()
+          version = os.environ['ZED_VERSION']
+          entry = f'''[dep-beacon]\nsubmodule = "extensions/dep-beacon"\npath = "packages/zed-dep-beacon"\nversion = "{version}"\n'''
+          marker = '[dep-beacon]'
+
+          if marker in text:
+              start = text.index(marker)
+              next_start = text.find('\n[', start + 1)
+              if next_start == -1:
+                  text = text[:start].rstrip() + '\n\n' + entry
+              else:
+                  text = text[:start].rstrip() + '\n\n' + entry + '\n' + text[next_start + 1:].lstrip()
+          else:
+              text = entry + '\n' + text.lstrip()
+
+          path.write_text(text)
+          PY
+
+          pnpm install --frozen-lockfile
+          pnpm run sort-extensions
+
+          git add .gitmodules extensions.toml extensions/dep-beacon
+          if git diff --cached --quiet; then
+            echo 'Zed registry entry is already up to date.'
+            exit 0
+          fi
+          git commit -m "dep-beacon ${ZED_VERSION}"
+          git push --force-with-lease origin "dep-beacon-${ZED_VERSION}"
+        env:
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
+
+      - name: Open Zed registry pull request
+        if: steps.zed-version.outputs.version != '0.0.0'
+        working-directory: zed-extensions
+        run: |
+          gh pr create \
+            --repo zed-industries/extensions \
+            --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
+            --base main \
+            --title "Add dep-beacon ${ZED_VERSION}" \
+            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${GITHUB_SHA}/packages/zed-dep-beacon"
+        env:
+          GH_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
+          ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}

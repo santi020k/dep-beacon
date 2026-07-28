@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: {}
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
+    name: Create release PR or publish
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -46,7 +50,7 @@ jobs:
           createGithubReleases: true
         env:
           HUSKY: 0
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"

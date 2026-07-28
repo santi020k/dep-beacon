@@ -1,0 +1,66 @@
+{
+  "name": "@santi020k/zed-dep-beacon",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Dep Beacon language server and Zed adapter for npm dependency intelligence.",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "dep-beacon-lsp": "./dist/server.cjs"
+  },
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "sync:extension-version": "node scripts/sync-extension-version.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:watch": "vitest --config vitest.config.ts",
+    "lint": "eslint . --no-warn-ignored",
+    "lint:fix": "eslint . --fix --no-warn-ignored",
+    "validate:extension": "node scripts/validate.mjs",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "@santi020k/dep-beacon-core": "workspace:*",
+    "vscode-languageserver": "catalog:",
+    "vscode-languageserver-textdocument": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "esbuild": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/santi020k/dep-beacon.git",
+    "directory": "packages/zed-dep-beacon"
+  },
+  "homepage": "https://beacon.santi020k.com",
+  "bugs": {
+    "url": "https://github.com/santi020k/dep-beacon/issues"
+  },
+  "keywords": [
+    "dependencies",
+    "language-server",
+    "npm",
+    "osv",
+    "pnpm",
+    "zed"
+  ],
+  "author": {
+    "name": "Santiago Molina",
+    "url": "https://santi020k.com"
+  },
+  "license": "MIT"
+}

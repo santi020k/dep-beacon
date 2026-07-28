@@ -1,0 +1,15 @@
+[package]
+name = "dep-beacon-zed"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Santiago Molina <hi@santi020k.com>"]
+license = "MIT"
+repository = "https://github.com/santi020k/dep-beacon"
+description = "Zed adapter for the Dep Beacon language server"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.7"

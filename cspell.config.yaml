@@ -8,6 +8,7 @@ words:
   - codemod
   - CodeLens
   - codicon
+  - cdylib
   - commitizen
   - commitlint
   - Consolas
@@ -22,14 +23,18 @@ words:
   - linecap
   - linejoin
   - lates
+  - lstrip
   - npmjs
   - OpenVSX
   - osv
   - OVSX
   - OVSX_PAT
   - packument
+  - pathlib
   - prerelease
   - rollup
+  - rstrip
+  - rustup
   - semver
   - Snyk
   - unrs
@@ -41,6 +46,7 @@ words:
   - VSIX
   - workerd
   - workspaces
+  - worktree
   - santi020k
 ignorePaths:
   - node_modules

@@ -20,7 +20,7 @@ catalog:
   "@commitlint/cli": ^21.0.2
   "@commitlint/config-conventional": ^21.0.2
   "@santi020k/eslint-config-basic": ^2.1.1
-  "@santi020k/lumen-astro": ^0.2.0
+  "@santi020k/lumen-astro": ^0.3.0
   "@tailwindcss/vite": ^4.3.1
   "@types/node": ^26.0.0
   "@types/semver": ^7.7.1
@@ -45,5 +45,7 @@ catalog:
   typescript: ^6.0.3
   typescript-eslint: ^8.62.0
   vitest: ^4.1.9
+  vscode-languageserver: ^9.0.1
+  vscode-languageserver-textdocument: ^1.0.12
   wrangler: ^4.103.0
   yaml: ^2.9.0

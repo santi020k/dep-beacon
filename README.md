@@ -1,11 +1,12 @@
 # Dep Beacon
 
-Dep Beacon is a VS Code extension and dependency intelligence engine for npm projects. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
+Dep Beacon is a dependency intelligence engine for npm projects with integrations for VS Code and Zed. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
 
 ## Packages
 
 - `@santi020k/dep-beacon-core` analyzes package manifests, npm registry metadata, semver ranges, and OSV advisories.
 - `vscode-dep-beacon` adds CodeLens, inline status decorations, diagnostics, update commands, sorting, cache control, and install-on-save workflows to VS Code.
+- `@santi020k/zed-dep-beacon` provides status CodeLens, diagnostics, npm links, and update quick fixes in Zed through LSP.
 - `@santi020k/dep-beacon-docs` is the Astro documentation site.
 
 ## Quick Start
@@ -51,6 +52,9 @@ Copy `.env.example` to `.env` for local release or deploy commands. Use these na
 - `NPM_TOKEN`
 - `VSCE_PAT`
 - `OVSX_PAT`
+- `ZED_EXTENSIONS_TOKEN` for pushing a Zed registry update branch
+- `ZED_EXTENSIONS_FORK`, for example `santi020k/extensions`
+- optional `ZED_EXTENSIONS_HEAD`; defaults to the repository owner
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - optional `CLOUDFLARE_PAGES_PROJECT_NAME`

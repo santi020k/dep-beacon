@@ -23,6 +23,10 @@ const config = await defineConfig({
       preset: Preset.Library,
       runtime: Runtime.Node,
     },
+    'packages/zed-dep-beacon': {
+      preset: Preset.Library,
+      runtime: Runtime.Node,
+    },
   },
   testing: [Testing.Vitest],
   tools: [Tool.Pnpm, Tool.Cspell, Tool.GithubActions],
@@ -55,7 +59,7 @@ const config = await defineConfig({
   },
   ...tseslint.configs.disableTypeChecked,
 }, {
-  files: ['packages/vscode-dep-beacon/scripts/**/*.cjs'],
+  files: ['packages/{vscode-dep-beacon,zed-dep-beacon}/scripts/**/*.{cjs,mjs}'],
   name: 'local-extension-scripts',
   rules: {
     'no-console': 'off',

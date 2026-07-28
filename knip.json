@@ -41,6 +41,17 @@
         "src/**/*.ts",
         "tests/**/*.ts"
       ]
+    },
+    "packages/zed-dep-beacon": {
+      "entry": [
+        "scripts/*.{cjs,mjs}",
+        "src/server.ts"
+      ],
+      "project": [
+        "scripts/*.{cjs,mjs}",
+        "src/**/*.ts",
+        "tests/**/*.ts"
+      ]
     }
   }
 }
