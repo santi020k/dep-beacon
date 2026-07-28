@@ -242,6 +242,34 @@ importers:
         specifier: 'catalog:'
         version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-v8@4.1.9)(jsdom@25.0.1)(vite@8.0.16(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
 
+  packages/dep-beacon-lsp:
+    dependencies:
+      '@santi020k/dep-beacon-core':
+        specifier: workspace:*
+        version: link:../dep-beacon-core
+      vscode-languageserver:
+        specifier: 'catalog:'
+        version: 9.0.1
+      vscode-languageserver-textdocument:
+        specifier: 'catalog:'
+        version: 1.0.12
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.0.0
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.9(vitest@4.1.9)
+      esbuild:
+        specifier: 'catalog:'
+        version: 0.28.1
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-v8@4.1.9)(jsdom@25.0.1)(vite@8.0.16(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+
   packages/vscode-dep-beacon:
     dependencies:
       '@santi020k/dep-beacon-core':
@@ -275,34 +303,6 @@ importers:
       yaml:
         specifier: 'catalog:'
         version: 2.9.0
-
-  packages/zed-dep-beacon:
-    dependencies:
-      '@santi020k/dep-beacon-core':
-        specifier: workspace:*
-        version: link:../dep-beacon-core
-      vscode-languageserver:
-        specifier: 'catalog:'
-        version: 9.0.1
-      vscode-languageserver-textdocument:
-        specifier: 'catalog:'
-        version: 1.0.12
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.0.0
-      '@vitest/coverage-v8':
-        specifier: 'catalog:'
-        version: 4.1.9(vitest@4.1.9)
-      esbuild:
-        specifier: 'catalog:'
-        version: 0.28.1
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.9(@types/node@26.0.0)(@vitest/coverage-v8@4.1.9)(jsdom@25.0.1)(vite@8.0.16(@types/node@26.0.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
 
 packages:
 

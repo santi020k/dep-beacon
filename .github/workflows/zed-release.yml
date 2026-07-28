@@ -111,7 +111,7 @@ jobs:
           path = Path('extensions.toml')
           text = path.read_text()
           version = os.environ['ZED_VERSION']
-          entry = f'''[dep-beacon]\nsubmodule = "extensions/dep-beacon"\npath = "packages/zed-dep-beacon"\nversion = "{version}"\n'''
+          entry = f'''[dep-beacon]\nsubmodule = "extensions/dep-beacon"\npath = "extensions/zed-dep-beacon"\nversion = "{version}"\n'''
           marker = '[dep-beacon]'
 
           if marker in text:
@@ -149,7 +149,7 @@ jobs:
             --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
             --base main \
             --title "Add dep-beacon ${ZED_VERSION}" \
-            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${GITHUB_SHA}/packages/zed-dep-beacon"
+            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${GITHUB_SHA}/extensions/zed-dep-beacon"
         env:
           GH_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
           ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}

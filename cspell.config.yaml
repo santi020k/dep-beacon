@@ -44,6 +44,7 @@ words:
   - vsc
   - vsce
   - VSIX
+  - wasip
   - workerd
   - workspaces
   - worktree

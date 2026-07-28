@@ -1,18 +1,12 @@
 # Dep Beacon for Zed
 
-Dep Beacon brings npm dependency intelligence to Zed through the Language Server Protocol. It reuses `@santi020k/dep-beacon-core` and supports:
+This directory contains the thin Rust/WASM adapter that connects Zed to `@santi020k/dep-beacon-lsp`. The language server provides dependency status CodeLens, diagnostics, npm links, update quick fixes, pnpm catalog awareness, and OSV vulnerability signals.
 
-- `package.json`, `pnpm-workspace.yaml`, and `pnpm-workspace.yml` manifests.
-- Dependency status CodeLens.
-- Diagnostics for outdated, invalid, missing, and vulnerable packages.
-- Quick-fix code actions for patch, minor, major, and latest updates.
-- Links from dependency names to npm.
-- pnpm default and named catalog resolution.
-- npm registry metadata and optional OSV.dev vulnerability checks.
-
-Zed does not currently expose APIs equivalent to VS Code inline decorations or install-on-save, so those features remain specific to `vscode-dep-beacon`.
+The Node language-server source and npm package are maintained separately in [`packages/dep-beacon-lsp`](../../packages/dep-beacon-lsp).
 
 ## Development
+
+From the repository root, build and validate the language server:
 
 ```sh
 pnpm --filter @santi020k/dep-beacon-core build
@@ -22,24 +16,30 @@ pnpm --filter @santi020k/dep-beacon-lsp test
 pnpm --filter @santi020k/dep-beacon-lsp validate:extension
 ```
 
-The Zed adapter is in `src/lib.rs`; the bundled Node language server is written to `dist/server.cjs`.
+Compile the adapter directly with:
+
+```sh
+cargo check \
+  --manifest-path extensions/zed-dep-beacon/Cargo.toml \
+  --target wasm32-wasip1
+```
 
 ## Install as a development extension
 
-1. Install Rust with `rustup` (Zed requires the rustup toolchain for dev extensions).
-2. Build this package.
-3. Make `dep-beacon-lsp` available in the environment used to launch Zed, or publish this package to npm so the adapter can install it automatically.
-4. Run `zed: install dev extension` and select `packages/zed-dep-beacon`.
+1. Install Rust with `rustup` and add the `wasm32-wasip1` target.
+2. Build `@santi020k/dep-beacon-lsp`.
+3. Make `dep-beacon-lsp` available in the environment used to launch Zed.
+4. Run `zed: install dev extension` and select `extensions/zed-dep-beacon`.
 
-For local server debugging before the npm package is published, expose the built executable through a temporary bin directory and launch Zed from the same shell:
+Before the npm package is published, expose the local build on `PATH`:
 
 ```sh
 mkdir -p /tmp/dep-beacon-zed-bin
-ln -sf "$PWD/packages/zed-dep-beacon/dist/server.cjs" /tmp/dep-beacon-zed-bin/dep-beacon-lsp
+ln -sf "$PWD/packages/dep-beacon-lsp/dist/server.cjs" /tmp/dep-beacon-zed-bin/dep-beacon-lsp
 PATH="/tmp/dep-beacon-zed-bin:$PATH" zed examples/sample-workspace
 ```
 
-The adapter checks `PATH` before attempting to download the published npm package.
+The adapter checks `PATH` before attempting to download `@santi020k/dep-beacon-lsp`.
 
 ## Settings
 
@@ -63,10 +63,14 @@ Configure the server under Zed's `lsp.dep-beacon.settings` key:
 
 ## Publishing
 
-The `@santi020k/dep-beacon-lsp` package is published to npm for the Zed adapter to download. Publishing the editor adapter itself requires a PR to `zed-industries/extensions` with this repository as a submodule and `path = "packages/zed-dep-beacon"`.
+The npm language server is published as `@santi020k/dep-beacon-lsp`. The Zed registry points its Dep Beacon entry at `extensions/zed-dep-beacon` in this repository.
 
-The same Zed registry environment used by `santi020k-theme` can be reused:
+The same registry environment used by `santi020k-theme` can be reused:
 
 - Secret `ZED_EXTENSIONS_TOKEN`
 - Variable `ZED_EXTENSIONS_FORK`
 - Optional variable `ZED_EXTENSIONS_HEAD`
+
+## License
+
+MIT
