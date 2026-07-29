@@ -40,7 +40,8 @@ export const getResolutionPackageName = (key: string): string => {
 }
 
 export const getOverridePackageName = (key: string): string => {
-  const atIndex = key.indexOf('@', key.startsWith('@') ? key.indexOf('/') + 1 : 0)
+  const packageSelector = key.slice(key.lastIndexOf('>') + 1)
+  const atIndex = packageSelector.indexOf('@', packageSelector.startsWith('@') ? packageSelector.indexOf('/') + 1 : 0)
 
-  return atIndex > 0 ? key.slice(0, atIndex) : key
+  return atIndex > 0 ? packageSelector.slice(0, atIndex) : packageSelector
 }

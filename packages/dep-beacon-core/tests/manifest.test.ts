@@ -20,7 +20,8 @@ describe('manifest parsing', () => {
   },
   "pnpm": {
     "overrides": {
-      "rollup": "^5.0.0"
+      "rollup": "^5.0.0",
+      "next>sharp": "^0.35.3"
     },
     "packageExtensions": {
       "left-pad@*": {
@@ -41,6 +42,7 @@ describe('manifest parsing', () => {
       ['vite', 'overrides', '^7.0.0'],
       ['react', 'resolutions', '^19.0.0'],
       ['rollup', 'pnpm.overrides', '^5.0.0'],
+      ['sharp', 'pnpm.overrides', '^0.35.3'],
       ['debug', 'packageExtensions', '^4.4.0'],
     ])
     expect(manifest.dependencies.at(-1)?.path).toEqual(['pnpm', 'packageExtensions', 'left-pad@*', 'dependencies', 'debug'])

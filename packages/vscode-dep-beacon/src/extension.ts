@@ -243,6 +243,9 @@ const diagnosticSeverity = (analysis: DependencyAnalysis): vscode.DiagnosticSeve
     case 'outdated':
       return vscode.DiagnosticSeverity.Information
 
+    case 'unavailable':
+      return vscode.DiagnosticSeverity.Warning
+
     case 'protocol':
       return undefined
 

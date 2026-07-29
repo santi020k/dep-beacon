@@ -39,19 +39,10 @@ cargo check \
 ## Install as a development extension
 
 1. Install Rust with `rustup` and add the `wasm32-wasip1` target.
-2. Build `@santi020k/dep-beacon-lsp`.
-3. Make `dep-beacon-lsp` available in the environment used to launch Zed.
-4. Run `zed: install dev extension` and select `extensions/zed-dep-beacon`.
+2. Build and publish the corresponding `@santi020k/dep-beacon-lsp` version.
+3. Run `zed: install dev extension` and select `extensions/zed-dep-beacon`.
 
-Before the npm package is published, expose the local build on `PATH`:
-
-```sh
-mkdir -p /tmp/dep-beacon-zed-bin
-ln -sf "$PWD/packages/dep-beacon-lsp/dist/server.cjs" /tmp/dep-beacon-zed-bin/dep-beacon-lsp
-PATH="/tmp/dep-beacon-zed-bin:$PATH" zed examples/sample-workspace
-```
-
-The adapter checks `PATH` before attempting to download `@santi020k/dep-beacon-lsp`. If a global `dep-beacon-lsp` is already installed, Zed will use that binary; make sure it is also `0.0.3` or newer, or remove it so Zed can install the managed package.
+The adapter always uses Zed's managed `@santi020k/dep-beacon-lsp` installation so a stale global binary cannot override the released server. Publish the language-server package before testing or releasing an adapter that depends on new server behavior.
 
 ## Zed UI
 

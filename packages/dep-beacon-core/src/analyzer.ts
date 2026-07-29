@@ -53,7 +53,7 @@ const createEmptyRangeAnalysis = (
 })
 
 const lookupFailureStatus = (error: RegistryLookupError): DependencyStatus =>
-  error.code === 'not-found' ? 'missing' : 'invalid'
+  error.code === 'not-found' ? 'missing' : 'unavailable'
 
 const createLookupFailureAnalysis = (
   dependency: DependencyEntry,
@@ -212,6 +212,38 @@ export const analyzeDependency = async (
   })
 }
 
+const MAX_CONCURRENT_REGISTRY_LOOKUPS = 8
+
+const analyzeWithConcurrencyLimit = async (
+  dependencies: readonly DependencyEntry[],
+  options: AnalyzeManyOptions & { registryClient: NpmRegistryClient },
+): Promise<DependencyAnalysis[]> => {
+  const analyses = new Array<DependencyAnalysis>(dependencies.length)
+  let nextIndex = 0
+
+  const worker = async (): Promise<void> => {
+    while (nextIndex < dependencies.length) {
+      const index = nextIndex
+      const dependency = dependencies[index]
+
+      nextIndex += 1
+
+      if (!dependency) continue
+
+      analyses[index] = await analyzeDependency(dependency, {
+        ...options,
+        vulnerability: undefined,
+      })
+    }
+  }
+
+  const workerCount = Math.min(MAX_CONCURRENT_REGISTRY_LOOKUPS, dependencies.length)
+
+  await Promise.all(Array.from({ length: workerCount }, worker))
+
+  return analyses
+}
+
 export const analyzeDependencies = async (
   dependencies: readonly DependencyEntry[],
   options: AnalyzeManyOptions & {
@@ -221,13 +253,10 @@ export const analyzeDependencies = async (
 ): Promise<DependencyAnalysis[]> => {
   const registryClient = options.registryClient ?? new NpmRegistryClient({ registryUrl: options.registryUrl })
 
-  const baseAnalyses = await Promise.all(
-    dependencies.map((dependency) => analyzeDependency(dependency, {
-      ...options,
-      registryClient,
-      vulnerability: undefined,
-    })),
-  )
+  const baseAnalyses = await analyzeWithConcurrencyLimit(dependencies, {
+    ...options,
+    registryClient,
+  })
 
   if (!options.vulnerabilities) return baseAnalyses
 

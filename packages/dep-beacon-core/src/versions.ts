@@ -178,7 +178,9 @@ export const getDependencyStatus = (
 ): DependencyStatus => {
   if (args.vulnerability && isHighRiskSeverity(args.vulnerability.severity)) return 'vulnerable'
 
-  if (args.statusBeforeVulnerability === 'invalid' || args.statusBeforeVulnerability === 'missing') return args.statusBeforeVulnerability
+  if (args.statusBeforeVulnerability === 'invalid'
+    || args.statusBeforeVulnerability === 'missing'
+    || args.statusBeforeVulnerability === 'unavailable') return args.statusBeforeVulnerability
 
   if (args.vulnerability && hasModerateRiskSeverity(args.vulnerability.severity)) return 'vulnerable'
 

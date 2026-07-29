@@ -46,6 +46,9 @@ export const statusTone = (status: DependencyStatus): DecorationTone => {
     case 'outdated':
       return 'yellow'
 
+    case 'unavailable':
+      return 'yellow'
+
     case 'vulnerable':
       return 'orange'
 
@@ -82,6 +85,9 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
     case 'invalid':
       return '$(error) invalid range'
 
+    case 'unavailable':
+      return '$(warning) registry unavailable'
+
     case 'protocol':
       return '$(symbol-key) local or catalog-managed'
   }
@@ -110,6 +116,7 @@ const STATUS_LABELS: Record<DependencyStatus, string> = {
   missing: 'Package or version not found',
   outdated: 'Update available',
   protocol: 'Locally managed dependency',
+  unavailable: 'Registry temporarily unavailable',
   'up-to-date': 'Up to date',
   vulnerable: 'Security update recommended',
 }
@@ -172,29 +179,23 @@ export const bulkUpdateSpec = (
   return targetSpec === editableSpec.trim() ? undefined : targetSpec
 }
 
+type DecorationTextBuilder = (analysis: DependencyAnalysis, suffix: string) => string
+
+const DECORATION_TEXT_BUILDERS: Record<DependencyStatus, DecorationTextBuilder> = {
+  invalid: () => ' invalid',
+  missing: () => ' missing',
+  outdated: (_analysis, suffix) => ` update${suffix}`,
+  protocol: () => ' managed',
+  unavailable: () => ' unavailable',
+  'up-to-date': (_analysis, suffix) => ` ok${suffix}`,
+  vulnerable: (analysis, suffix) => ` ${analysis.vulnerability?.severity ?? 'known'} risk${suffix}`,
+}
+
 export const decorationText = (analysis: DependencyAnalysis): string => {
   const signal = versionSignal(analysis)
   const suffix = signal ? ` ${signal}` : ''
 
-  switch (analysis.status) {
-    case 'up-to-date':
-      return ` ok${suffix}`
-
-    case 'outdated':
-      return ` update${suffix}`
-
-    case 'vulnerable':
-      return ` ${analysis.vulnerability?.severity ?? 'known'} risk${suffix}`
-
-    case 'missing':
-      return ' missing'
-
-    case 'invalid':
-      return ' invalid'
-
-    case 'protocol':
-      return ' managed'
-  }
+  return DECORATION_TEXT_BUILDERS[analysis.status](analysis, suffix)
 }
 
 const updateActionsForSpec = (analysis: DependencyAnalysis, spec: string): UpdateAction[] => {

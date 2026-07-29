@@ -63,6 +63,7 @@ describe('presentation helpers', () => {
   test('maps status to editor decoration tones', () => {
     expect(statusTone('up-to-date')).toBe('green')
     expect(statusTone('outdated')).toBe('yellow')
+    expect(statusTone('unavailable')).toBe('yellow')
     expect(statusTone('vulnerable')).toBe('orange')
     expect(statusTone('invalid')).toBe('red')
     expect(statusTone('missing')).toBe('red')
@@ -75,10 +76,11 @@ describe('presentation helpers', () => {
     ['missing', '$(error) missing package or version', ' missing'],
     ['invalid', '$(error) invalid range', ' invalid'],
     ['protocol', '$(symbol-key) local or catalog-managed', ' managed'],
+    ['unavailable', '$(warning) registry unavailable', ' unavailable'],
   ] as const)('creates compact labels and inline text for %s', (status, title, decoration) => {
     const analysis = baseAnalysis(status)
 
-    if (status === 'missing' || status === 'invalid' || status === 'protocol') analysis.targets = {}
+    if (status === 'missing' || status === 'invalid' || status === 'protocol' || status === 'unavailable') analysis.targets = {}
 
     expect(statusTitle(analysis)).toBe(title)
     expect(decorationText(analysis)).toBe(decoration)

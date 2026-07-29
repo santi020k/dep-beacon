@@ -41,6 +41,7 @@ describe('diagnosticSeverity', () => {
     ['missing', 'error'],
     ['outdated', 'warning'],
     ['protocol', undefined],
+    ['unavailable', 'warning'],
     ['up-to-date', undefined],
   ] as const)('maps %s to %s', (status, expected) => {
     expect(diagnosticSeverity(analysis({ status }))).toBe(expected)
@@ -102,6 +103,7 @@ describe('statusTitle', () => {
     expect(statusTitle(analysis({ status: 'missing', targets: {} }))).toContain('missing')
     expect(statusTitle(analysis({ status: 'invalid', targets: {} }))).toContain('invalid')
     expect(statusTitle(analysis({ status: 'protocol', targets: {} }))).toContain('catalog-managed')
+    expect(statusTitle(analysis({ status: 'unavailable', targets: {} }))).toContain('registry unavailable')
   })
 
   test('uses fallback labels when version and vulnerability details are unavailable', () => {
@@ -123,6 +125,7 @@ describe('inlayHintLabel', () => {
     expect(inlayHintLabel(analysis({ status: 'missing', targets: {} }))).toBe('✕ missing')
     expect(inlayHintLabel(analysis({ status: 'invalid', targets: {} }))).toBe('✕ invalid')
     expect(inlayHintLabel(analysis({ status: 'protocol', targets: {} }))).toBe('◆ managed')
+    expect(inlayHintLabel(analysis({ status: 'unavailable', targets: {} }))).toBe('⚠ unavailable')
   })
 })
 

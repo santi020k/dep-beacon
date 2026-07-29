@@ -225,6 +225,7 @@ const collectPnpmOverrides = (
   collectStringMap(lineStarts, propertyValue(overridesNode), 'pnpm.overrides', entries, {
     basePath: ['pnpm', 'overrides'],
     manager: 'pnpm',
+    packageNameTransform: getOverridePackageName,
   })
 
   collectPackageExtensions(lineStarts, propertyValue(packageExtensionsNode), entries, ['pnpm', 'packageExtensions'])

@@ -94,6 +94,8 @@ describe('pnpm workspace parser edge cases', () => {
     const manifest = parsePnpmWorkspaceManifest(`
 overrides:
   react@^18: 18.3.1
+  next>sharp: ^0.35.3
+  "@scope/parent@^1>@scope/child@^2": 2.1.0
 packageExtensions:
   left-pad@*:
     optionalDependencies:
@@ -109,6 +111,8 @@ packageExtensions:
       dependency.path,
     ])).toEqual([
       ['react', 'overrides', '18.3.1', ['overrides', 'react@^18']],
+      ['sharp', 'overrides', '^0.35.3', ['overrides', 'next>sharp']],
+      ['@scope/child', 'overrides', '2.1.0', ['overrides', '@scope/parent@^1>@scope/child@^2']],
       ['debug', 'packageExtensions', '^4.4.0', ['packageExtensions', 'left-pad@*', 'optionalDependencies', 'debug']],
       ['ms', 'packageExtensions', '^2.1.0', ['packageExtensions', 'left-pad@*', 'peerDependencies', 'ms']],
     ])

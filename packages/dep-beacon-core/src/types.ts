@@ -14,7 +14,7 @@ export type DependencySection =
   | 'pnpm.overrides'
   | 'resolutions'
 
-export type DependencyStatus = 'invalid' | 'missing' | 'outdated' | 'protocol' | 'up-to-date' | 'vulnerable'
+export type DependencyStatus = 'invalid' | 'missing' | 'outdated' | 'protocol' | 'unavailable' | 'up-to-date' | 'vulnerable'
 
 export type Severity = 'critical' | 'high' | 'low' | 'medium' | 'none' | 'unknown'
 

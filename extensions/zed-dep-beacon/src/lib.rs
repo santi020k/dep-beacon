@@ -1,6 +1,5 @@
 use zed_extension_api::{self as zed, LanguageServerId, Result};
 
-const BINARY_NAME: &str = "dep-beacon-lsp";
 const PACKAGE_NAME: &str = "@santi020k/dep-beacon-lsp";
 const SERVER_PATH: &str = "node_modules/@santi020k/dep-beacon-lsp/dist/server.cjs";
 
@@ -36,16 +35,8 @@ impl zed::Extension for DepBeaconExtension {
     fn language_server_command(
         &mut self,
         language_server_id: &LanguageServerId,
-        worktree: &zed::Worktree,
+        _worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        if let Some(command) = worktree.which(BINARY_NAME) {
-            return Ok(zed::Command {
-                command,
-                args: vec!["--stdio".into()],
-                env: Vec::new(),
-            });
-        }
-
         Self::install_language_server(language_server_id)?;
 
         Ok(zed::Command {

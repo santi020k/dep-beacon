@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { basename, join, relative } from 'node:path'
+import { basename } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import {
@@ -44,6 +44,7 @@ import {
   statusTitle,
   updateTargets,
 } from './presentation.js'
+import { findWorkspaceManifestPath, workspaceRootsFromInitializeParams } from './workspace.js'
 
 declare const DEP_BEACON_VERSION: string
 
@@ -158,33 +159,22 @@ const analysisDiagnostic = (analysis: DependencyAnalysis): Diagnostic | undefine
   }
 }
 
-const workspaceRootForPath = (path: string): string | undefined => workspaceRoots
-  .filter((root) => {
-    const relativePath = relative(root, path)
-
-    return relativePath === '' || (!relativePath.startsWith('..') && !relativePath.startsWith('/'))
-  })
-  .sort((left, right) => right.length - left.length)[0]
-
 const readWorkspaceManifests = (documentPath: string): WorkspaceManifest[] => {
-  const root = workspaceRootForPath(documentPath)
+  const path = findWorkspaceManifestPath(documentPath, workspaceRoots, (candidate) => {
+    const uri = pathToFileURL(candidate).toString()
 
-  if (!root) return []
+    return documents.get(uri) !== undefined || existsSync(candidate)
+  })
 
-  for (const name of ['pnpm-workspace.yaml', 'pnpm-workspace.yml']) {
-    const path = join(root, name)
-    const uri = pathToFileURL(path).toString()
-    const openDocument = documents.get(uri)
+  if (!path) return []
 
-    if (openDocument || existsSync(path)) {
-      return [{
-        manifest: parseManifest(path, openDocument?.getText() ?? readFileSync(path, 'utf8')),
-        uri,
-      }]
-    }
-  }
+  const uri = pathToFileURL(path).toString()
+  const openDocument = documents.get(uri)
 
-  return []
+  return [{
+    manifest: parseManifest(path, openDocument?.getText() ?? readFileSync(path, 'utf8')),
+    uri,
+  }]
 }
 
 const catalogLocation = (analysis: DependencyAnalysis, locations: readonly CatalogLocation[]): CatalogLocation | undefined => {
@@ -341,7 +331,7 @@ const updateSettings = (value: unknown): void => {
 }
 
 connection.onInitialize((params): InitializeResult => {
-  workspaceRoots = (params.workspaceFolders ?? []).flatMap(({ uri }) => uri.startsWith('file:') ? [fileURLToPath(uri)] : [])
+  workspaceRoots = workspaceRootsFromInitializeParams(params)
 
   updateSettings(params.initializationOptions)
 

@@ -217,7 +217,7 @@ describe('dependency analysis edge cases', () => {
     })
     await expect(analyzeDependency(registryError, { registryClient: registryErrorClient })).resolves.toMatchObject({
       message: 'npm registry returned 500 for demo.',
-      status: 'invalid',
+      status: 'unavailable',
     })
     await expect(analyzeDependency(invalid, { registryClient: registryClient() })).resolves.toMatchObject({
       message: 'The version range "not-a-version" is not a valid semver range.',

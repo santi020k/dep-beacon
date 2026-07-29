@@ -125,6 +125,34 @@ describe('dependency analysis', () => {
     expect(analysis.targets.current).toBe('1.1.0')
   })
 
+  test('limits concurrent registry requests for large workspaces', async () => {
+    const dependencies = parsePackageJsonManifest(JSON.stringify({
+      dependencies: Object.fromEntries(Array.from({ length: 24 }, (_, index) => [`demo-${index}`, '^1.0.0'])),
+    })).dependencies
+    let activeRequests = 0
+    let maximumActiveRequests = 0
+    const registryClient = new NpmRegistryClient({
+      fetch: async (url) => {
+        activeRequests += 1
+        maximumActiveRequests = Math.max(maximumActiveRequests, activeRequests)
+
+        await new Promise(resolve => setTimeout(resolve, 2))
+
+        activeRequests -= 1
+
+        const packageName = decodeURIComponent(url.split('/').at(-1) ?? '')
+
+        return new Response(JSON.stringify(packument(packageName, ['1.0.0'], '1.0.0')), { status: 200 })
+      },
+    })
+
+    const analyses = await analyzeDependencies(dependencies, { registryClient })
+
+    expect(analyses).toHaveLength(24)
+    expect(maximumActiveRequests).toBeLessThanOrEqual(8)
+    expect(analyses.every(({ status }) => status === 'up-to-date')).toBe(true)
+  })
+
   test('uses OSV severity to upgrade status to vulnerable', async () => {
     const dependency = firstDependency(`{
   "dependencies": {

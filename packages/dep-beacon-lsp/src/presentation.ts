@@ -29,33 +29,33 @@ const STATUS_LABELS: Record<DependencyAnalysis['status'], string> = {
   missing: 'Package or version not found',
   outdated: 'Update available',
   protocol: 'Locally managed dependency',
+  unavailable: 'Registry temporarily unavailable',
   'up-to-date': 'Up to date',
   vulnerable: 'Security update recommended',
+}
+
+const STATIC_DIAGNOSTIC_SEVERITIES: Record<
+  Exclude<DependencyAnalysis['status'], 'outdated' | 'vulnerable'>,
+  BeaconDiagnosticSeverity | undefined
+> = {
+  invalid: 'error',
+  missing: 'error',
+  protocol: undefined,
+  unavailable: 'warning',
+  'up-to-date': undefined,
 }
 
 export const diagnosticSeverity = (
   analysis: DependencyAnalysis,
   { showUpdates = true }: DiagnosticOptions = {},
 ): BeaconDiagnosticSeverity | undefined => {
-  switch (analysis.status) {
-    case 'invalid':
-      return 'error'
+  if (analysis.status === 'outdated') return showUpdates ? 'warning' : undefined
 
-    case 'missing':
-      return 'error'
-
-    case 'outdated':
-      return showUpdates ? 'warning' : undefined
-
-    case 'vulnerable':
-      return isHighRiskSeverity(analysis.vulnerability?.severity) ? 'error' : 'warning'
-
-    case 'protocol':
-      return undefined
-
-    case 'up-to-date':
-      return undefined
+  if (analysis.status === 'vulnerable') {
+    return isHighRiskSeverity(analysis.vulnerability?.severity) ? 'error' : 'warning'
   }
+
+  return STATIC_DIAGNOSTIC_SEVERITIES[analysis.status]
 }
 
 type StatusTitleBuilder = (analysis: DependencyAnalysis, versions: string | undefined) => string
@@ -65,6 +65,7 @@ const STATUS_TITLES: Record<DependencyAnalysis['status'], StatusTitleBuilder> = 
   missing: () => '✕ missing package or version',
   outdated: (_analysis, versions) => `↑ ${versions ?? 'update available'}`,
   protocol: () => '◆ local or catalog-managed',
+  unavailable: () => '⚠ registry unavailable',
   'up-to-date': (_analysis, versions) => `✓ ${versions ?? 'up to date'}`,
   vulnerable: (analysis, versions) =>
     `⚠ ${analysis.vulnerability?.severity ?? 'known'} risk${versions ? ` · ${versions}` : ''}`,
@@ -75,6 +76,7 @@ const INLAY_HINT_LABELS: Record<DependencyAnalysis['status'], StatusTitleBuilder
   missing: () => '✕ missing',
   outdated: (_analysis, versions) => `↑ ${versions ?? 'update'}`,
   protocol: () => '◆ managed',
+  unavailable: () => '⚠ unavailable',
   'up-to-date': (_analysis, versions) => `✓ ${versions ?? 'up to date'}`,
   vulnerable: (analysis, versions) =>
     `⚠ ${analysis.vulnerability?.severity ?? 'known'} risk${versions ? ` · ${versions}` : ''}`,
@@ -124,6 +126,7 @@ const DIAGNOSTIC_MESSAGES: Record<DependencyAnalysis['status'], DiagnosticMessag
   missing: defaultDiagnosticMessage,
   outdated: outdatedDiagnosticMessage,
   protocol: defaultDiagnosticMessage,
+  unavailable: defaultDiagnosticMessage,
   'up-to-date': defaultDiagnosticMessage,
   vulnerable: vulnerableDiagnosticMessage,
 }
