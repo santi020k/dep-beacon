@@ -78,5 +78,6 @@ minimumReleaseAgeExclude:
 
 auditConfig:
   ignoreGhsas:
-    # Dev-only lint tooling requires brace-expansion's legacy default export.
+    # Dev-only lint tooling requires the legacy default export; remove this
+    # exception when those tools support brace-expansion 5.
     - GHSA-mh99-v99m-4gvg
