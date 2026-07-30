@@ -14,7 +14,7 @@
     "lint": "pnpm run lint:repo && turbo run lint -- --max-warnings=0",
     "lint:repo": "eslint . --cache --no-warn-ignored --max-warnings=0",
     "lint:fix": "pnpm run lint:repo:fix && turbo run lint:fix",
-    "lint:repo:fix": "eslint . --cache --fix --no-warn-ignored",
+    "lint:repo:fix": "eslint . --cache --fix --no-warn-ignored --max-warnings=0",
     "lint:spell": "cspell \"**\" --gitignore --cache --show-suggestions --show-context",
     "lint:knip": "knip",
     "validate": "pnpm run build && pnpm run typecheck && pnpm run test:coverage && pnpm run lint && pnpm run lint:spell && pnpm run lint:knip && pnpm run package:extension",
@@ -61,10 +61,10 @@
   },
   "lint-staged": {
     "*.{astro,js,mjs,ts,mts}": [
-      "eslint --fix --no-warn-ignored"
+      "eslint --fix --no-warn-ignored --max-warnings=0"
     ],
     "*.{json,jsonc,md,yml,yaml}": [
-      "eslint --fix --no-warn-ignored"
+      "eslint --fix --no-warn-ignored --max-warnings=0"
     ]
   },
   "engines": {

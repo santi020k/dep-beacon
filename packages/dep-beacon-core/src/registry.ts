@@ -12,6 +12,53 @@ interface CacheEntry {
   request: Promise<RegistryLookupResult>
 }
 
+const MAX_CONCURRENT_REGISTRY_LOOKUPS = 8
+
+class RegistryLookupLimiter {
+  #active = 0
+  readonly #limit: number
+  readonly #queue: (() => void)[] = []
+
+  constructor(limit: number) {
+    this.#limit = limit
+  }
+
+  async run<T>(lookup: () => Promise<T>): Promise<T> {
+    await this.#acquire()
+
+    try {
+      return await lookup()
+    } finally {
+      this.#release()
+    }
+  }
+
+  async #acquire(): Promise<void> {
+    if (this.#active < this.#limit) {
+      this.#active += 1
+
+      return
+    }
+
+    await new Promise<void>(resolve => {
+      this.#queue.push(resolve)
+    })
+  }
+
+  #release(): void {
+    const next = this.#queue.shift()
+
+    if (next) {
+      next()
+
+      return
+    }
+
+    this.#active -= 1
+  }
+}
+
+const registryLookupLimiter = new RegistryLookupLimiter(MAX_CONCURRENT_REGISTRY_LOOKUPS)
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const toDistTags = (value: unknown): Record<string, string> => {
@@ -37,7 +84,13 @@ const toMetadata = (packageName: string, value: unknown): NpmPackageMetadata | u
   }
 }
 
-const trimTrailingSlash = (value: string): string => value.replace(/\/+$/u, '')
+const trimTrailingSlash = (value: string): string => {
+  let end = value.length
+
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end -= 1
+
+  return value.slice(0, end)
+}
 
 export const createNpmPackageUrl = (packageName: string): string => `https://www.npmjs.com/package/${packageName}`
 
@@ -96,63 +149,65 @@ export class NpmRegistryClient {
   }
 
   async #requestPackage(packageName: string): Promise<RegistryLookupResult> {
-    const encodedName = encodeURIComponent(packageName)
+    return registryLookupLimiter.run(async () => {
+      const encodedName = encodeURIComponent(packageName)
 
-    try {
-      const response = await fetchWithTimeout(this.#fetch, `${this.#registryUrl}/${encodedName}`, {
-        headers: {
-          accept: 'application/vnd.npm.install-v1+json, application/json'
+      try {
+        const response = await fetchWithTimeout(this.#fetch, `${this.#registryUrl}/${encodedName}`, {
+          headers: {
+            accept: 'application/vnd.npm.install-v1+json, application/json'
+          }
+        }, this.#requestTimeoutMs)
+
+        if (response.status === 404) {
+          return {
+            error: {
+              code: 'not-found',
+              message: `${packageName} was not found in the npm registry.`,
+              status: response.status
+            },
+            ok: false
+          }
         }
-      }, this.#requestTimeoutMs)
 
-      if (response.status === 404) {
+        if (!response.ok) {
+          return {
+            error: {
+              code: 'registry-error',
+              message: `npm registry returned ${response.status} for ${packageName}.`,
+              status: response.status
+            },
+            ok: false
+          }
+        }
+
+        const metadata = toMetadata(packageName, await response.json())
+
+        if (!metadata) {
+          return {
+            error: {
+              code: 'registry-error',
+              message: `npm registry response for ${packageName} did not include versions.`,
+              status: response.status
+            },
+            ok: false
+          }
+        }
+
+        return {
+          metadata,
+          ok: true
+        }
+      } catch (error) {
         return {
           error: {
-            code: 'not-found',
-            message: `${packageName} was not found in the npm registry.`,
-            status: response.status
+            code: 'network-error',
+            message: error instanceof Error ? error.message : String(error)
           },
           ok: false
         }
       }
-
-      if (!response.ok) {
-        return {
-          error: {
-            code: 'registry-error',
-            message: `npm registry returned ${response.status} for ${packageName}.`,
-            status: response.status
-          },
-          ok: false
-        }
-      }
-
-      const metadata = toMetadata(packageName, await response.json())
-
-      if (!metadata) {
-        return {
-          error: {
-            code: 'registry-error',
-            message: `npm registry response for ${packageName} did not include versions.`,
-            status: response.status
-          },
-          ok: false
-        }
-      }
-
-      return {
-        metadata,
-        ok: true
-      }
-    } catch (error) {
-      return {
-        error: {
-          code: 'network-error',
-          message: error instanceof Error ? error.message : String(error)
-        },
-        ok: false
-      }
-    }
+    })
   }
 
   async #shortenErrorCache(packageName: string, request: Promise<RegistryLookupResult>): Promise<void> {

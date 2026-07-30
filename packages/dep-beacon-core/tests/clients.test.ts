@@ -26,7 +26,7 @@ describe('npm registry client', () => {
     }
     const client = new NpmRegistryClient({
       fetch: fetcher,
-      registryUrl: 'https://registry.example.test/'
+      registryUrl: 'https://registry.example.test////'
     })
 
     const first = await client.getPackage('@scope/demo')

@@ -21,8 +21,8 @@
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "test:watch": "vitest --config vitest.config.ts",
-    "lint": "eslint . --no-warn-ignored",
-    "lint:fix": "eslint . --fix --no-warn-ignored",
+    "lint": "eslint . --no-warn-ignored --max-warnings=0",
+    "lint:fix": "eslint . --fix --no-warn-ignored --max-warnings=0",
     "validate:extension": "node scripts/validate.mjs",
     "clean": "rm -rf dist coverage"
   },
