@@ -10,8 +10,8 @@ words:
   - codicon
   - cdylib
   - commitlint
+  - commitprompt
   - Consolas
-  - czg
   - dep
   - depbeacon
   - domexception

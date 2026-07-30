@@ -32,13 +32,12 @@
     "prepare": "husky",
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run check:astro && pnpm run typecheck && pnpm run test && pnpm run lint",
-    "commit": "czg"
+    "commit": "commitprompt"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
-    "@commitlint/cli": "catalog:",
-    "@commitlint/config-conventional": "catalog:",
+    "@santi020k/commitprompt": "catalog:",
     "@santi020k/eslint-config-astro": "catalog:",
     "@santi020k/eslint-config-basic": "catalog:",
     "@santi020k/eslint-config-extensions": "catalog:",
@@ -46,16 +45,13 @@
     "@santi020k/eslint-config-libraries": "catalog:",
     "@santi020k/eslint-config-testing": "catalog:",
     "@santi020k/eslint-config-tools": "catalog:",
-    "@typescript/native": "catalog:",
     "@types/node": "catalog:",
     "cspell": "catalog:",
-    "czg": "catalog:",
     "eslint": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
     "lint-staged": "catalog:",
     "sharp": "catalog:",
-    "tailwindcss": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:",
     "wrangler": "catalog:"
