@@ -1,4 +1,4 @@
-import { defineConfig } from '@santi020k/eslint-config-basic'
+import { attachReferencedPlugins, defineConfig } from '@santi020k/eslint-config-basic'
 
 const config = await defineConfig({
   features: {
@@ -14,13 +14,14 @@ const config = await defineConfig({
     'no-console': 'off',
     'unicorn/prefer-module': 'off',
   },
+}, {
+  files: ['**/*.astro'],
+  rules: {
+    'better-tailwindcss/no-unknown-classes': 'off',
+  },
 })
 
-const betterTailwindcssPlugin = config
-  .find(({ plugins }) => plugins?.['better-tailwindcss'])
-  ?.plugins?.['better-tailwindcss']
-
-export default [
+export default attachReferencedPlugins([
   ...config,
   {
     name: 'temporary-formatting-compatibility',
@@ -31,13 +32,4 @@ export default [
       ).map(rule => [`@stylistic/${rule}`, 'off'])
     ),
   },
-  {
-    files: ['**/*.astro'],
-    plugins: {
-      'better-tailwindcss': betterTailwindcssPlugin,
-    },
-    rules: {
-      'better-tailwindcss/no-unknown-classes': 'off',
-    },
-  },
-]
+])
