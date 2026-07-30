@@ -18,11 +18,13 @@ words:
   - esbuild
   - expressjs
   - GHSA
+  - Ghsas
   - jsonc
   - keytar
   - knip
   - linecap
   - linejoin
+  - linkify
   - lates
   - lstrip
   - npmjs
