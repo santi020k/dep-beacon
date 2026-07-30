@@ -9,7 +9,10 @@ const SORTABLE_SECTIONS = [
 type JsonObject = Record<string, unknown>
 
 const isJsonObject = (value: unknown): value is JsonObject => typeof value === 'object' && value !== null && !Array.isArray(value)
-const sortObjectByKey = (value: JsonObject): JsonObject => Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
+
+const sortObjectByKey = (value: JsonObject): JsonObject => (
+  Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
+)
 
 const detectIndent = (text: string): string | number => {
   const match = /\n([ \t]+)/u.exec(text)

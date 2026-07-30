@@ -21,7 +21,11 @@ import {
   specSatisfiesLatest
 } from './versions.js'
 
-const createProtocolAnalysis = (dependency: DependencyEntry, displaySpec: string, message: string): DependencyAnalysis => ({
+const createProtocolAnalysis = (
+  dependency: DependencyEntry,
+  displaySpec: string,
+  message: string
+): DependencyAnalysis => ({
   dependency,
   displaySpec,
   exists: true,
@@ -193,7 +197,14 @@ export const analyzeDependency = async (
   const targets = computeUpdateTargets(range, lookup.metadata, includePrerelease)
 
   if (!targets.current) {
-    return createInvalidTargetAnalysis(dependency, normalized.displaySpec, normalized.packageName, range, lookup.metadata, targets)
+    return createInvalidTargetAnalysis(
+      dependency,
+      normalized.displaySpec,
+      normalized.packageName,
+      range,
+      lookup.metadata,
+      targets
+    )
   }
 
   return createVersionAnalysis({

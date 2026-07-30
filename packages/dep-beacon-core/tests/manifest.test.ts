@@ -35,7 +35,13 @@ describe('manifest parsing', () => {
 `)
 
     expect(manifest.errors).toEqual([])
-    expect(manifest.dependencies.map(dependency => [dependency.packageName, dependency.section, dependency.spec])).toEqual([
+    const dependencies = manifest.dependencies.map(dependency => [
+      dependency.packageName,
+      dependency.section,
+      dependency.spec
+    ])
+
+    expect(dependencies).toEqual([
       ['astro', 'dependencies', '^7.0.0'],
       ['@scope/pkg', 'dependencies', '~1.2.3'],
       ['typescript', 'devDependencies', '^6.0.3'],
@@ -70,7 +76,13 @@ packageExtensions:
     expect(manifest.errors).toEqual([])
     expect(manifest.catalogs.default.get('astro')).toBe('^7.0.0')
     expect(manifest.catalogs.named.get('react19')?.get('react')).toBe('^19.0.0')
-    expect(manifest.dependencies.map(dependency => [dependency.packageName, dependency.section, dependency.spec])).toEqual([
+    const dependencies = manifest.dependencies.map(dependency => [
+      dependency.packageName,
+      dependency.section,
+      dependency.spec
+    ])
+
+    expect(dependencies).toEqual([
       ['astro', 'catalog', '^7.0.0'],
       ['typescript', 'catalog', '^6.0.3'],
       ['react', 'catalogs', '^19.0.0'],

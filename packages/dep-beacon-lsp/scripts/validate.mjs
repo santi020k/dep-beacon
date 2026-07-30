@@ -12,7 +12,11 @@ const manifestVersion = /^version = "([^"]+)"$/m.exec(manifest)?.[1]
 const cargoVersion = /^version = "([^"]+)"$/m.exec(cargo)?.[1]
 const cargoLockVersion = /\[\[package\]\]\nname = "dep-beacon-zed"\nversion = "([^"]+)"\n/.exec(cargoLock)?.[1]
 
-if (manifestVersion !== packageJson.version || cargoVersion !== packageJson.version || cargoLockVersion !== packageJson.version) {
+if (
+  manifestVersion !== packageJson.version ||
+  cargoVersion !== packageJson.version ||
+  cargoLockVersion !== packageJson.version
+) {
   throw new Error(`Version mismatch: package=${packageJson.version}, extension=${manifestVersion}, cargo=${cargoVersion}, lock=${cargoLockVersion}.`)
 }
 

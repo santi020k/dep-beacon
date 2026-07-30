@@ -71,10 +71,12 @@ export const isHighRiskSeverity = (severity: Severity | undefined): boolean => s
 
 export const hasModerateRiskSeverity = (severity: Severity | undefined): boolean => severity === 'medium' || severity === 'low'
 
-export const versionCandidates = (metadata: NpmPackageMetadata, includePrerelease: boolean): string[] => metadata.versions
-  .filter(version => valid(version))
-  .filter(version => includePrerelease || prerelease(version) === null)
-  .sort(compare)
+export const versionCandidates = (metadata: NpmPackageMetadata, includePrerelease: boolean): string[] => (
+  metadata.versions
+    .filter(version => valid(version))
+    .filter(version => includePrerelease || prerelease(version) === null)
+    .sort(compare)
+)
 
 const maxVersion = (versions: readonly string[]): string | undefined => versions.at(-1)
 
@@ -95,7 +97,11 @@ export const getLatestVersion = (metadata: NpmPackageMetadata, includePrerelease
 const firstHigherMinor = (versions: readonly string[], baseVersion: string): string | undefined => {
   const baseMajor = major(baseVersion)
   const baseMinor = minor(baseVersion)
-  const higher = versions.filter(version => major(version) === baseMajor && minor(version) > baseMinor && gt(version, baseVersion))
+
+  const higher = versions.filter(version => major(version) === baseMajor &&
+    minor(version) > baseMinor &&
+    gt(version, baseVersion))
+
   const nextMinor = higher.map(version => minor(version)).sort((left, right) => left - right).at(0)
 
   if (typeof nextMinor !== 'number') return undefined
@@ -113,7 +119,12 @@ const firstHigherMajor = (versions: readonly string[], baseVersion: string): str
   return maxVersion(higher.filter(version => major(version) === nextMajor))
 }
 
-const highestPatch = (versions: readonly string[], baseVersion: string): string | undefined => maxVersion(versions.filter(version => major(version) === major(baseVersion) && minor(version) === minor(baseVersion) && gt(version, baseVersion)))
+const highestPatch = (versions: readonly string[], baseVersion: string): string | undefined => (
+  maxVersion(versions.filter(version => major(version) === major(baseVersion) &&
+    minor(version) === minor(baseVersion) &&
+    gt(version, baseVersion)))
+)
+
 const isConcreteSpec = (spec: string): boolean => /^[\^~]?\d/u.test(spec.trim())
 
 const safeMinVersion = (spec: string): string | undefined => {

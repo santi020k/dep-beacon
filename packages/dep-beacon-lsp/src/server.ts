@@ -30,7 +30,7 @@ import {
   TextDocumentSyncKind,
   TextEdit,
   type WorkspaceEdit
-} from 'vscode-languageserver/node.js'
+} from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import {
@@ -177,7 +177,10 @@ const readWorkspaceManifests = (documentPath: string): WorkspaceManifest[] => {
   }]
 }
 
-const catalogLocation = (analysis: DependencyAnalysis, locations: readonly CatalogLocation[]): CatalogLocation | undefined => {
+const catalogLocation = (
+  analysis: DependencyAnalysis,
+  locations: readonly CatalogLocation[]
+): CatalogLocation | undefined => {
   const spec = analysis.dependency.spec
 
   if (!spec.startsWith('catalog:')) return undefined
@@ -385,8 +388,10 @@ connection.onHover(async ({ position, textDocument }): Promise<Hover | undefined
 
   const result = results.get(document.uri) ?? await analyzeDocument(document)
 
-  const analysis = result?.analyses.find(candidate => containsPosition(toRange(candidate.dependency.nameRange), position) ||
-    containsPosition(toRange(candidate.dependency.specRange), position))
+  const analysis = result?.analyses.find(candidate => (
+    containsPosition(toRange(candidate.dependency.nameRange), position) ||
+    containsPosition(toRange(candidate.dependency.specRange), position)
+  ))
 
   if (!analysis) return undefined
 

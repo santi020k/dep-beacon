@@ -31,4 +31,6 @@ export const parseManifest = (filePath: string, text: string): ManifestParseResu
   }
 }
 
-export const collectCatalogSnapshot = (manifests: readonly ManifestParseResult[]): CatalogSnapshot => mergeCatalogSnapshots(...manifests.map(manifest => manifest.catalogs))
+export const collectCatalogSnapshot = (manifests: readonly ManifestParseResult[]): CatalogSnapshot => (
+  mergeCatalogSnapshots(...manifests.map(manifest => manifest.catalogs))
+)

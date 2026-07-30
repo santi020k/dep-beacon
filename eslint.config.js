@@ -15,9 +15,24 @@ export default defineConfig({
     'unicorn/prefer-module': 'off',
   },
 }, {
-  name: 'local-stylistic-preferences',
+  name: 'local-rule-preferences',
   rules: {
     '@stylistic/function-call-argument-newline': ['error', 'consistent'],
+    '@stylistic/max-len': ['warn', {
+      code: 120,
+      comments: 200,
+      ignoreStrings: true,
+      ignoreTemplateLiterals: true,
+      ignoreUrls: true,
+      tabWidth: 2,
+    }],
+    camelcase: ['warn', {
+      allow: ['database_specific', 'ecosystem_specific'],
+      ignoreDestructuring: false,
+      ignoreGlobals: false,
+      ignoreImports: false,
+      properties: 'always',
+    }],
   },
 }, {
   files: ['**/*.astro'],

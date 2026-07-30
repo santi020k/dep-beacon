@@ -3,7 +3,14 @@ import { type Node as JsonNode, type ParseError, parseTree } from 'jsonc-parser'
 import { createEmptyCatalogSnapshot } from './catalogs.js'
 import { getOverridePackageName, getResolutionPackageName } from './package-name.js'
 import { createLineStarts, createTextRange } from './text.js'
-import type { DependencyEntry, DependencyManager, DependencySection, ManifestParseError, ManifestParseResult, TextRange } from './types.js'
+import type {
+  DependencyEntry,
+  DependencyManager,
+  DependencySection,
+  ManifestParseError,
+  ManifestParseResult,
+  TextRange
+} from './types.js'
 
 const DIRECT_SECTIONS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const
 const parseErrorMessage = (error: ParseError): string => `JSON parse error ${error.error} at offset ${error.offset}.`
@@ -33,7 +40,10 @@ const stringNodeValue = (node: JsonStringNode): string => {
   return typeof value === 'string' ? value : ''
 }
 
-const nodeRange = (lineStarts: readonly number[], node: JsonNode): TextRange => createTextRange(lineStarts, node.offset, node.offset + node.length)
+const nodeRange = (lineStarts: readonly number[], node: JsonNode): TextRange => (
+  createTextRange(lineStarts, node.offset, node.offset + node.length)
+)
+
 const objectProperties = (node: JsonNode | undefined): JsonNode[] => (isObjectNode(node) ? node.children : [])
 
 const propertyKey = (property: JsonNode): string | undefined => {

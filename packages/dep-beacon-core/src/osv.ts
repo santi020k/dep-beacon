@@ -130,7 +130,9 @@ const vulnerabilityAliases = (details: readonly (OsvVulnerability | undefined)[]
   return [...aliases]
 }
 
-const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined)[]): Severity[] => details.flatMap(detail => (detail ? [vulnerabilitySeverity(detail)] : []))
+const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined)[]): Severity[] => (
+  details.flatMap(detail => (detail ? [vulnerabilitySeverity(detail)] : []))
+)
 
 export class OsvClient {
   readonly #baseUrl: string
@@ -214,7 +216,12 @@ export class OsvClient {
 
   async #requestVulnerability(id: string): Promise<OsvVulnerability | undefined> {
     try {
-      const response = await fetchWithTimeout(this.#fetch, `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`, {}, this.#requestTimeoutMs)
+      const response = await fetchWithTimeout(
+        this.#fetch,
+        `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`,
+        {},
+        this.#requestTimeoutMs
+      )
 
       if (!response.ok) return undefined
 
