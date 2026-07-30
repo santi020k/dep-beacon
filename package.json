@@ -39,7 +39,13 @@
     "@changesets/cli": "catalog:",
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
+    "@santi020k/eslint-config-astro": "catalog:",
     "@santi020k/eslint-config-basic": "catalog:",
+    "@santi020k/eslint-config-extensions": "catalog:",
+    "@santi020k/eslint-config-formats": "catalog:",
+    "@santi020k/eslint-config-libraries": "catalog:",
+    "@santi020k/eslint-config-testing": "catalog:",
+    "@santi020k/eslint-config-tools": "catalog:",
     "@types/node": "catalog:",
     "cspell": "catalog:",
     "czg": "catalog:",
@@ -51,7 +57,6 @@
     "tailwindcss": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
     "wrangler": "catalog:"
   },
   "lint-staged": {
@@ -63,7 +68,7 @@
     ]
   },
   "engines": {
-    "node": "^20.19.0 || >=22.13.0"
+    "node": ">=22.19.0"
   },
   "packageManager": "pnpm@11.1.2"
 }

@@ -42,9 +42,13 @@ if (!manifest.includes('[language_servers.dep-beacon]')) {
   throw new Error('extension.toml does not register the Dep Beacon language server.')
 }
 
-if (!adapterSource.includes('Self::install_language_server(language_server_id)?')
+if (!adapterSource.includes('zed::npm_install_package(PACKAGE_NAME, &latest_version)?')
   || adapterSource.includes('worktree.which(')) {
   throw new Error('The Zed adapter must use its managed language-server package instead of a PATH binary.')
+}
+
+if (!adapterSource.includes('.join(SERVER_PATH)')) {
+  throw new Error('The Zed adapter must resolve the managed language-server path from its extension work directory.')
 }
 
 process.stdout.write(`Validated Dep Beacon ${packageJson.version} for Zed.\n`)
