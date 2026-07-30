@@ -45,7 +45,8 @@ body:
     id: manifest
     attributes:
       label: Relevant manifest or workspace config
-      description: Paste the smallest relevant package.json, pnpm-workspace.yaml, override, catalog, or dependency entry.
+      description: >-
+        Paste the smallest relevant package.json, pnpm-workspace.yaml, override, catalog, or dependency entry.
       render: json
   - type: input
     id: extension-version

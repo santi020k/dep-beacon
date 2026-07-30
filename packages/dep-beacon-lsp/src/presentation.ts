@@ -128,7 +128,9 @@ const DIAGNOSTIC_MESSAGES: Record<DependencyAnalysis['status'], DiagnosticMessag
   vulnerable: vulnerableDiagnosticMessage
 }
 
-export const diagnosticMessage = (analysis: DependencyAnalysis): string => DIAGNOSTIC_MESSAGES[analysis.status](analysis)
+export const diagnosticMessage = (analysis: DependencyAnalysis): string => (
+  DIAGNOSTIC_MESSAGES[analysis.status](analysis)
+)
 
 export const editSpec = (dependency: DependencyEntry, targetSpec: string): string => dependency.source === 'package-json' ? JSON.stringify(targetSpec) : targetSpec
 
@@ -205,7 +207,10 @@ export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
   return lines.join('\n')
 }
 
-export const updateTargets = (analysis: DependencyAnalysis, editableSpec = analysis.dependency.spec): UpdateTarget[] => {
+export const updateTargets = (
+  analysis: DependencyAnalysis,
+  editableSpec = analysis.dependency.spec
+): UpdateTarget[] => {
   if (editableSpec.startsWith('catalog:')) return []
 
   const currentSpec = editableSpec.trim()

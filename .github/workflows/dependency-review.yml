@@ -52,4 +52,12 @@ jobs:
             cat "$REPORT"
             exit 1
           fi
-          node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const vulnerabilities = report.metadata?.vulnerabilities ?? {}; console.log(`No high or critical vulnerabilities found (${vulnerabilities.high ?? 0} high, ${vulnerabilities.critical ?? 0} critical).`)' "$REPORT"
+          node - "$REPORT" <<'NODE'
+          const fs = require('node:fs')
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
+          const vulnerabilities = report.metadata?.vulnerabilities ?? {}
+          console.log(
+            `No high or critical vulnerabilities found ` +
+            `(${vulnerabilities.high ?? 0} high, ${vulnerabilities.critical ?? 0} critical).`
+          )
+          NODE
