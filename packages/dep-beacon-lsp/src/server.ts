@@ -9,7 +9,7 @@ import {
   type DependencyEntry,
   type ManifestParseError,
   type ManifestParseResult,
-  parseManifest,
+  parseManifest
 } from '@santi020k/dep-beacon-core'
 
 import {
@@ -29,7 +29,7 @@ import {
   TextDocuments,
   TextDocumentSyncKind,
   TextEdit,
-  type WorkspaceEdit,
+  type WorkspaceEdit
 } from 'vscode-languageserver/node.js'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
@@ -42,7 +42,7 @@ import {
   hoverMarkdown,
   inlayHintLabel,
   statusTitle,
-  updateTargets,
+  updateTargets
 } from './presentation.js'
 import { findWorkspaceManifestPath, workspaceRootsFromInitializeParams } from './workspace.js'
 
@@ -80,7 +80,7 @@ const DEFAULT_SETTINGS: DepBeaconSettings = {
   checkVulnerabilities: true,
   includePrerelease: false,
   registryUrl: 'https://registry.npmjs.org',
-  showUpdateDiagnostics: true,
+  showUpdateDiagnostics: true
 }
 
 const connection = createConnection(ProposedFeatures.all)
@@ -92,22 +92,22 @@ let workspaceRoots: string[] = []
 
 const toRange = (range: { endPosition: Position, startPosition: Position }): Range => ({
   end: range.endPosition,
-  start: range.startPosition,
+  start: range.startPosition
 })
 
 const containsPosition = (range: Range, position: Position): boolean => {
-  const afterStart = position.line > range.start.line
-    || (position.line === range.start.line && position.character >= range.start.character)
+  const afterStart = position.line > range.start.line ||
+    (position.line === range.start.line && position.character >= range.start.character)
 
-  const beforeEnd = position.line < range.end.line
-    || (position.line === range.end.line && position.character <= range.end.character)
+  const beforeEnd = position.line < range.end.line ||
+    (position.line === range.end.line && position.character <= range.end.character)
 
   return afterStart && beforeEnd
 }
 
 const emptyRange: Range = {
   end: Position.create(0, 1),
-  start: Position.create(0, 0),
+  start: Position.create(0, 0)
 }
 
 const manifestPath = (document: TextDocument): string | undefined => {
@@ -116,16 +116,16 @@ const manifestPath = (document: TextDocument): string | undefined => {
   const filePath = fileURLToPath(document.uri)
   const fileName = basename(filePath)
 
-  return fileName === 'package.json' || fileName === 'pnpm-workspace.yaml' || fileName === 'pnpm-workspace.yml'
-    ? filePath
-    : undefined
+  return fileName === 'package.json' || fileName === 'pnpm-workspace.yaml' || fileName === 'pnpm-workspace.yml' ?
+    filePath :
+    undefined
 }
 
 const parseErrorDiagnostic = (error: ManifestParseError): Diagnostic => ({
   message: error.message,
   range: error.range ? toRange(error.range) : emptyRange,
   severity: DiagnosticSeverity.Error,
-  source: 'Dep Beacon',
+  source: 'Dep Beacon'
 })
 
 const lspSeverity = (analysis: DependencyAnalysis): DiagnosticSeverity | undefined => {
@@ -155,12 +155,12 @@ const analysisDiagnostic = (analysis: DependencyAnalysis): Diagnostic | undefine
     message: diagnosticMessage(analysis),
     range: toRange(analysis.dependency.specRange),
     severity,
-    source: 'Dep Beacon',
+    source: 'Dep Beacon'
   }
 }
 
 const readWorkspaceManifests = (documentPath: string): WorkspaceManifest[] => {
-  const path = findWorkspaceManifestPath(documentPath, workspaceRoots, (candidate) => {
+  const path = findWorkspaceManifestPath(documentPath, workspaceRoots, candidate => {
     const uri = pathToFileURL(candidate).toString()
 
     return documents.get(uri) !== undefined || existsSync(candidate)
@@ -173,7 +173,7 @@ const readWorkspaceManifests = (documentPath: string): WorkspaceManifest[] => {
 
   return [{
     manifest: parseManifest(path, openDocument?.getText() ?? readFileSync(path, 'utf8')),
-    uri,
+    uri
   }]
 }
 
@@ -201,7 +201,7 @@ const catalogLocation = (analysis: DependencyAnalysis, locations: readonly Catal
 const bulkWorkspaceEdit = (
   documentUri: string,
   result: DocumentAnalysis,
-  strategy: BulkUpdateStrategy,
+  strategy: BulkUpdateStrategy
 ): BulkWorkspaceEdit | undefined => {
   const changes: Record<string, TextEdit[]> = {}
   const editedRanges = new Set<string>()
@@ -221,7 +221,7 @@ const bulkWorkspaceEdit = (
       editableRange.start.line,
       editableRange.start.character,
       editableRange.end.line,
-      editableRange.end.character,
+      editableRange.end.character
     ].join(':')
 
     if (editedRanges.has(rangeKey)) continue
@@ -257,7 +257,7 @@ const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis
     catalogSnapshot: catalogs,
     includePrerelease: settings.includePrerelease,
     registryUrl: settings.registryUrl,
-    vulnerabilities: settings.checkVulnerabilities,
+    vulnerabilities: settings.checkVulnerabilities
   })
 
   return { analyses, catalogLocations, manifest }
@@ -285,11 +285,11 @@ const refreshDocument = async (document: TextDocument): Promise<void> => {
 
     const diagnostics = [
       ...result.manifest.errors.map(parseErrorDiagnostic),
-      ...result.analyses.flatMap((analysis) => {
+      ...result.analyses.flatMap(analysis => {
         const diagnostic = analysisDiagnostic(analysis)
 
         return diagnostic ? [diagnostic] : []
-      }),
+      })
     ]
 
     await connection.sendDiagnostics({ diagnostics, uri: document.uri })
@@ -305,9 +305,9 @@ const refreshDocument = async (document: TextDocument): Promise<void> => {
         message: `Dependency analysis failed: ${error instanceof Error ? error.message : String(error)}`,
         range: emptyRange,
         severity: DiagnosticSeverity.Warning,
-        source: 'Dep Beacon',
+        source: 'Dep Beacon'
       }],
-      uri: document.uri,
+      uri: document.uri
     })
   }
 }
@@ -326,7 +326,7 @@ const updateSettings = (value: unknown): void => {
     checkVulnerabilities: configured.checkVulnerabilities ?? DEFAULT_SETTINGS.checkVulnerabilities,
     includePrerelease: configured.includePrerelease ?? DEFAULT_SETTINGS.includePrerelease,
     registryUrl: configured.registryUrl?.trim() || DEFAULT_SETTINGS.registryUrl,
-    showUpdateDiagnostics: configured.showUpdateDiagnostics ?? DEFAULT_SETTINGS.showUpdateDiagnostics,
+    showUpdateDiagnostics: configured.showUpdateDiagnostics ?? DEFAULT_SETTINGS.showUpdateDiagnostics
   }
 }
 
@@ -343,12 +343,12 @@ connection.onInitialize((params): InitializeResult => {
       hoverProvider: true,
       inlayHintProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      workspace: { workspaceFolders: { supported: true } },
+      workspace: { workspaceFolders: { supported: true } }
     },
     serverInfo: {
       name: 'Dep Beacon',
-      version: DEP_BEACON_VERSION,
-    },
+      version: DEP_BEACON_VERSION
+    }
   }
 })
 
@@ -362,8 +362,6 @@ connection.onDidChangeConfiguration(({ settings: configuredSettings }) => {
   void refreshAllDocuments()
 })
 
-
-
 connection.onCodeLens(async ({ textDocument }): Promise<CodeLens[]> => {
   const document = documents.get(textDocument.uri)
 
@@ -371,12 +369,12 @@ connection.onCodeLens(async ({ textDocument }): Promise<CodeLens[]> => {
 
   const result = results.get(document.uri) ?? await analyzeDocument(document)
 
-  return result?.analyses.map((analysis) => ({
+  return result?.analyses.map(analysis => ({
     range: Range.create(analysis.dependency.nameRange.startPosition, analysis.dependency.nameRange.startPosition),
     command: {
       command: '',
-      title: statusTitle(analysis),
-    },
+      title: statusTitle(analysis)
+    }
   })) ?? []
 })
 
@@ -387,17 +385,17 @@ connection.onHover(async ({ position, textDocument }): Promise<Hover | undefined
 
   const result = results.get(document.uri) ?? await analyzeDocument(document)
 
-  const analysis = result?.analyses.find((candidate) => containsPosition(toRange(candidate.dependency.nameRange), position)
-      || containsPosition(toRange(candidate.dependency.specRange), position))
+  const analysis = result?.analyses.find(candidate => containsPosition(toRange(candidate.dependency.nameRange), position) ||
+    containsPosition(toRange(candidate.dependency.specRange), position))
 
   if (!analysis) return undefined
 
   return {
     contents: {
       kind: MarkupKind.Markdown,
-      value: hoverMarkdown(analysis),
+      value: hoverMarkdown(analysis)
     },
-    range: Range.create(analysis.dependency.nameRange.startPosition, analysis.dependency.specRange.endPosition),
+    range: Range.create(analysis.dependency.nameRange.startPosition, analysis.dependency.specRange.endPosition)
   }
 })
 
@@ -408,7 +406,7 @@ connection.languages.inlayHint.on(async ({ range, textDocument }): Promise<Inlay
 
   const result = results.get(document.uri) ?? await analyzeDocument(document)
 
-  return result?.analyses.flatMap((analysis) => {
+  return result?.analyses.flatMap(analysis => {
     const position = analysis.dependency.specRange.endPosition
 
     if (!containsPosition(range, position)) return []
@@ -419,8 +417,8 @@ connection.languages.inlayHint.on(async ({ range, textDocument }): Promise<Inlay
       position,
       tooltip: {
         kind: MarkupKind.Markdown,
-        value: hoverMarkdown(analysis),
-      },
+        value: hoverMarkdown(analysis)
+      }
     }]
   }) ?? []
 })
@@ -432,10 +430,10 @@ connection.onDocumentLinks(async ({ textDocument }): Promise<DocumentLink[]> => 
 
   const result = results.get(document.uri) ?? await analyzeDocument(document)
 
-  return result?.analyses.map((analysis) => ({
+  return result?.analyses.map(analysis => ({
     range: toRange(analysis.dependency.nameRange),
     target: analysis.packageUrl,
-    tooltip: `Open ${analysis.dependency.packageName} on npm`,
+    tooltip: `Open ${analysis.dependency.packageName} on npm`
   })) ?? []
 })
 
@@ -448,50 +446,50 @@ connection.onCodeAction(async ({ range, textDocument }) => {
 
   if (!result) return []
 
-  const selectedAnalyses = result.analyses.filter((analysis) => {
+  const selectedAnalyses = result.analyses.filter(analysis => {
     const dependencyRange = toRange(analysis.dependency.specRange)
     const outsideSelection = range.end.line < dependencyRange.start.line || range.start.line > dependencyRange.end.line
 
     return !outsideSelection
   })
 
-  const selectedDependencyHasUpdate = selectedAnalyses.some((analysis) => {
+  const selectedDependencyHasUpdate = selectedAnalyses.some(analysis => {
     const catalog = catalogLocation(analysis, result.catalogLocations)
     const editableSpec = catalog?.dependency.spec ?? analysis.dependency.spec
 
-    return bulkUpdateSpec(analysis, editableSpec, 'compatible') !== undefined
-      || bulkUpdateSpec(analysis, editableSpec, 'latest') !== undefined
+    return bulkUpdateSpec(analysis, editableSpec, 'compatible') !== undefined ||
+      bulkUpdateSpec(analysis, editableSpec, 'latest') !== undefined
   })
 
-  const bulkActions = selectedDependencyHasUpdate
-    ? ([
-        ['compatible', 'Update all compatible dependencies'],
-        ['latest', 'Update all dependencies to latest'],
-      ] as const).flatMap(([strategy, title]) => {
-        const update = bulkWorkspaceEdit(document.uri, result, strategy)
+  const bulkActions = selectedDependencyHasUpdate ?
+    ([
+      ['compatible', 'Update all compatible dependencies'],
+      ['latest', 'Update all dependencies to latest']
+    ] as const).flatMap(([strategy, title]) => {
+      const update = bulkWorkspaceEdit(document.uri, result, strategy)
 
-        if (!update) return []
+      if (!update) return []
 
-        return [{
-          edit: update.edit,
-          kind: CodeActionKind.QuickFix,
-          title: `Dep Beacon: ${title} (${update.count})`,
-        }]
-      })
-    : []
+      return [{
+        edit: update.edit,
+        kind: CodeActionKind.QuickFix,
+        title: `Dep Beacon: ${title} (${update.count})`
+      }]
+    }) :
+    []
 
-  const dependencyActions = selectedAnalyses.flatMap((analysis) => {
+  const dependencyActions = selectedAnalyses.flatMap(analysis => {
     const catalog = catalogLocation(analysis, result.catalogLocations)
     const editableDependency = catalog?.dependency ?? analysis.dependency
     const editableUri = catalog?.uri ?? document.uri
     const editableRange = toRange(editableDependency.specRange)
     const diagnostic = analysisDiagnostic(analysis)
 
-    return updateTargets(analysis, editableDependency.spec).map((target) => {
+    return updateTargets(analysis, editableDependency.spec).map(target => {
       const edit: WorkspaceEdit = {
         changes: {
-          [editableUri]: [TextEdit.replace(editableRange, editSpec(editableDependency, target.spec))],
-        },
+          [editableUri]: [TextEdit.replace(editableRange, editSpec(editableDependency, target.spec))]
+        }
       }
 
       return {
@@ -499,7 +497,7 @@ connection.onCodeAction(async ({ range, textDocument }) => {
         edit,
         isPreferred: target.kind === 'latest',
         kind: CodeActionKind.QuickFix,
-        title: catalog ? `${target.title} in pnpm catalog` : target.title,
+        title: catalog ? `${target.title} in pnpm catalog` : target.title
       }
     })
   })

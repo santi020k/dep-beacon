@@ -17,11 +17,11 @@ const run = async () => {
     mainFields: ['module', 'main'],
     outfile: resolve(DIST_PATH, 'extension.js'),
     platform: 'node',
-    sourcemap: true,
+    sourcemap: true
   })
 }
 
-run().catch((error) => {
+run().catch(error => {
   process.stderr.write(`${error instanceof Error ? error.stack ?? error.message : String(error)}\n`)
 
   process.exitCode = 1

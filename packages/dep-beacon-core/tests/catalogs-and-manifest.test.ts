@@ -6,7 +6,7 @@ import {
   isSupportedManifestPath,
   mergeCatalogSnapshots,
   parseManifest,
-  resolveCatalogSpec,
+  resolveCatalogSpec
 } from '../src/index.js'
 
 describe('catalog snapshots and manifest routing', () => {
@@ -17,7 +17,7 @@ describe('catalog snapshots and manifest routing', () => {
     first.default.set('react', '^18.0.0')
     first.named.set('ui', new Map([
       ['@scope/button', '^1.0.0'],
-      ['@scope/card', '^1.0.0'],
+      ['@scope/card', '^1.0.0']
     ]))
 
     second.default.set('react', '^19.0.0')

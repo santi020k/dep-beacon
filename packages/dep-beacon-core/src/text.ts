@@ -32,19 +32,19 @@ export const offsetToPosition = (lineStarts: readonly number[], offset: number):
 
   return {
     character: Math.max(0, offset - lineStart),
-    line,
+    line
   }
 }
 
 export const createTextRange = (
   lineStarts: readonly number[],
   start: number,
-  end: number,
+  end: number
 ): TextRange => ({
   end,
   endPosition: offsetToPosition(lineStarts, end),
   start,
-  startPosition: offsetToPosition(lineStarts, start),
+  startPosition: offsetToPosition(lineStarts, start)
 })
 
 export const createFullRange = (text: string): TextRange => {

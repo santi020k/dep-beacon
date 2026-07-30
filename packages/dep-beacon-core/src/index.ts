@@ -27,7 +27,7 @@ export type {
   Severity,
   TextPosition,
   TextRange,
-  VulnerabilitySummary,
+  VulnerabilitySummary
 } from './types.js'
 export {
   createTargetSpec,
@@ -37,5 +37,5 @@ export {
   normalizeDependencySpec,
   specLooksPublished,
   specSatisfiesLatest,
-  versionCandidates,
+  versionCandidates
 } from './versions.js'

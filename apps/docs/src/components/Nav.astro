@@ -12,7 +12,7 @@ const pageLinks = [{ href: '/', label: 'Home' }, ...DOCS_NAV]
 const primaryLinks = [
   { href: '/docs', label: 'Docs' },
   { href: '/docs/vscode-extension', label: 'VS Code' },
-  { href: '/docs/zed-extension', label: 'Zed' },
+  { href: '/docs/zed-extension', label: 'Zed' }
 ]
 ---
 
@@ -24,7 +24,7 @@ const primaryLinks = [
     </Link>
     <div class="header-actions">
       <NavigationMenu class="top-nav" aria-label="Primary navigation" variant="unstyled">
-        {primaryLinks.map((item) => (
+        {primaryLinks.map(item => (
           <Link href={item.href} aria-current={pathname === item.href ? 'page' : undefined}>
             {item.label}
           </Link>
@@ -51,7 +51,7 @@ const primaryLinks = [
     <Button variant="ghost" type="button" data-ui-sheet-close>Close</Button>
   </div>
   <NavigationMenu class="mobile-nav" aria-label="Mobile primary navigation" variant="unstyled">
-    {pageLinks.map((item) => (
+    {pageLinks.map(item => (
       <Link
         href={item.href}
         aria-current={pathname === item.href ? 'page' : undefined}

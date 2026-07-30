@@ -27,7 +27,7 @@ const requiredServerFeatures = [
   ['Dep Beacon hover', 'hoverProvider: true'],
   ['inline dependency status', 'inlayHintProvider: true'],
   ['bulk dependency updates', 'Update all compatible dependencies'],
-  ['pnpm catalog updates', 'in pnpm catalog'],
+  ['pnpm catalog updates', 'in pnpm catalog']
 ]
 
 for (const [feature, marker] of requiredServerFeatures) {
@@ -42,8 +42,8 @@ if (!manifest.includes('[language_servers.dep-beacon]')) {
   throw new Error('extension.toml does not register the Dep Beacon language server.')
 }
 
-if (!adapterSource.includes('zed::npm_install_package(PACKAGE_NAME, &latest_version)?')
-  || adapterSource.includes('worktree.which(')) {
+if (!adapterSource.includes('zed::npm_install_package(PACKAGE_NAME, &latest_version)?') ||
+  adapterSource.includes('worktree.which(')) {
   throw new Error('The Zed adapter must use its managed language-server package instead of a PATH binary.')
 }
 

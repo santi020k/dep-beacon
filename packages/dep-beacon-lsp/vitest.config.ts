@@ -10,9 +10,9 @@ export default defineConfig({
         branches: 90,
         functions: 90,
         lines: 90,
-        statements: 90,
-      },
+        statements: 90
+      }
     },
-    include: ['tests/**/*.test.ts'],
-  },
+    include: ['tests/**/*.test.ts']
+  }
 })

@@ -15,7 +15,7 @@ const run = async () => {
     banner: { js: '#!/usr/bin/env node' },
     bundle: true,
     define: {
-      DEP_BEACON_VERSION: JSON.stringify(packageJson.version),
+      DEP_BEACON_VERSION: JSON.stringify(packageJson.version)
     },
     entryPoints: [resolve(packageRoot, 'src/server.ts')],
     format: 'cjs',
@@ -23,13 +23,13 @@ const run = async () => {
     outfile: outputPath,
     platform: 'node',
     sourcemap: true,
-    target: 'node20',
+    target: 'node20'
   })
 
   chmodSync(outputPath, 0o755)
 }
 
-run().catch((error) => {
+run().catch(error => {
   process.stderr.write(`${error instanceof Error ? error.stack ?? error.message : String(error)}\n`)
 
   process.exitCode = 1

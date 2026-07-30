@@ -16,7 +16,7 @@ import {
   parsePackageJsonManifest,
   specLooksPublished,
   specSatisfiesLatest,
-  versionCandidates,
+  versionCandidates
 } from '../src/index.js'
 import {
   computeUpdateTargets,
@@ -24,13 +24,13 @@ import {
   getInvalidSpecMessage,
   hasModerateRiskSeverity,
   normalizeDependencySpec,
-  parseValidVersion,
+  parseValidVersion
 } from '../src/versions.js'
 
 const metadata = (versions: readonly string[], distTags: Record<string, string> = {}): NpmPackageMetadata => ({
   distTags,
   name: 'demo',
-  versions: [...versions],
+  versions: [...versions]
 })
 
 const firstDependency = (text: string): DependencyEntry => {
@@ -43,24 +43,24 @@ const firstDependency = (text: string): DependencyEntry => {
 
 const registryClient = (lookup: unknown = {
   'dist-tags': {
-    latest: '2.0.0',
+    latest: '2.0.0'
   },
   name: 'demo',
   versions: {
     '1.0.0': {},
     '1.0.1': {},
     '1.1.0': {},
-    '2.0.0': {},
-  },
+    '2.0.0': {}
+  }
 }): NpmRegistryClient => new NpmRegistryClient({
-  fetch: () => Promise.resolve(new Response(JSON.stringify(lookup), { status: 200 })),
+  fetch: () => Promise.resolve(new Response(JSON.stringify(lookup), { status: 200 }))
 })
 
 describe('version helpers', () => {
   test('filters version candidates and selects latest with prerelease awareness', () => {
     const packageMetadata = metadata(['bad', '1.0.0', '1.1.0', '2.0.0-beta.1'], {
       latest: '2.0.0-beta.1',
-      next: '2.0.0-beta.2',
+      next: '2.0.0-beta.2'
     })
 
     expect(versionCandidates(packageMetadata, false)).toEqual(['1.0.0', '1.1.0'])
@@ -75,11 +75,11 @@ describe('version helpers', () => {
     expect(computeUpdateTargets('^1.0.0', packageMetadata, false)).toEqual({
       current: '1.1.0',
       latest: '2.0.0',
-      nextMajor: '2.0.0',
+      nextMajor: '2.0.0'
     })
     expect(computeUpdateTargets('latest', packageMetadata, false)).toEqual({
       current: '2.0.0',
-      latest: '2.0.0',
+      latest: '2.0.0'
     })
     expect(computeUpdateTargets('definitely-not-semver', packageMetadata, false)).toEqual({})
     expect(getVersionPrefix('  ~1.0.0')).toBe('~')
@@ -98,7 +98,7 @@ describe('version helpers', () => {
     const aliasWithoutVersion = {
       ...dependency,
       packageName: 'alias',
-      spec: 'npm:real-package',
+      spec: 'npm:real-package'
     }
     const catalog = createEmptyCatalogSnapshot()
 
@@ -106,26 +106,26 @@ describe('version helpers', () => {
 
     expect(normalizeDependencySpec(dependency)).toMatchObject({
       packageName: '@scope/real',
-      spec: '^2.0.0',
+      spec: '^2.0.0'
     })
     expect(normalizeDependencySpec(aliasWithoutVersion)).toMatchObject({
       packageName: 'alias',
-      spec: 'real-package',
+      spec: 'real-package'
     })
     expect(normalizeDependencySpec({
       ...dependency,
-      spec: 'workspace:*',
+      spec: 'workspace:*'
     })).toMatchObject({
       protocol: 'unsupported',
-      spec: 'workspace:*',
+      spec: 'workspace:*'
     })
     expect(normalizeDependencySpec({
       ...dependency,
-      spec: 'catalog:ui',
+      spec: 'catalog:ui'
     }, catalog)).toMatchObject({
       displaySpec: 'catalog:ui (^3.0.0)',
       protocol: 'catalog',
-      spec: '^3.0.0',
+      spec: '^3.0.0'
     })
   })
 
@@ -140,19 +140,19 @@ describe('version helpers', () => {
       exists: true,
       isLatestSatisfied: true,
       statusBeforeVulnerability: 'outdated',
-      vulnerability: { aliases: [], ids: ['OSV-1'], severity: 'medium', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['OSV-1'], severity: 'medium', source: 'osv' }
     })).toBe('vulnerable')
     expect(getDependencyStatus({
       exists: false,
       isLatestSatisfied: false,
       statusBeforeVulnerability: 'missing',
-      vulnerability: { aliases: [], ids: ['OSV-1'], severity: 'high', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['OSV-1'], severity: 'high', source: 'osv' }
     })).toBe('vulnerable')
     expect(getDependencyStatus({
       exists: false,
       isLatestSatisfied: false,
       statusBeforeVulnerability: 'missing',
-      vulnerability: { aliases: [], ids: ['OSV-1'], severity: 'low', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['OSV-1'], severity: 'low', source: 'osv' }
     })).toBe('missing')
     expect(specLooksPublished('^9.0.0', packageMetadata)).toBe(false)
     expect(specLooksPublished('*', packageMetadata)).toBe(true)
@@ -172,16 +172,16 @@ describe('dependency analysis edge cases', () => {
 }`)
     const catalogDependency = {
       ...workspaceDependency,
-      spec: 'catalog:',
+      spec: 'catalog:'
     }
 
     await expect(analyzeDependency(workspaceDependency)).resolves.toMatchObject({
       message: 'This dependency uses a local, workspace, git, or URL protocol, so Dep Beacon does not query npm for it.',
-      status: 'protocol',
+      status: 'protocol'
     })
     await expect(analyzeDependency(catalogDependency)).resolves.toMatchObject({
       message: 'This dependency uses a catalog reference that could not be resolved from pnpm-workspace.yaml.',
-      status: 'protocol',
+      status: 'protocol'
     })
   })
 
@@ -193,35 +193,35 @@ describe('dependency analysis edge cases', () => {
 }`)
     const invalid = {
       ...empty,
-      spec: 'not-a-version',
+      spec: 'not-a-version'
     }
     const registryError = {
       ...empty,
-      spec: '^1.0.0',
+      spec: '^1.0.0'
     }
     const upToDate = {
       ...empty,
-      spec: '^2.0.0',
+      spec: '^2.0.0'
     }
     const distTag = {
       ...empty,
-      spec: 'latest',
+      spec: 'latest'
     }
     const registryErrorClient = new NpmRegistryClient({
-      fetch: () => Promise.resolve(new Response(JSON.stringify({ error: 'temporary' }), { status: 500 })),
+      fetch: () => Promise.resolve(new Response(JSON.stringify({ error: 'temporary' }), { status: 500 }))
     })
 
     await expect(analyzeDependency(empty, { registryClient: registryClient() })).resolves.toMatchObject({
       message: 'This dependency has an empty version range.',
-      status: 'invalid',
+      status: 'invalid'
     })
     await expect(analyzeDependency(registryError, { registryClient: registryErrorClient })).resolves.toMatchObject({
       message: 'npm registry returned 500 for demo.',
-      status: 'unavailable',
+      status: 'unavailable'
     })
     await expect(analyzeDependency(invalid, { registryClient: registryClient() })).resolves.toMatchObject({
       message: 'The version range "not-a-version" is not a valid semver range.',
-      status: 'invalid',
+      status: 'invalid'
     })
     await expect(analyzeDependency(distTag, { registryClient: registryClient() })).resolves.toMatchObject({
       isLatestSatisfied: true,
@@ -229,13 +229,13 @@ describe('dependency analysis edge cases', () => {
       status: 'up-to-date',
       targets: {
         current: '2.0.0',
-        latest: '2.0.0',
-      },
+        latest: '2.0.0'
+      }
     })
     await expect(analyzeDependency(upToDate, { registryClient: registryClient() })).resolves.toMatchObject({
       isLatestSatisfied: true,
       message: 'Current range accepts the latest published version. Latest is 2.0.0.',
-      status: 'up-to-date',
+      status: 'up-to-date'
     })
   })
 
@@ -252,8 +252,8 @@ describe('dependency analysis edge cases', () => {
         aliases: [],
         ids: ['OSV-unknown'],
         severity: 'unknown',
-        source: 'osv',
-      },
+        source: 'osv'
+      }
     })
 
     expect(direct.message).toContain('OSV reports known vulnerability data for this version.')
@@ -261,19 +261,19 @@ describe('dependency analysis edge cases', () => {
 
     const noVulnerabilities = await analyzeDependencies([{
       ...dependency,
-      spec: 'catalog:',
+      spec: 'catalog:'
     }, {
       ...dependency,
-      spec: 'not-a-version',
+      spec: 'not-a-version'
     }], {
       registryClient: registryClient(),
       vulnerabilities: true,
       osvClient: new OsvClient({
-        fetch: () => Promise.reject(new Error('OSV should not be queried when no analyses have a current version.')),
-      }),
+        fetch: () => Promise.reject(new Error('OSV should not be queried when no analyses have a current version.'))
+      })
     })
 
-    expect(noVulnerabilities.map((analysis) => analysis.status)).toEqual(['protocol', 'invalid'])
+    expect(noVulnerabilities.map(analysis => analysis.status)).toEqual(['protocol', 'invalid'])
   })
 
   test('passes registry url to default registry clients', async () => {
@@ -283,13 +283,13 @@ describe('dependency analysis edge cases', () => {
   }
 }`)
     const urls: string[] = []
-    const fetcher: FetchLike = (url) => {
+    const fetcher: FetchLike = url => {
       urls.push(url)
 
       return Promise.resolve(new Response(JSON.stringify({
         'dist-tags': { latest: '1.0.0' },
         name: 'demo',
-        versions: { '1.0.0': {} },
+        versions: { '1.0.0': {} }
       }), { status: 200 }))
     }
     const originalFetch = globalThis.fetch
@@ -298,7 +298,7 @@ describe('dependency analysis edge cases', () => {
 
     try {
       await analyzeDependency(dependency, {
-        registryUrl: 'https://registry.example.test/',
+        registryUrl: 'https://registry.example.test/'
       })
     } finally {
       globalThis.fetch = originalFetch

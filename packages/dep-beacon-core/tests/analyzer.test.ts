@@ -6,15 +6,15 @@ import {
   createEmptyCatalogSnapshot,
   NpmRegistryClient,
   OsvClient,
-  parsePackageJsonManifest,
+  parsePackageJsonManifest
 } from '../src/index.js'
 
 const packument = (name: string, versions: readonly string[], latest: string): unknown => ({
   'dist-tags': {
-    latest,
+    latest
   },
   name,
-  versions: Object.fromEntries(versions.map((version) => [version, {}])),
+  versions: Object.fromEntries(versions.map(version => [version, {}]))
 })
 
 const fetchInputToUrl = (input: Parameters<typeof fetch>[0]): string => {
@@ -24,7 +24,7 @@ const fetchInputToUrl = (input: Parameters<typeof fetch>[0]): string => {
   return input.url
 }
 
-const registryFetch: typeof fetch = (input) => {
+const registryFetch: typeof fetch = input => {
   const url = fetchInputToUrl(input)
   const packageName = decodeURIComponent(url.split('/').at(-1) ?? '')
 
@@ -37,32 +37,32 @@ const registryFetch: typeof fetch = (input) => {
     '1.0.1',
     '1.1.0',
     '2.0.0',
-    '2.1.0',
+    '2.1.0'
   ], '2.1.0')), {
     headers: {
-      'content-type': 'application/json',
+      'content-type': 'application/json'
     },
-    status: 200,
+    status: 200
   }))
 }
 
-const osvFetch: typeof fetch = (input) => {
+const osvFetch: typeof fetch = input => {
   const url = fetchInputToUrl(input)
 
   if (url.endsWith('/v1/querybatch')) {
     return Promise.resolve(new Response(JSON.stringify({
       results: [{
-        vulns: [{ id: 'OSV-2026-1' }],
-      }],
+        vulns: [{ id: 'OSV-2026-1' }]
+      }]
     }), { status: 200 }))
   }
 
   return Promise.resolve(new Response(JSON.stringify({
     aliases: ['GHSA-demo'],
-    'database_specific': {
-      severity: 'HIGH',
+    database_specific: {
+      severity: 'HIGH'
     },
-    id: 'OSV-2026-1',
+    id: 'OSV-2026-1'
   }), { status: 200 }))
 }
 
@@ -88,7 +88,7 @@ describe('dependency analysis', () => {
     expect(analysis.targets).toMatchObject({
       current: '1.1.0',
       latest: '2.1.0',
-      nextMajor: '2.1.0',
+      nextMajor: '2.1.0'
     })
   })
 
@@ -118,7 +118,7 @@ describe('dependency analysis', () => {
     const registryClient = new NpmRegistryClient({ fetch: registryFetch })
     const analysis = await analyzeDependency(dependency, {
       catalogSnapshot: catalogs,
-      registryClient,
+      registryClient
     })
 
     expect(analysis.displaySpec).toBe('catalog: (^1.0.0)')
@@ -127,12 +127,12 @@ describe('dependency analysis', () => {
 
   test('limits concurrent registry requests for large workspaces', async () => {
     const dependencies = parsePackageJsonManifest(JSON.stringify({
-      dependencies: Object.fromEntries(Array.from({ length: 24 }, (_, index) => [`demo-${index}`, '^1.0.0'])),
+      dependencies: Object.fromEntries(Array.from({ length: 24 }, (_, index) => [`demo-${index}`, '^1.0.0']))
     })).dependencies
     let activeRequests = 0
     let maximumActiveRequests = 0
     const registryClient = new NpmRegistryClient({
-      fetch: async (url) => {
+      fetch: async url => {
         activeRequests += 1
         maximumActiveRequests = Math.max(maximumActiveRequests, activeRequests)
 
@@ -143,7 +143,7 @@ describe('dependency analysis', () => {
         const packageName = decodeURIComponent(url.split('/').at(-1) ?? '')
 
         return new Response(JSON.stringify(packument(packageName, ['1.0.0'], '1.0.0')), { status: 200 })
-      },
+      }
     })
 
     const analyses = await analyzeDependencies(dependencies, { registryClient })
@@ -163,7 +163,7 @@ describe('dependency analysis', () => {
     const [analysis] = await analyzeDependencies([dependency], {
       osvClient: new OsvClient({ fetch: osvFetch }),
       registryClient,
-      vulnerabilities: true,
+      vulnerabilities: true
     })
 
     expect(analysis?.status).toBe('vulnerable')

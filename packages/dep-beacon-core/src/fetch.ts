@@ -6,7 +6,7 @@ export const fetchWithTimeout = async (
   fetcher: FetchLike,
   input: string,
   init: RequestInit = {},
-  timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+  timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS
 ): Promise<Response> => {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return fetcher(input, init)
 
@@ -19,7 +19,7 @@ export const fetchWithTimeout = async (
   try {
     return await fetcher(input, {
       ...init,
-      signal: controller.signal,
+      signal: controller.signal
     })
   } catch (error) {
     if (controller.signal.aborted) {

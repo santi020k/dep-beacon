@@ -24,7 +24,7 @@ export const stripNpmAlias = (packageName: string, spec: string): { packageName:
 
   return {
     packageName: withoutProtocol.slice(0, separatorIndex),
-    spec: withoutProtocol.slice(separatorIndex + 1),
+    spec: withoutProtocol.slice(separatorIndex + 1)
   }
 }
 
@@ -34,7 +34,7 @@ export const getResolutionPackageName = (key: string): string => {
 
   if (scopedMatch) return scopedMatch[0]
 
-  const parts = normalized.split('/').filter((part) => !part.includes('*') && part.length > 0)
+  const parts = normalized.split('/').filter(part => !part.includes('*') && part.length > 0)
 
   return parts.at(-1) ?? key
 }

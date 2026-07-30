@@ -10,7 +10,7 @@ import {
   prerelease,
   satisfies,
   valid,
-  validRange,
+  validRange
 } from 'semver'
 
 import { resolveCatalogSpec } from './catalogs.js'
@@ -22,7 +22,7 @@ import type {
   DependencyUpdateTargets,
   NpmPackageMetadata,
   Severity,
-  VulnerabilitySummary,
+  VulnerabilitySummary
 } from './types.js'
 
 export interface NormalizedDependencySpec {
@@ -36,7 +36,7 @@ const VERSION_PREFIX_PATTERN = /^(?<prefix>[\^~>=< ]*)\d/u
 
 export const normalizeDependencySpec = (
   dependency: DependencyEntry,
-  catalogSnapshot?: CatalogSnapshot,
+  catalogSnapshot?: CatalogSnapshot
 ): NormalizedDependencySpec => {
   if (dependency.spec.startsWith('catalog:')) {
     const catalogSpec = resolveCatalogSpec(catalogSnapshot, dependency.packageName, dependency.spec)
@@ -45,7 +45,7 @@ export const normalizeDependencySpec = (
       displaySpec: catalogSpec ? `${dependency.spec} (${catalogSpec})` : dependency.spec,
       packageName: dependency.packageName,
       protocol: catalogSpec ? 'catalog' : 'unsupported',
-      spec: catalogSpec ?? dependency.spec,
+      spec: catalogSpec ?? dependency.spec
     }
   }
 
@@ -54,7 +54,7 @@ export const normalizeDependencySpec = (
       displaySpec: dependency.spec,
       packageName: dependency.packageName,
       protocol: 'unsupported',
-      spec: dependency.spec,
+      spec: dependency.spec
     }
   }
 
@@ -63,21 +63,18 @@ export const normalizeDependencySpec = (
   return {
     displaySpec: dependency.spec,
     packageName: alias.packageName,
-    spec: alias.spec,
+    spec: alias.spec
   }
 }
 
-export const isHighRiskSeverity = (severity: Severity | undefined): boolean =>
-  severity === 'critical' || severity === 'high'
+export const isHighRiskSeverity = (severity: Severity | undefined): boolean => severity === 'critical' || severity === 'high'
 
-export const hasModerateRiskSeverity = (severity: Severity | undefined): boolean =>
-  severity === 'medium' || severity === 'low'
+export const hasModerateRiskSeverity = (severity: Severity | undefined): boolean => severity === 'medium' || severity === 'low'
 
-export const versionCandidates = (metadata: NpmPackageMetadata, includePrerelease: boolean): string[] =>
-  metadata.versions
-    .filter((version) => valid(version))
-    .filter((version) => includePrerelease || prerelease(version) === null)
-    .sort(compare)
+export const versionCandidates = (metadata: NpmPackageMetadata, includePrerelease: boolean): string[] => metadata.versions
+  .filter(version => valid(version))
+  .filter(version => includePrerelease || prerelease(version) === null)
+  .sort(compare)
 
 const maxVersion = (versions: readonly string[]): string | undefined => versions.at(-1)
 
@@ -91,35 +88,32 @@ const distTagVersion = (metadata: NpmPackageMetadata, tag: string, includePrerel
   return version
 }
 
-export const getLatestVersion = (metadata: NpmPackageMetadata, includePrerelease: boolean): string | undefined =>
-  distTagVersion(metadata, includePrerelease ? 'next' : 'latest', includePrerelease)
-  ?? distTagVersion(metadata, 'latest', includePrerelease)
-  ?? maxVersion(versionCandidates(metadata, includePrerelease))
+export const getLatestVersion = (metadata: NpmPackageMetadata, includePrerelease: boolean): string | undefined => distTagVersion(metadata, includePrerelease ? 'next' : 'latest', includePrerelease) ??
+  distTagVersion(metadata, 'latest', includePrerelease) ??
+  maxVersion(versionCandidates(metadata, includePrerelease))
 
 const firstHigherMinor = (versions: readonly string[], baseVersion: string): string | undefined => {
   const baseMajor = major(baseVersion)
   const baseMinor = minor(baseVersion)
-  const higher = versions.filter((version) => major(version) === baseMajor && minor(version) > baseMinor && gt(version, baseVersion))
-  const nextMinor = higher.map((version) => minor(version)).sort((left, right) => left - right).at(0)
+  const higher = versions.filter(version => major(version) === baseMajor && minor(version) > baseMinor && gt(version, baseVersion))
+  const nextMinor = higher.map(version => minor(version)).sort((left, right) => left - right).at(0)
 
   if (typeof nextMinor !== 'number') return undefined
 
-  return maxVersion(higher.filter((version) => minor(version) === nextMinor))
+  return maxVersion(higher.filter(version => minor(version) === nextMinor))
 }
 
 const firstHigherMajor = (versions: readonly string[], baseVersion: string): string | undefined => {
   const baseMajor = major(baseVersion)
-  const higher = versions.filter((version) => major(version) > baseMajor && gt(version, baseVersion))
-  const nextMajor = higher.map((version) => major(version)).sort((left, right) => left - right).at(0)
+  const higher = versions.filter(version => major(version) > baseMajor && gt(version, baseVersion))
+  const nextMajor = higher.map(version => major(version)).sort((left, right) => left - right).at(0)
 
   if (typeof nextMajor !== 'number') return undefined
 
-  return maxVersion(higher.filter((version) => major(version) === nextMajor))
+  return maxVersion(higher.filter(version => major(version) === nextMajor))
 }
 
-const highestPatch = (versions: readonly string[], baseVersion: string): string | undefined =>
-  maxVersion(versions.filter((version) => major(version) === major(baseVersion) && minor(version) === minor(baseVersion) && gt(version, baseVersion)))
-
+const highestPatch = (versions: readonly string[], baseVersion: string): string | undefined => maxVersion(versions.filter(version => major(version) === major(baseVersion) && minor(version) === minor(baseVersion) && gt(version, baseVersion)))
 const isConcreteSpec = (spec: string): boolean => /^[\^~]?\d/u.test(spec.trim())
 
 const safeMinVersion = (spec: string): string | undefined => {
@@ -144,13 +138,12 @@ export const getVersionPrefix = (spec: string): string => {
   return ''
 }
 
-export const createTargetSpec = (currentSpec: string, targetVersion: string): string =>
-  `${getVersionPrefix(currentSpec)}${targetVersion}`
+export const createTargetSpec = (currentSpec: string, targetVersion: string): string => `${getVersionPrefix(currentSpec)}${targetVersion}`
 
 export const computeUpdateTargets = (
   spec: string,
   metadata: NpmPackageMetadata,
-  includePrerelease: boolean,
+  includePrerelease: boolean
 ): DependencyUpdateTargets => {
   const range = validRange(spec)
   const candidates = versionCandidates(metadata, includePrerelease)
@@ -164,7 +157,7 @@ export const computeUpdateTargets = (
     latest: getLatestVersion(metadata, includePrerelease),
     nextMajor: firstHigherMajor(candidates, current),
     nextMinor: firstHigherMinor(candidates, current),
-    nextPatch: highestPatch(candidates, current),
+    nextPatch: highestPatch(candidates, current)
   }
 }
 
@@ -174,13 +167,13 @@ export const getDependencyStatus = (
     isLatestSatisfied: boolean
     statusBeforeVulnerability: DependencyStatus
     vulnerability?: VulnerabilitySummary
-  },
+  }
 ): DependencyStatus => {
   if (args.vulnerability && isHighRiskSeverity(args.vulnerability.severity)) return 'vulnerable'
 
-  if (args.statusBeforeVulnerability === 'invalid'
-    || args.statusBeforeVulnerability === 'missing'
-    || args.statusBeforeVulnerability === 'unavailable') return args.statusBeforeVulnerability
+  if (args.statusBeforeVulnerability === 'invalid' ||
+    args.statusBeforeVulnerability === 'missing' ||
+    args.statusBeforeVulnerability === 'unavailable') return args.statusBeforeVulnerability
 
   if (args.vulnerability && hasModerateRiskSeverity(args.vulnerability.severity)) return 'vulnerable'
 
@@ -201,7 +194,7 @@ export const specSatisfiesLatest = (
   spec: string,
   latest: string | undefined,
   includePrerelease: boolean,
-  metadata?: NpmPackageMetadata,
+  metadata?: NpmPackageMetadata
 ): boolean => {
   if (!latest) return false
 

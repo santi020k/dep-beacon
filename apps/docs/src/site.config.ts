@@ -13,7 +13,7 @@ export const SITE = {
     'npm dependencies',
     'pnpm workspace catalogs',
     'OSV vulnerabilities',
-    'package.json',
+    'package.json'
   ],
   lumenUrl: 'https://lumen.santi020k.com',
   marketplaceUrl: 'https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon',
@@ -25,5 +25,5 @@ export const SITE = {
   shortDescription: 'Dependency signals for npm manifests in VS Code and Zed.',
   url: siteUrl,
   vscodePackage: 'vscode-dep-beacon',
-  zedPackage: '@santi020k/dep-beacon-lsp',
+  zedPackage: '@santi020k/dep-beacon-lsp'
 }

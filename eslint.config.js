@@ -1,6 +1,6 @@
-import { attachReferencedPlugins, defineConfig } from '@santi020k/eslint-config-basic'
+import { defineConfig } from '@santi020k/eslint-config-basic'
 
-const config = await defineConfig({
+export default defineConfig({
   features: {
     boundaries: true,
     unicorn: true,
@@ -15,21 +15,15 @@ const config = await defineConfig({
     'unicorn/prefer-module': 'off',
   },
 }, {
+  name: 'local-stylistic-preferences',
+  rules: {
+    '@stylistic/function-call-argument-newline': ['error', 'consistent'],
+  },
+}, {
   files: ['**/*.astro'],
   rules: {
     'better-tailwindcss/no-unknown-classes': 'off',
+    // Astro's inline scripts conflict with JSX tag indentation during autofix.
+    '@stylistic/indent': 'off',
   },
 })
-
-export default attachReferencedPlugins([
-  ...config,
-  {
-    name: 'temporary-formatting-compatibility',
-    rules: Object.fromEntries(
-      Object.keys(
-        config.find(({ plugins }) => plugins?.['@stylistic'])
-          ?.plugins?.['@stylistic']?.rules ?? {}
-      ).map(rule => [`@stylistic/${rule}`, 'off'])
-    ),
-  },
-])

@@ -37,6 +37,6 @@ export const getDepBeaconConfig = (): DepBeaconConfig => {
     packageManager: config.get<PackageManagerPreference>('packageManager', 'auto'),
     registryUrl: configuredString(config, 'registryUrl') ?? envValue('DEP_BEACON_REGISTRY_URL', DEFAULT_REGISTRY_URL),
     runInstallOnSave: config.get('runInstallOnSave', false),
-    showInlineStatus: config.get('showInlineStatus', true),
+    showInlineStatus: config.get('showInlineStatus', true)
   }
 }

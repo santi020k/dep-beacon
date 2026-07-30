@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest'
 import {
   findWorkspaceManifestPath,
   workspaceRootForPath,
-  workspaceRootsFromInitializeParams,
+  workspaceRootsFromInitializeParams
 } from '../src/workspace.js'
 
 const root = fileURLToPath(new URL('../../../examples/sample-workspace', import.meta.url))
@@ -17,19 +17,19 @@ describe('workspace discovery', () => {
     expect(workspaceRootsFromInitializeParams({
       rootPath: '/legacy',
       rootUri: pathToFileURL(root).toString(),
-      workspaceFolders: [{ name: 'folder', uri: folder }],
+      workspaceFolders: [{ name: 'folder', uri: folder }]
     })).toEqual([fileURLToPath(folder)])
 
     expect(workspaceRootsFromInitializeParams({
       rootPath: '/legacy',
       rootUri: pathToFileURL(root).toString(),
-      workspaceFolders: null,
+      workspaceFolders: null
     })).toEqual([root])
 
     expect(workspaceRootsFromInitializeParams({
       rootPath: '/legacy',
       rootUri: null,
-      workspaceFolders: null,
+      workspaceFolders: null
     })).toEqual(['/legacy'])
   })
 
@@ -42,7 +42,7 @@ describe('workspace discovery', () => {
   test('finds yaml and yml workspace manifests from nested package documents', () => {
     const existing = new Set([
       '/repo/pnpm-workspace.yaml',
-      '/repo/packages/nested/pnpm-workspace.yml',
+      '/repo/packages/nested/pnpm-workspace.yml'
     ])
     const pathExists = (path: string): boolean => existing.has(path)
 

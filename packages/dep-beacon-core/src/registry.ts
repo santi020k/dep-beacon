@@ -12,14 +12,13 @@ interface CacheEntry {
   request: Promise<RegistryLookupResult>
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const toDistTags = (value: unknown): Record<string, string> => {
   if (!isRecord(value)) return {}
 
   return Object.fromEntries(
-    Object.entries(value).flatMap(([key, tagValue]) => (typeof tagValue === 'string' ? [[key, tagValue]] : [])),
+    Object.entries(value).flatMap(([key, tagValue]) => (typeof tagValue === 'string' ? [[key, tagValue]] : []))
   )
 }
 
@@ -34,14 +33,13 @@ const toMetadata = (packageName: string, value: unknown): NpmPackageMetadata | u
   return {
     distTags: toDistTags(packument['dist-tags']),
     name: typeof packument.name === 'string' ? packument.name : packageName,
-    versions,
+    versions
   }
 }
 
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/u, '')
 
-export const createNpmPackageUrl = (packageName: string): string =>
-  `https://www.npmjs.com/package/${packageName}`
+export const createNpmPackageUrl = (packageName: string): string => `https://www.npmjs.com/package/${packageName}`
 
 export class NpmRegistryClient {
   readonly #cache = new Map<string, CacheEntry>()
@@ -63,8 +61,7 @@ export class NpmRegistryClient {
     this.#cacheTtlMs = Math.max(0, options.cacheTtlMs ?? Number.POSITIVE_INFINITY)
 
     this.#errorCacheTtlMs = Math.min(
-      Math.max(0, options.errorCacheTtlMs ?? 30_000),
-      this.#cacheTtlMs,
+      Math.max(0, options.errorCacheTtlMs ?? 30_000), this.#cacheTtlMs
     )
 
     this.#fetch = options.fetch ?? fetch
@@ -86,7 +83,7 @@ export class NpmRegistryClient {
 
     this.#cache.set(packageName, {
       expiresAt: Number.isFinite(this.#cacheTtlMs) ? now + this.#cacheTtlMs : Number.POSITIVE_INFINITY,
-      request,
+      request
     })
 
     this.#shortenErrorCache(packageName, request).catch(() => null)
@@ -104,8 +101,8 @@ export class NpmRegistryClient {
     try {
       const response = await fetchWithTimeout(this.#fetch, `${this.#registryUrl}/${encodedName}`, {
         headers: {
-          accept: 'application/vnd.npm.install-v1+json, application/json',
-        },
+          accept: 'application/vnd.npm.install-v1+json, application/json'
+        }
       }, this.#requestTimeoutMs)
 
       if (response.status === 404) {
@@ -113,9 +110,9 @@ export class NpmRegistryClient {
           error: {
             code: 'not-found',
             message: `${packageName} was not found in the npm registry.`,
-            status: response.status,
+            status: response.status
           },
-          ok: false,
+          ok: false
         }
       }
 
@@ -124,9 +121,9 @@ export class NpmRegistryClient {
           error: {
             code: 'registry-error',
             message: `npm registry returned ${response.status} for ${packageName}.`,
-            status: response.status,
+            status: response.status
           },
-          ok: false,
+          ok: false
         }
       }
 
@@ -137,23 +134,23 @@ export class NpmRegistryClient {
           error: {
             code: 'registry-error',
             message: `npm registry response for ${packageName} did not include versions.`,
-            status: response.status,
+            status: response.status
           },
-          ok: false,
+          ok: false
         }
       }
 
       return {
         metadata,
-        ok: true,
+        ok: true
       }
     } catch (error) {
       return {
         error: {
           code: 'network-error',
-          message: error instanceof Error ? error.message : String(error),
+          message: error instanceof Error ? error.message : String(error)
         },
-        ok: false,
+        ok: false
       }
     }
   }
@@ -169,7 +166,7 @@ export class NpmRegistryClient {
 
     this.#cache.set(packageName, {
       expiresAt: this.#now() + this.#errorCacheTtlMs,
-      request,
+      request
     })
   }
 }

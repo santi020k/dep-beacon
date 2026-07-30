@@ -16,7 +16,7 @@ const containsPath = (root: string, path: string): boolean => {
 }
 
 export const workspaceRootsFromInitializeParams = (
-  params: WorkspaceInitializeParams,
+  params: WorkspaceInitializeParams
 ): string[] => {
   const folderRoots = (params.workspaceFolders ?? [])
     .flatMap(({ uri }) => uri.startsWith('file:') ? [fileURLToPath(uri)] : [])
@@ -35,7 +35,7 @@ export const workspaceRootForPath = (roots: readonly string[], path: string): st
 export const findWorkspaceManifestPath = (
   documentPath: string,
   roots: readonly string[],
-  pathExists: (path: string) => boolean,
+  pathExists: (path: string) => boolean
 ): string | undefined => {
   const root = workspaceRootForPath(roots, documentPath)
 

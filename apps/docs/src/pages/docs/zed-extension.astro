@@ -20,12 +20,16 @@ const settingsExample = `{
 <Docs title="Zed Extension" description="Zed features provided by Dep Beacon through the Language Server Protocol.">
   <h1>Dep Beacon for Zed</h1>
   <p>
-    Dep Beacon brings npm dependency intelligence to Zed through the Language Server Protocol. Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` to see dependency signals in your editor.
+    Dep Beacon brings npm dependency intelligence to Zed through the Language Server Protocol. Open `package.json`,
+    `pnpm-workspace.yaml`, or `pnpm-workspace.yml` to see dependency signals in your editor.
   </p>
 
   <Callout class="docs-callout">
     <strong>Required version:</strong>
-    <span>Use Dep Beacon for Zed `0.0.3` or newer. Version `0.0.3` is the first release with the zero-configuration diagnostics workflow and bulk update actions described below.</span>
+    <span>
+      Use Dep Beacon for Zed `0.0.3` or newer. Version `0.0.3` is the first release with the zero-configuration
+      diagnostics workflow and bulk update actions described below.
+    </span>
   </Callout>
 
   <h2>Install</h2>
@@ -36,7 +40,8 @@ const settingsExample = `{
     <li>Open a supported manifest.</li>
   </ol>
   <p>
-    If the manifest was already open during installation or an extension update, focus it and run `editor: restart language server` once. Closing and reopening the manifest works too.
+    If the manifest was already open during installation or an extension update, focus it and run
+    `editor: restart language server` once. Closing and reopening the manifest works too.
   </p>
 
   <h2>Features</h2>
@@ -53,7 +58,9 @@ const settingsExample = `{
 
   <h2>Dependency dashboard</h2>
   <p>
-    Open a supported manifest and Dep Beacon starts automatically. Click the error and warning indicator in Zed's status bar or run `diagnostics: deploy` (`cmd-shift-m` on macOS or `ctrl-shift-m` on Linux and Windows) to see actionable dependencies from your open manifests in one editable multi-buffer.
+    Open a supported manifest and Dep Beacon starts automatically. Click the error and warning indicator in Zed's
+    status bar or run `diagnostics: deploy` (`cmd-shift-m` on macOS or `ctrl-shift-m` on Linux and Windows) to see
+    actionable dependencies from your open manifests in one editable multi-buffer.
   </p>
 
   <h2>Update dependencies</h2>
@@ -62,47 +69,64 @@ const settingsExample = `{
   </p>
   <ul>
     <li>Patch, minor, major, and latest actions update only the selected dependency.</li>
-    <li>`Update all compatible dependencies` applies the highest available patch or minor targets without crossing a major version.</li>
+    <li>
+      `Update all compatible dependencies` applies the highest available patch or minor targets without crossing a
+      major version.
+    </li>
     <li>`Update all dependencies to latest` may include breaking major-version updates.</li>
     <li>Bulk actions appear only when the selected dependency has an applicable manifest edit.</li>
   </ul>
   <p>
-    For a `catalog:` or named `catalog:&lt;name&gt;` dependency in `package.json`, the action edits its owning entry in `pnpm-workspace.yaml`.
+    For a `catalog:` or named `catalog:&lt;name&gt;` dependency in `package.json`, the action edits its owning entry in
+    `pnpm-workspace.yaml`.
   </p>
 
   <h2>Understand npm tags</h2>
   <p>
-    npm can publish a version under another tag such as `next` while its `latest` tag still points to an older version. If the existing semver range already accepts that newer version, Dep Beacon explains the range and tag difference without offering a no-op edit or downgrade.
+    npm can publish a version under another tag such as `next` while its `latest` tag still points to an older version.
+    If the existing semver range already accepts that newer version, Dep Beacon explains the range and tag difference
+    without offering a no-op edit or downgrade.
   </p>
 
   <h2>Optional inline status</h2>
   <p>
-    No visual settings are required for the dashboard. If you also want compact signals such as `↑ 18.3.1 → 19.1.0`, `⚠ high risk`, and `✓ 19.1.0` beside every dependency, enable Zed's inlay hints.
+    No visual settings are required for the dashboard. If you also want compact signals such as `↑ 18.3.1 → 19.1.0`,
+    `⚠ high risk`, and `✓ 19.1.0` beside every dependency, enable Zed's inlay hints.
   </p>
   <pre><code>{`{
   "inlay_hints": {
     "enabled": true,
     "show_other_hints": true
   }
-}`}</code></pre>
+}`}
+       </code>
+  </pre>
   <h2>Settings</h2>
   <p>
-    Settings are optional. To override the defaults, configure the language server under `lsp.dep-beacon.settings` in your Zed settings file.
+    Settings are optional. To override the defaults, configure the language server under `lsp.dep-beacon.settings` in
+    your Zed settings file.
   </p>
   <pre><code>{settingsExample}</code></pre>
   <ul>
     <li>`checkVulnerabilities` defaults to `true`.</li>
     <li>`includePrerelease` defaults to `false`.</li>
     <li>`registryUrl` defaults to the public npm registry.</li>
-    <li>`showUpdateDiagnostics` defaults to `true`. Set it to `false` to hide dependency update warnings while keeping security and manifest errors visible.</li>
+    <li>
+      `showUpdateDiagnostics` defaults to `true`. Set it to `false` to hide dependency update warnings while keeping
+      security and manifest errors visible.
+    </li>
   </ul>
   <p>
-    Disabling update diagnostics does not disable dependency analysis. Hover details, code actions, and individual or bulk dependency upgrades remain available.
+    Disabling update diagnostics does not disable dependency analysis. Hover details, code actions, and individual or
+    bulk dependency upgrades remain available.
   </p>
 
   <Callout class="docs-callout">
     <strong>Editor differences:</strong>
-    <span>Zed does not currently expose custom extension panels or APIs equivalent to VS Code inline decorations. Dep Beacon therefore uses Zed's native diagnostics multi-buffer, hover, and code-action surfaces.</span>
+    <span>
+      Zed does not currently expose custom extension panels or APIs equivalent to VS Code inline decorations. Dep
+      Beacon therefore uses Zed's native diagnostics multi-buffer, hover, and code-action surfaces.
+    </span>
   </Callout>
 
   <h2>Source</h2>

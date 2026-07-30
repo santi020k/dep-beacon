@@ -15,14 +15,14 @@ const rootEnvValue = (name: string): string | undefined => {
   try {
     const line = readFileSync(new URL('.env', workspaceRoot), 'utf8')
       .split(/\r?\n/)
-      .find((entry) => entry.trimStart().startsWith(`${name}=`))
+      .find(entry => entry.trimStart().startsWith(`${name}=`))
 
     if (!line) return undefined
 
     const value = line.slice(line.indexOf('=') + 1).trim()
     const quote = value.at(0)
 
-    return quote && quote === value.at(-1) && ['"', "'"].includes(quote) ? value.slice(1, -1) : value
+    return quote && quote === value.at(-1) && ['"', '\''].includes(quote) ? value.slice(1, -1) : value
   } catch {
     return undefined
   }
@@ -35,6 +35,6 @@ export default defineConfig({
   site: normalizeSiteUrl(docsUrl),
   vite: {
     envDir,
-    plugins: [tailwindcss()],
-  },
+    plugins: [tailwindcss()]
+  }
 })

@@ -44,19 +44,19 @@ describe('package.json parser edge cases', () => {
 }`)
 
     expect(manifest.errors).toEqual([])
-    expect(manifest.dependencies.map((dependency) => [
+    expect(manifest.dependencies.map(dependency => [
       dependency.packageName,
       dependency.section,
       dependency.spec,
       dependency.manager,
-      dependency.path,
+      dependency.path
     ])).toEqual([
       ['fsevents', 'optionalDependencies', '^2.3.0', 'npm', ['optionalDependencies', 'fsevents']],
       ['react', 'peerDependencies', '^19.0.0', 'npm', ['peerDependencies', 'react']],
       ['react@^18', 'overrides', '18.3.1', 'npm', ['overrides', 'react@^18', '.']],
       ['scheduler', 'overrides', '0.23.2', 'npm', ['overrides', 'react@^18', 'scheduler@^0.23.0']],
       ['debug', 'packageExtensions', '^4.4.0', 'pnpm', ['pnpm', 'packageExtensions', 'left-pad@*', 'optionalDependencies', 'debug']],
-      ['ms', 'packageExtensions', '^2.1.0', 'pnpm', ['pnpm', 'packageExtensions', 'left-pad@*', 'peerDependencies', 'ms']],
+      ['ms', 'packageExtensions', '^2.1.0', 'pnpm', ['pnpm', 'packageExtensions', 'left-pad@*', 'peerDependencies', 'ms']]
     ])
   })
 
@@ -69,14 +69,14 @@ describe('package.json parser edge cases', () => {
   }
 }`)
 
-    expect(manifest.dependencies.map((dependency) => [
+    expect(manifest.dependencies.map(dependency => [
       dependency.packageName,
       dependency.manager,
-      dependency.path,
+      dependency.path
     ])).toEqual([
       ['@scope/leaf', 'yarn', ['resolutions', '@scope/root/@scope/leaf']],
       ['webpack', 'yarn', ['resolutions', '**/webpack']],
-      ['plain', 'yarn', ['resolutions', 'plain']],
+      ['plain', 'yarn', ['resolutions', 'plain']]
     ])
   })
 })
@@ -104,17 +104,17 @@ packageExtensions:
       ms: ^2.1.0
 `)
 
-    expect(manifest.dependencies.map((dependency) => [
+    expect(manifest.dependencies.map(dependency => [
       dependency.packageName,
       dependency.section,
       dependency.spec,
-      dependency.path,
+      dependency.path
     ])).toEqual([
       ['react', 'overrides', '18.3.1', ['overrides', 'react@^18']],
       ['sharp', 'overrides', '^0.35.3', ['overrides', 'next>sharp']],
       ['@scope/child', 'overrides', '2.1.0', ['overrides', '@scope/parent@^1>@scope/child@^2']],
       ['debug', 'packageExtensions', '^4.4.0', ['packageExtensions', 'left-pad@*', 'optionalDependencies', 'debug']],
-      ['ms', 'packageExtensions', '^2.1.0', ['packageExtensions', 'left-pad@*', 'peerDependencies', 'ms']],
+      ['ms', 'packageExtensions', '^2.1.0', ['packageExtensions', 'left-pad@*', 'peerDependencies', 'ms']]
     ])
   })
 
