@@ -21,15 +21,16 @@ export const parseManifest = (filePath: string, text: string): ManifestParseResu
   return {
     catalogs: {
       default: new Map(),
-      named: new Map(),
+      named: new Map()
     },
     dependencies: [],
     errors: [{
-      message: `${name} is not a supported Dep Beacon manifest.`,
+      message: `${name} is not a supported Dep Beacon manifest.`
     }],
-    source: 'package-json',
+    source: 'package-json'
   }
 }
 
-export const collectCatalogSnapshot = (manifests: readonly ManifestParseResult[]): CatalogSnapshot =>
-  mergeCatalogSnapshots(...manifests.map((manifest) => manifest.catalogs))
+export const collectCatalogSnapshot = (manifests: readonly ManifestParseResult[]): CatalogSnapshot => (
+  mergeCatalogSnapshots(...manifests.map(manifest => manifest.catalogs))
+)

@@ -3,7 +3,14 @@ import { type Node as JsonNode, type ParseError, parseTree } from 'jsonc-parser'
 import { createEmptyCatalogSnapshot } from './catalogs.js'
 import { getOverridePackageName, getResolutionPackageName } from './package-name.js'
 import { createLineStarts, createTextRange } from './text.js'
-import type { DependencyEntry, DependencyManager, DependencySection, ManifestParseError, ManifestParseResult, TextRange } from './types.js'
+import type {
+  DependencyEntry,
+  DependencyManager,
+  DependencySection,
+  ManifestParseError,
+  ManifestParseResult,
+  TextRange
+} from './types.js'
 
 const DIRECT_SECTIONS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const
 const parseErrorMessage = (error: ParseError): string => `JSON parse error ${error.error} at offset ${error.offset}.`
@@ -23,14 +30,9 @@ interface StringMapProperty {
   valueNode: JsonStringNode
 }
 
-const isObjectNode = (node: JsonNode | undefined): node is JsonNode & { children: JsonNode[] } =>
-  node?.type === 'object' && Array.isArray(node.children)
-
-const isPropertyNode = (node: JsonNode | undefined): node is JsonNode & { children: [JsonNode, JsonNode] } =>
-  node?.type === 'property' && Array.isArray(node.children) && node.children.length === 2
-
-const isStringNode = (node: JsonNode | undefined): node is JsonStringNode =>
-  node?.type === 'string' && typeof node.value === 'string'
+const isObjectNode = (node: JsonNode | undefined): node is JsonNode & { children: JsonNode[] } => node?.type === 'object' && Array.isArray(node.children)
+const isPropertyNode = (node: JsonNode | undefined): node is JsonNode & { children: [JsonNode, JsonNode] } => node?.type === 'property' && Array.isArray(node.children) && node.children.length === 2
+const isStringNode = (node: JsonNode | undefined): node is JsonStringNode => node?.type === 'string' && typeof node.value === 'string'
 
 const stringNodeValue = (node: JsonStringNode): string => {
   const value: unknown = node.value
@@ -38,8 +40,9 @@ const stringNodeValue = (node: JsonStringNode): string => {
   return typeof value === 'string' ? value : ''
 }
 
-const nodeRange = (lineStarts: readonly number[], node: JsonNode): TextRange =>
+const nodeRange = (lineStarts: readonly number[], node: JsonNode): TextRange => (
   createTextRange(lineStarts, node.offset, node.offset + node.length)
+)
 
 const objectProperties = (node: JsonNode | undefined): JsonNode[] => (isObjectNode(node) ? node.children : [])
 
@@ -67,7 +70,7 @@ const createEntry = (
     section: DependencySection
     spec: string
     specNode: JsonStringNode
-  },
+  }
 ): DependencyEntry => ({
   id: `${args.section}:${args.path.join('.')}:${args.packageName}:${args.specNode.offset}`,
   manager: args.manager ?? 'npm',
@@ -77,7 +80,7 @@ const createEntry = (
   section: args.section,
   source: 'package-json',
   spec: args.spec,
-  specRange: nodeRange(args.lineStarts, args.specNode),
+  specRange: nodeRange(args.lineStarts, args.specNode)
 })
 
 const stringMapProperty = (property: JsonNode): StringMapProperty | undefined => {
@@ -91,32 +94,29 @@ const stringMapProperty = (property: JsonNode): StringMapProperty | undefined =>
     key: stringNodeValue(keyNode),
     keyNode,
     spec: stringNodeValue(valueNode),
-    valueNode,
+    valueNode
   }
 }
 
-const defaultPackageName = (key: string, section: DependencySection): string =>
-  section === 'resolutions' ? getResolutionPackageName(key) : key
+const defaultPackageName = (key: string, section: DependencySection): string => section === 'resolutions' ? getResolutionPackageName(key) : key
 
 const packageNameForStringMapProperty = (
   property: StringMapProperty,
   section: DependencySection,
-  options: CollectStringMapOptions,
-): string =>
-  options.packageNameTransform?.(property.key) ?? defaultPackageName(property.key, section)
+  options: CollectStringMapOptions
+): string => options.packageNameTransform?.(property.key) ?? defaultPackageName(property.key, section)
 
 const managerForStringMapEntry = (
   section: DependencySection,
-  options: CollectStringMapOptions,
-): DependencyManager =>
-  options.manager ?? (section === 'resolutions' ? 'yarn' : 'npm')
+  options: CollectStringMapOptions
+): DependencyManager => options.manager ?? (section === 'resolutions' ? 'yarn' : 'npm')
 
 const collectStringMap = (
   lineStarts: readonly number[],
   parent: JsonNode | undefined,
   section: DependencySection,
   entries: DependencyEntry[],
-  options: CollectStringMapOptions = {},
+  options: CollectStringMapOptions = {}
 ): void => {
   if (!isObjectNode(parent)) return
 
@@ -135,7 +135,7 @@ const collectStringMap = (
       path: [...basePath, stringProperty.key],
       section,
       spec: stringProperty.spec,
-      specNode: stringProperty.valueNode,
+      specNode: stringProperty.valueNode
     }))
   }
 }
@@ -144,7 +144,7 @@ const collectOverrides = (
   lineStarts: readonly number[],
   parent: JsonNode | undefined,
   entries: DependencyEntry[],
-  path: string[] = ['overrides'],
+  path: string[] = ['overrides']
 ): void => {
   if (!isObjectNode(parent)) return
 
@@ -168,7 +168,7 @@ const collectOverrides = (
         path: [...path, key],
         section: 'overrides',
         spec,
-        specNode: valueNode,
+        specNode: valueNode
       }))
 
       continue
@@ -182,7 +182,7 @@ const collectPackageExtensions = (
   lineStarts: readonly number[],
   parent: JsonNode | undefined,
   entries: DependencyEntry[],
-  path: string[] = ['packageExtensions'],
+  path: string[] = ['packageExtensions']
 ): void => {
   if (!isObjectNode(parent)) return
 
@@ -196,17 +196,13 @@ const collectPackageExtensions = (
     const extensionKey = stringNodeValue(extensionKeyNode)
 
     for (const section of DIRECT_SECTIONS) {
-      const sectionProperty = objectProperties(extensionValueNode).find((property) => propertyKey(property) === section)
+      const sectionProperty = objectProperties(extensionValueNode).find(property => propertyKey(property) === section)
 
       collectStringMap(
-        lineStarts,
-        propertyValue(sectionProperty),
-        'packageExtensions',
-        entries,
-        {
+        lineStarts, propertyValue(sectionProperty), 'packageExtensions', entries, {
           basePath: [...path, extensionKey, section],
-          manager: 'pnpm',
-        },
+          manager: 'pnpm'
+        }
       )
     }
   }
@@ -215,16 +211,17 @@ const collectPackageExtensions = (
 const collectPnpmOverrides = (
   lineStarts: readonly number[],
   pnpmNode: JsonNode | undefined,
-  entries: DependencyEntry[],
+  entries: DependencyEntry[]
 ): void => {
   if (!isObjectNode(pnpmNode)) return
 
-  const overridesNode = objectProperties(pnpmNode).find((property) => propertyKey(property) === 'overrides')
-  const packageExtensionsNode = objectProperties(pnpmNode).find((property) => propertyKey(property) === 'packageExtensions')
+  const overridesNode = objectProperties(pnpmNode).find(property => propertyKey(property) === 'overrides')
+  const packageExtensionsNode = objectProperties(pnpmNode).find(property => propertyKey(property) === 'packageExtensions')
 
   collectStringMap(lineStarts, propertyValue(overridesNode), 'pnpm.overrides', entries, {
     basePath: ['pnpm', 'overrides'],
     manager: 'pnpm',
+    packageNameTransform: getOverridePackageName
   })
 
   collectPackageExtensions(lineStarts, propertyValue(packageExtensionsNode), entries, ['pnpm', 'packageExtensions'])
@@ -237,12 +234,12 @@ export const parsePackageJsonManifest = (text: string): ManifestParseResult => {
   const root = parseTree(text, errors, {
     allowEmptyContent: false,
     allowTrailingComma: false,
-    disallowComments: false,
+    disallowComments: false
   })
 
-  const parseErrors: ManifestParseError[] = errors.map((error) => ({
+  const parseErrors: ManifestParseError[] = errors.map(error => ({
     message: parseErrorMessage(error),
-    range: createTextRange(lineStarts, error.offset, error.offset + error.length),
+    range: createTextRange(lineStarts, error.offset, error.offset + error.length)
   }))
 
   if (!isObjectNode(root)) {
@@ -250,28 +247,28 @@ export const parsePackageJsonManifest = (text: string): ManifestParseResult => {
       catalogs: createEmptyCatalogSnapshot(),
       dependencies: [],
       errors: parseErrors,
-      source: 'package-json',
+      source: 'package-json'
     }
   }
 
   const entries: DependencyEntry[] = []
 
   for (const section of DIRECT_SECTIONS) {
-    const sectionProperty = objectProperties(root).find((property) => propertyKey(property) === section)
+    const sectionProperty = objectProperties(root).find(property => propertyKey(property) === section)
 
     collectStringMap(lineStarts, propertyValue(sectionProperty), section, entries)
   }
 
-  collectOverrides(lineStarts, propertyValue(objectProperties(root).find((property) => propertyKey(property) === 'overrides')), entries)
+  collectOverrides(lineStarts, propertyValue(objectProperties(root).find(property => propertyKey(property) === 'overrides')), entries)
 
-  collectStringMap(lineStarts, propertyValue(objectProperties(root).find((property) => propertyKey(property) === 'resolutions')), 'resolutions', entries)
+  collectStringMap(lineStarts, propertyValue(objectProperties(root).find(property => propertyKey(property) === 'resolutions')), 'resolutions', entries)
 
-  collectPnpmOverrides(lineStarts, propertyValue(objectProperties(root).find((property) => propertyKey(property) === 'pnpm')), entries)
+  collectPnpmOverrides(lineStarts, propertyValue(objectProperties(root).find(property => propertyKey(property) === 'pnpm')), entries)
 
   return {
     catalogs: createEmptyCatalogSnapshot(),
     dependencies: entries,
     errors: parseErrors,
-    source: 'package-json',
+    source: 'package-json'
   }
 }

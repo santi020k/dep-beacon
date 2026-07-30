@@ -8,7 +8,7 @@ const manifestPath = resolve(extensionRoot, 'extension.toml')
 const cargoPath = resolve(extensionRoot, 'Cargo.toml')
 const cargoLockPath = resolve(extensionRoot, 'Cargo.lock')
 
-const syncVersion = (path) => {
+const syncVersion = path => {
   const source = readFileSync(path, 'utf8')
 
   if (!/^version = "[^"]+"$/m.test(source)) throw new Error(`Could not find a version field in ${path}.`)

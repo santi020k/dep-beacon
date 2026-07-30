@@ -24,7 +24,7 @@ export const stripNpmAlias = (packageName: string, spec: string): { packageName:
 
   return {
     packageName: withoutProtocol.slice(0, separatorIndex),
-    spec: withoutProtocol.slice(separatorIndex + 1),
+    spec: withoutProtocol.slice(separatorIndex + 1)
   }
 }
 
@@ -34,13 +34,14 @@ export const getResolutionPackageName = (key: string): string => {
 
   if (scopedMatch) return scopedMatch[0]
 
-  const parts = normalized.split('/').filter((part) => !part.includes('*') && part.length > 0)
+  const parts = normalized.split('/').filter(part => !part.includes('*') && part.length > 0)
 
   return parts.at(-1) ?? key
 }
 
 export const getOverridePackageName = (key: string): string => {
-  const atIndex = key.indexOf('@', key.startsWith('@') ? key.indexOf('/') + 1 : 0)
+  const packageSelector = key.slice(key.lastIndexOf('>') + 1)
+  const atIndex = packageSelector.indexOf('@', packageSelector.startsWith('@') ? packageSelector.indexOf('/') + 1 : 0)
 
-  return atIndex > 0 ? key.slice(0, atIndex) : key
+  return atIndex > 0 ? packageSelector.slice(0, atIndex) : packageSelector
 }

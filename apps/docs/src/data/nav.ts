@@ -5,5 +5,5 @@ export const DOCS_NAV = [
   { href: '/docs/zed-extension', label: 'Zed Extension' },
   { href: '/docs/pnpm-workspaces', label: 'pnpm Workspaces' },
   { href: '/docs/security', label: 'Security Signals' },
-  { href: '/docs/configuration', label: 'Configuration' },
+  { href: '/docs/configuration', label: 'Configuration' }
 ]

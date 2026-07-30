@@ -29,11 +29,10 @@ const SEVERITY_RANK: Record<Severity, number> = {
   medium: 2,
   low: 1,
   none: 0,
-  unknown: 0,
+  unknown: 0
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const severityFromString = (value: unknown): Severity => {
   if (typeof value !== 'string') return 'unknown'
@@ -68,8 +67,7 @@ const severityFromCvss = (score: string): Severity => {
   return 'none'
 }
 
-const maxSeverity = (severities: readonly Severity[]): Severity =>
-  severities.reduce<Severity>((highest, severity) => (SEVERITY_RANK[severity] > SEVERITY_RANK[highest] ? severity : highest), 'unknown')
+const maxSeverity = (severities: readonly Severity[]): Severity => severities.reduce<Severity>((highest, severity) => (SEVERITY_RANK[severity] > SEVERITY_RANK[highest] ? severity : highest), 'unknown')
 
 const vulnerabilitySeverity = (vulnerability: OsvVulnerability): Severity => {
   const severities: Severity[] = []
@@ -101,24 +99,22 @@ const toBatchResponse = (value: unknown): OsvBatchResponse => {
   if (!isRecord(value) || !Array.isArray(value.results)) return { results: [] }
 
   return {
-    results: value.results.map((result) => {
+    results: value.results.map(result => {
       if (!isRecord(result) || !Array.isArray(result.vulns)) return { vulns: [] }
 
       return {
-        vulns: result.vulns.flatMap((vulnerability) => {
+        vulns: result.vulns.flatMap(vulnerability => {
           if (!isRecord(vulnerability) || typeof vulnerability.id !== 'string') return []
 
           return [{ id: vulnerability.id }]
-        }),
+        })
       }
-    }),
+    })
   }
 }
 
 const queryKey = (query: OsvQuery): string => `${query.name}@${query.version}`
-
-const vulnerabilityIds = (result: OsvBatchResult | undefined): string[] =>
-  (result?.vulns ?? []).flatMap((vulnerability) => (typeof vulnerability.id === 'string' ? [vulnerability.id] : []))
+const vulnerabilityIds = (result: OsvBatchResult | undefined): string[] => (result?.vulns ?? []).flatMap(vulnerability => (typeof vulnerability.id === 'string' ? [vulnerability.id] : []))
 
 const vulnerabilityAliases = (details: readonly (OsvVulnerability | undefined)[]): string[] => {
   const aliases = new Set<string>()
@@ -134,8 +130,9 @@ const vulnerabilityAliases = (details: readonly (OsvVulnerability | undefined)[]
   return [...aliases]
 }
 
-const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined)[]): Severity[] =>
-  details.flatMap((detail) => (detail ? [vulnerabilitySeverity(detail)] : []))
+const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined)[]): Severity[] => (
+  details.flatMap(detail => (detail ? [vulnerabilitySeverity(detail)] : []))
+)
 
 export class OsvClient {
   readonly #baseUrl: string
@@ -159,18 +156,18 @@ export class OsvClient {
     try {
       const response = await fetchWithTimeout(this.#fetch, `${this.#baseUrl}/v1/querybatch`, {
         body: JSON.stringify({
-          queries: queries.map((query) => ({
+          queries: queries.map(query => ({
             package: {
               ecosystem: 'npm',
-              name: query.name,
+              name: query.name
             },
-            version: query.version,
-          })),
+            version: query.version
+          }))
         }),
         headers: {
-          'content-type': 'application/json',
+          'content-type': 'application/json'
         },
-        method: 'POST',
+        method: 'POST'
       }, this.#requestTimeoutMs)
 
       if (!response.ok) return new Map()
@@ -181,27 +178,27 @@ export class OsvClient {
     }
 
     const summaries = await Promise.all(
-      queries.map((query, index) => this.#summarizeQuery(query, batch.results?.[index])),
+      queries.map((query, index) => this.#summarizeQuery(query, batch.results?.[index]))
     )
 
-    return new Map(summaries.flatMap((summary) => (summary ? [summary] : [])))
+    return new Map(summaries.flatMap(summary => (summary ? [summary] : [])))
   }
 
   async #summarizeQuery(
     query: OsvQuery,
-    result: OsvBatchResult | undefined,
+    result: OsvBatchResult | undefined
   ): Promise<[string, VulnerabilitySummary] | undefined> {
     const ids = vulnerabilityIds(result)
 
     if (ids.length === 0) return undefined
 
-    const details = await Promise.all(ids.map((id) => this.#getVulnerability(id)))
+    const details = await Promise.all(ids.map(id => this.#getVulnerability(id)))
 
     return [queryKey(query), {
       aliases: vulnerabilityAliases(details),
       ids,
       severity: maxSeverity(vulnerabilitySeverities(details)),
-      source: 'osv',
+      source: 'osv'
     }]
   }
 
@@ -219,7 +216,12 @@ export class OsvClient {
 
   async #requestVulnerability(id: string): Promise<OsvVulnerability | undefined> {
     try {
-      const response = await fetchWithTimeout(this.#fetch, `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`, {}, this.#requestTimeoutMs)
+      const response = await fetchWithTimeout(
+        this.#fetch,
+        `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`,
+        {},
+        this.#requestTimeoutMs
+      )
 
       if (!response.ok) return undefined
 

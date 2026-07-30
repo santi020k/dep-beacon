@@ -1,13 +1,18 @@
+use std::{env, fs};
+
 use zed_extension_api::{self as zed, LanguageServerId, Result};
 
-const BINARY_NAME: &str = "dep-beacon-lsp";
 const PACKAGE_NAME: &str = "@santi020k/dep-beacon-lsp";
 const SERVER_PATH: &str = "node_modules/@santi020k/dep-beacon-lsp/dist/server.cjs";
 
 struct DepBeaconExtension;
 
 impl DepBeaconExtension {
-    fn install_language_server(language_server_id: &LanguageServerId) -> Result<()> {
+    fn server_exists() -> bool {
+        fs::metadata(SERVER_PATH).is_ok_and(|metadata| metadata.is_file())
+    }
+
+    fn server_script_path(language_server_id: &LanguageServerId) -> Result<String> {
         zed::set_language_server_installation_status(
             language_server_id,
             &zed::LanguageServerInstallationStatus::CheckingForUpdate,
@@ -16,7 +21,7 @@ impl DepBeaconExtension {
         let latest_version = zed::npm_package_latest_version(PACKAGE_NAME)?;
         let installed_version = zed::npm_package_installed_version(PACKAGE_NAME)?;
 
-        if installed_version.as_deref() != Some(latest_version.as_str()) {
+        if !Self::server_exists() || installed_version.as_deref() != Some(latest_version.as_str()) {
             zed::set_language_server_installation_status(
                 language_server_id,
                 &zed::LanguageServerInstallationStatus::Downloading,
@@ -24,7 +29,17 @@ impl DepBeaconExtension {
             zed::npm_install_package(PACKAGE_NAME, &latest_version)?;
         }
 
-        Ok(())
+        if !Self::server_exists() {
+            return Err(format!(
+                "installed package '{PACKAGE_NAME}' did not contain expected path '{SERVER_PATH}'"
+            ));
+        }
+
+        Ok(env::current_dir()
+            .map_err(|error| format!("failed to resolve the extension work directory: {error}"))?
+            .join(SERVER_PATH)
+            .to_string_lossy()
+            .into_owned())
     }
 }
 
@@ -36,21 +51,13 @@ impl zed::Extension for DepBeaconExtension {
     fn language_server_command(
         &mut self,
         language_server_id: &LanguageServerId,
-        worktree: &zed::Worktree,
+        _worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        if let Some(command) = worktree.which(BINARY_NAME) {
-            return Ok(zed::Command {
-                command,
-                args: vec!["--stdio".into()],
-                env: Vec::new(),
-            });
-        }
-
-        Self::install_language_server(language_server_id)?;
+        let server_path = Self::server_script_path(language_server_id)?;
 
         Ok(zed::Command {
             command: zed::node_binary_path()?,
-            args: vec![SERVER_PATH.into(), "--stdio".into()],
+            args: vec![server_path, "--stdio".into()],
             env: Vec::new(),
         })
     }

@@ -10,22 +10,22 @@ import {
   resolvedUpdateActions,
   statusTitle,
   statusTone,
-  updateActions,
+  updateActions
 } from '../src/presentation.js'
 
 const baseAnalysis = (status: DependencyAnalysis['status']): DependencyAnalysis => {
-  const targets = status === 'up-to-date'
-    ? {
-        current: '2.0.0',
-        latest: '2.0.0',
-      }
-    : {
-        current: '1.0.0',
-        latest: '2.0.0',
-        nextMajor: '2.0.0',
-        nextMinor: '1.1.0',
-        nextPatch: '1.0.1',
-      }
+  const targets = status === 'up-to-date' ?
+    {
+      current: '2.0.0',
+      latest: '2.0.0'
+    } :
+    {
+      current: '1.0.0',
+      latest: '2.0.0',
+      nextMajor: '2.0.0',
+      nextMinor: '1.1.0',
+      nextPatch: '1.0.1'
+    }
 
   return {
     dependency: {
@@ -35,7 +35,7 @@ const baseAnalysis = (status: DependencyAnalysis['status']): DependencyAnalysis 
         end: 8,
         endPosition: { character: 8, line: 1 },
         start: 4,
-        startPosition: { character: 4, line: 1 },
+        startPosition: { character: 4, line: 1 }
       },
       packageName: 'demo',
       path: ['dependencies', 'demo'],
@@ -46,8 +46,8 @@ const baseAnalysis = (status: DependencyAnalysis['status']): DependencyAnalysis 
         end: 20,
         endPosition: { character: 20, line: 1 },
         start: 12,
-        startPosition: { character: 12, line: 1 },
-      },
+        startPosition: { character: 12, line: 1 }
+      }
     },
     displaySpec: '^1.0.0',
     exists: true,
@@ -55,7 +55,7 @@ const baseAnalysis = (status: DependencyAnalysis['status']): DependencyAnalysis 
     message: 'A newer version is available.',
     packageUrl: 'https://www.npmjs.com/package/demo',
     status,
-    targets,
+    targets
   }
 }
 
@@ -63,6 +63,7 @@ describe('presentation helpers', () => {
   test('maps status to editor decoration tones', () => {
     expect(statusTone('up-to-date')).toBe('green')
     expect(statusTone('outdated')).toBe('yellow')
+    expect(statusTone('unavailable')).toBe('yellow')
     expect(statusTone('vulnerable')).toBe('orange')
     expect(statusTone('invalid')).toBe('red')
     expect(statusTone('missing')).toBe('red')
@@ -75,10 +76,11 @@ describe('presentation helpers', () => {
     ['missing', '$(error) missing package or version', ' missing'],
     ['invalid', '$(error) invalid range', ' invalid'],
     ['protocol', '$(symbol-key) local or catalog-managed', ' managed'],
+    ['unavailable', '$(warning) registry unavailable', ' unavailable']
   ] as const)('creates compact labels and inline text for %s', (status, title, decoration) => {
     const analysis = baseAnalysis(status)
 
-    if (status === 'missing' || status === 'invalid' || status === 'protocol') analysis.targets = {}
+    if (status === 'missing' || status === 'invalid' || status === 'protocol' || status === 'unavailable') analysis.targets = {}
 
     expect(statusTitle(analysis)).toBe(title)
     expect(decorationText(analysis)).toBe(decoration)
@@ -91,7 +93,7 @@ describe('presentation helpers', () => {
       aliases: ['GHSA-demo'],
       ids: ['OSV-2026-1'],
       severity: 'critical',
-      source: 'osv',
+      source: 'osv'
     }
 
     expect(statusTitle(vulnerable)).toBe('$(flame) critical vulnerability | current 1.0.0 | latest 2.0.0')
@@ -107,7 +109,7 @@ describe('presentation helpers', () => {
     const analysis = baseAnalysis('outdated')
 
     analysis.targets = {
-      current: '1.0.0',
+      current: '1.0.0'
     }
 
     expect(statusTitle(analysis)).toBe('$(warning) update available | current 1.0.0')
@@ -115,7 +117,7 @@ describe('presentation helpers', () => {
   })
 
   test('creates deduplicated update actions', () => {
-    expect(updateActions(baseAnalysis('outdated')).map((action) => action.kind)).toEqual(['patch', 'minor', 'major'])
+    expect(updateActions(baseAnalysis('outdated')).map(action => action.kind)).toEqual(['patch', 'minor', 'major'])
   })
 
   test('creates compact package lens labels', () => {
@@ -129,7 +131,7 @@ describe('presentation helpers', () => {
       aliases: [],
       ids: ['GHSA-demo'],
       severity: 'high',
-      source: 'osv',
+      source: 'osv'
     }
 
     const markdown = hoverMarkdown(analysis)
@@ -150,13 +152,13 @@ describe('presentation helpers', () => {
   })
 
   test('resolves update actions with manifest target specs', () => {
-    expect(resolvedUpdateActions(baseAnalysis('outdated')).map((action) => ({
+    expect(resolvedUpdateActions(baseAnalysis('outdated')).map(action => ({
       kind: action.kind,
-      targetSpec: action.targetSpec,
+      targetSpec: action.targetSpec
     }))).toEqual([
       { kind: 'patch', targetSpec: '^1.0.1' },
       { kind: 'minor', targetSpec: '^1.1.0' },
-      { kind: 'major', targetSpec: '^2.0.0' },
+      { kind: 'major', targetSpec: '^2.0.0' }
     ])
   })
 
@@ -166,13 +168,13 @@ describe('presentation helpers', () => {
     analysis.dependency.spec = 'catalog:'
 
     expect(resolvedUpdateActions(analysis)).toEqual([])
-    expect(resolvedUpdateActions(analysis, '^1.0.0').map((action) => ({
+    expect(resolvedUpdateActions(analysis, '^1.0.0').map(action => ({
       kind: action.kind,
-      targetSpec: action.targetSpec,
+      targetSpec: action.targetSpec
     }))).toEqual([
       { kind: 'patch', targetSpec: '^1.0.1' },
       { kind: 'minor', targetSpec: '^1.1.0' },
-      { kind: 'major', targetSpec: '^2.0.0' },
+      { kind: 'major', targetSpec: '^2.0.0' }
     ])
   })
 
@@ -184,14 +186,14 @@ describe('presentation helpers', () => {
       latest: '3.0.0',
       nextMajor: '2.0.0',
       nextMinor: '1.1.0',
-      nextPatch: '1.0.1',
+      nextPatch: '1.0.1'
     }
 
     expect(updateActions(analysis)).toEqual([
       { kind: 'patch', title: 'Patch', version: '1.0.1' },
       { kind: 'minor', title: 'Minor', version: '1.1.0' },
       { kind: 'major', title: 'Major', version: '2.0.0' },
-      { kind: 'latest', title: 'Latest', version: '3.0.0' },
+      { kind: 'latest', title: 'Latest', version: '3.0.0' }
     ])
   })
 
@@ -201,11 +203,11 @@ describe('presentation helpers', () => {
     analysis.dependency.spec = '^19.0.0'
     analysis.targets = {
       current: '19.2.7',
-      latest: '19.2.7',
+      latest: '19.2.7'
     }
 
     expect(updateActions(analysis)).toEqual([
-      { kind: 'latest', title: 'Latest', version: '19.2.7' },
+      { kind: 'latest', title: 'Latest', version: '19.2.7' }
     ])
 
     analysis.dependency.spec = '^19.2.7'
@@ -220,11 +222,11 @@ describe('presentation helpers', () => {
       current: '1.0.0',
       latest: '1.0.0',
       nextMajor: '2.0.0',
-      nextMinor: '2.0.0',
+      nextMinor: '2.0.0'
     }
 
     expect(updateActions(analysis)).toEqual([
-      { kind: 'minor', title: 'Minor', version: '2.0.0' },
+      { kind: 'minor', title: 'Minor', version: '2.0.0' }
     ])
   })
 

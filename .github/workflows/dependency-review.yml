@@ -47,9 +47,12 @@ jobs:
 
       - name: Audit all dependencies for high risk
         run: |
-          REPORT="${RUNNER_TEMP:-.}/pnpm-audit-high.json"
-          if ! pnpm audit --json --audit-level=high --ignore-registry-errors > "$REPORT"; then
-            cat "$REPORT"
+          # The workspace audit config documents the dev-tooling-only exception.
+          if ! AUDIT_OUTPUT="$(pnpm audit \
+            --audit-level=high \
+            --ignore-registry-errors)"; then
+            echo "$AUDIT_OUTPUT"
             exit 1
           fi
-          node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const vulnerabilities = report.metadata?.vulnerabilities ?? {}; console.log(`No high or critical vulnerabilities found (${vulnerabilities.high ?? 0} high, ${vulnerabilities.critical ?? 0} critical).`)' "$REPORT"
+          echo "$AUDIT_OUTPUT"
+          echo "No unignored high or critical vulnerabilities found."

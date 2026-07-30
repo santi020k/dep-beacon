@@ -29,33 +29,33 @@ const STATUS_LABELS: Record<DependencyAnalysis['status'], string> = {
   missing: 'Package or version not found',
   outdated: 'Update available',
   protocol: 'Locally managed dependency',
+  unavailable: 'Registry temporarily unavailable',
   'up-to-date': 'Up to date',
-  vulnerable: 'Security update recommended',
+  vulnerable: 'Security update recommended'
+}
+
+const STATIC_DIAGNOSTIC_SEVERITIES: Record<
+  Exclude<DependencyAnalysis['status'], 'outdated' | 'vulnerable'>,
+  BeaconDiagnosticSeverity | undefined
+> = {
+  invalid: 'error',
+  missing: 'error',
+  protocol: undefined,
+  unavailable: 'warning',
+  'up-to-date': undefined
 }
 
 export const diagnosticSeverity = (
   analysis: DependencyAnalysis,
-  { showUpdates = true }: DiagnosticOptions = {},
+  { showUpdates = true }: DiagnosticOptions = {}
 ): BeaconDiagnosticSeverity | undefined => {
-  switch (analysis.status) {
-    case 'invalid':
-      return 'error'
+  if (analysis.status === 'outdated') return showUpdates ? 'warning' : undefined
 
-    case 'missing':
-      return 'error'
-
-    case 'outdated':
-      return showUpdates ? 'warning' : undefined
-
-    case 'vulnerable':
-      return isHighRiskSeverity(analysis.vulnerability?.severity) ? 'error' : 'warning'
-
-    case 'protocol':
-      return undefined
-
-    case 'up-to-date':
-      return undefined
+  if (analysis.status === 'vulnerable') {
+    return isHighRiskSeverity(analysis.vulnerability?.severity) ? 'error' : 'warning'
   }
+
+  return STATIC_DIAGNOSTIC_SEVERITIES[analysis.status]
 }
 
 type StatusTitleBuilder = (analysis: DependencyAnalysis, versions: string | undefined) => string
@@ -65,9 +65,9 @@ const STATUS_TITLES: Record<DependencyAnalysis['status'], StatusTitleBuilder> = 
   missing: () => '✕ missing package or version',
   outdated: (_analysis, versions) => `↑ ${versions ?? 'update available'}`,
   protocol: () => '◆ local or catalog-managed',
+  unavailable: () => '⚠ registry unavailable',
   'up-to-date': (_analysis, versions) => `✓ ${versions ?? 'up to date'}`,
-  vulnerable: (analysis, versions) =>
-    `⚠ ${analysis.vulnerability?.severity ?? 'known'} risk${versions ? ` · ${versions}` : ''}`,
+  vulnerable: (analysis, versions) => `⚠ ${analysis.vulnerability?.severity ?? 'known'} risk${versions ? ` · ${versions}` : ''}`
 }
 
 const INLAY_HINT_LABELS: Record<DependencyAnalysis['status'], StatusTitleBuilder> = {
@@ -75,9 +75,9 @@ const INLAY_HINT_LABELS: Record<DependencyAnalysis['status'], StatusTitleBuilder
   missing: () => '✕ missing',
   outdated: (_analysis, versions) => `↑ ${versions ?? 'update'}`,
   protocol: () => '◆ managed',
+  unavailable: () => '⚠ unavailable',
   'up-to-date': (_analysis, versions) => `✓ ${versions ?? 'up to date'}`,
-  vulnerable: (analysis, versions) =>
-    `⚠ ${analysis.vulnerability?.severity ?? 'known'} risk${versions ? ` · ${versions}` : ''}`,
+  vulnerable: (analysis, versions) => `⚠ ${analysis.vulnerability?.severity ?? 'known'} risk${versions ? ` · ${versions}` : ''}`
 }
 
 export const statusTitle = (analysis: DependencyAnalysis): string => {
@@ -94,20 +94,19 @@ export const inlayHintLabel = (analysis: DependencyAnalysis): string => {
 
 type DiagnosticMessageBuilder = (analysis: DependencyAnalysis) => string
 
-const defaultDiagnosticMessage: DiagnosticMessageBuilder = analysis =>
-  `${analysis.dependency.packageName}: ${analysis.message}`
+const defaultDiagnosticMessage: DiagnosticMessageBuilder = analysis => `${analysis.dependency.packageName}: ${analysis.message}`
 
-const outdatedDiagnosticMessage: DiagnosticMessageBuilder = (analysis) => {
+const outdatedDiagnosticMessage: DiagnosticMessageBuilder = analysis => {
   const packageName = analysis.dependency.packageName
   const current = analysis.targets.current
   const latest = analysis.targets.latest
 
-  return current && latest
-    ? `Update available: ${packageName} ${current} → ${latest}.`
-    : defaultDiagnosticMessage(analysis)
+  return current && latest ?
+    `Update available: ${packageName} ${current} → ${latest}.` :
+    defaultDiagnosticMessage(analysis)
 }
 
-const vulnerableDiagnosticMessage: DiagnosticMessageBuilder = (analysis) => {
+const vulnerableDiagnosticMessage: DiagnosticMessageBuilder = analysis => {
   const packageName = analysis.dependency.packageName
   const current = analysis.targets.current
   const latest = analysis.targets.latest
@@ -124,26 +123,27 @@ const DIAGNOSTIC_MESSAGES: Record<DependencyAnalysis['status'], DiagnosticMessag
   missing: defaultDiagnosticMessage,
   outdated: outdatedDiagnosticMessage,
   protocol: defaultDiagnosticMessage,
+  unavailable: defaultDiagnosticMessage,
   'up-to-date': defaultDiagnosticMessage,
-  vulnerable: vulnerableDiagnosticMessage,
+  vulnerable: vulnerableDiagnosticMessage
 }
 
-export const diagnosticMessage = (analysis: DependencyAnalysis): string =>
+export const diagnosticMessage = (analysis: DependencyAnalysis): string => (
   DIAGNOSTIC_MESSAGES[analysis.status](analysis)
+)
 
-export const editSpec = (dependency: DependencyEntry, targetSpec: string): string =>
-  dependency.source === 'package-json' ? JSON.stringify(targetSpec) : targetSpec
+export const editSpec = (dependency: DependencyEntry, targetSpec: string): string => dependency.source === 'package-json' ? JSON.stringify(targetSpec) : targetSpec
 
 export const bulkUpdateSpec = (
   analysis: DependencyAnalysis,
   editableSpec: string,
-  strategy: BulkUpdateStrategy,
+  strategy: BulkUpdateStrategy
 ): string | undefined => {
   if (analysis.status !== 'outdated' && analysis.status !== 'vulnerable') return undefined
 
-  const version = strategy === 'latest'
-    ? analysis.targets.latest
-    : analysis.targets.nextMinor ?? analysis.targets.nextPatch
+  const version = strategy === 'latest' ?
+    analysis.targets.latest :
+    analysis.targets.nextMinor ?? analysis.targets.nextPatch
 
   if (!version) return undefined
 
@@ -185,7 +185,7 @@ export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
   const lines = [
     `### Dep Beacon — ${STATUS_LABELS[analysis.status]}`,
     '',
-    `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`,
+    `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`
   ]
 
   const versionLine = hoverVersionLine(analysis)
@@ -207,7 +207,10 @@ export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
   return lines.join('\n')
 }
 
-export const updateTargets = (analysis: DependencyAnalysis, editableSpec = analysis.dependency.spec): UpdateTarget[] => {
+export const updateTargets = (
+  analysis: DependencyAnalysis,
+  editableSpec = analysis.dependency.spec
+): UpdateTarget[] => {
   if (editableSpec.startsWith('catalog:')) return []
 
   const currentSpec = editableSpec.trim()

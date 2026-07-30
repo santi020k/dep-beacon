@@ -10,9 +10,9 @@ const CORE_PKG_PATH = resolve(__dirname, '../../dep-beacon-core/package.json')
 const originalContent = readFileSync(PKG_PATH, 'utf8')
 const workspace = parseDocument(readFileSync(WORKSPACE_PATH, 'utf8')).toJS()
 const pkg = JSON.parse(originalContent)
-const isRecord = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+const isRecord = value => typeof value === 'object' && value !== null && !Array.isArray(value)
 
-const resolveCatalogVersion = (packageName) => {
+const resolveCatalogVersion = packageName => {
   if (!isRecord(workspace) || !isRecord(workspace.catalog)) return null
 
   const value = workspace.catalog[packageName]
@@ -20,13 +20,13 @@ const resolveCatalogVersion = (packageName) => {
   return typeof value === 'string' && value.length > 0 ? value : undefined
 }
 
-const resolveWorkspaceVersion = (packageName) => {
+const resolveWorkspaceVersion = packageName => {
   if (packageName !== '@santi020k/dep-beacon-core') return null
 
   return JSON.parse(readFileSync(CORE_PKG_PATH, 'utf8')).version
 }
 
-const getDeps = (sectionName) => {
+const getDeps = sectionName => {
   if (sectionName === 'dependencies') return pkg.dependencies
 
   if (sectionName === 'devDependencies') return pkg.devDependencies
@@ -59,7 +59,7 @@ try {
 
   execSync('pnpm exec vsce package --no-dependencies -o dep-beacon.vsix', {
     cwd: resolve(__dirname, '..'),
-    stdio: 'inherit',
+    stdio: 'inherit'
   })
 } finally {
   writeFileSync(PKG_PATH, originalContent)

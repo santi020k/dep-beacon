@@ -10,8 +10,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "typecheck": "astro check",
-    "lint": "eslint . --no-warn-ignored",
-    "lint:fix": "eslint . --fix --no-warn-ignored",
+    "lint": "eslint . --no-warn-ignored --max-warnings=0",
+    "lint:fix": "eslint . --fix --no-warn-ignored --max-warnings=0",
     "clean": "rm -rf dist .astro"
   },
   "dependencies": {

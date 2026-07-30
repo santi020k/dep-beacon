@@ -5,13 +5,16 @@ import Docs from '../../layouts/Docs.astro'
 <Docs title="pnpm Workspaces" description="How Dep Beacon resolves pnpm workspace catalogs.">
   <h1>pnpm Workspaces</h1>
   <p>
-    Dep Beacon scans workspace `pnpm-workspace.yaml` files and creates a catalog snapshot before analyzing package manifests.
+    Dep Beacon scans workspace `pnpm-workspace.yaml` files and creates a catalog snapshot before analyzing package
+    manifests.
   </p>
 
   <h2>Default catalog</h2>
   <pre><code>catalog:
-  astro: ^7.0.0
-  typescript: ^6.0.3</code></pre>
+    astro: ^7.0.0
+    typescript: ^6.0.3
+       </code>
+  </pre>
 
   <p>
     A `package.json` dependency like `"astro": "catalog:"` is analyzed using the catalog range.
@@ -19,9 +22,11 @@ import Docs from '../../layouts/Docs.astro'
 
   <h2>Named catalogs</h2>
   <pre><code>catalogs:
-  react19:
-    react: ^19.0.0
-    react-dom: ^19.0.0</code></pre>
+    react19:
+      react: ^19.0.0
+      react-dom: ^19.0.0
+       </code>
+  </pre>
 
   <p>
     A dependency using `"react": "catalog:react19"` resolves against the named catalog.
@@ -29,6 +34,7 @@ import Docs from '../../layouts/Docs.astro'
 
   <h2>Workspace dependency maps</h2>
   <p>
-    Dep Beacon also analyzes workspace `overrides` and `packageExtensions` so central dependency policy gets the same status signals as package manifests.
+    Dep Beacon also analyzes workspace `overrides` and `packageExtensions` so central dependency policy gets the same
+    status signals as package manifests.
   </p>
 </Docs>

@@ -10,7 +10,7 @@ import type {
   NpmPackageMetadata,
   OsvQuery,
   RegistryLookupError,
-  VulnerabilitySummary,
+  VulnerabilitySummary
 } from './types.js'
 import {
   computeUpdateTargets,
@@ -18,10 +18,14 @@ import {
   getInvalidSpecMessage,
   normalizeDependencySpec,
   specLooksPublished,
-  specSatisfiesLatest,
+  specSatisfiesLatest
 } from './versions.js'
 
-const createProtocolAnalysis = (dependency: DependencyEntry, displaySpec: string, message: string): DependencyAnalysis => ({
+const createProtocolAnalysis = (
+  dependency: DependencyEntry,
+  displaySpec: string,
+  message: string
+): DependencyAnalysis => ({
   dependency,
   displaySpec,
   exists: true,
@@ -29,18 +33,17 @@ const createProtocolAnalysis = (dependency: DependencyEntry, displaySpec: string
   message,
   packageUrl: createNpmPackageUrl(dependency.packageName),
   status: 'protocol',
-  targets: {},
+  targets: {}
 })
 
-const unsupportedProtocolMessage = (dependency: DependencyEntry): string =>
-  dependency.spec.startsWith('catalog:')
-    ? 'This dependency uses a catalog reference that could not be resolved from pnpm-workspace.yaml.'
-    : 'This dependency uses a local, workspace, git, or URL protocol, so Dep Beacon does not query npm for it.'
+const unsupportedProtocolMessage = (dependency: DependencyEntry): string => dependency.spec.startsWith('catalog:') ?
+  'This dependency uses a catalog reference that could not be resolved from pnpm-workspace.yaml.' :
+  'This dependency uses a local, workspace, git, or URL protocol, so Dep Beacon does not query npm for it.'
 
 const createEmptyRangeAnalysis = (
   dependency: DependencyEntry,
   displaySpec: string,
-  packageName: string,
+  packageName: string
 ): DependencyAnalysis => ({
   dependency,
   displaySpec,
@@ -49,17 +52,16 @@ const createEmptyRangeAnalysis = (
   message: 'This dependency has an empty version range.',
   packageUrl: createNpmPackageUrl(packageName),
   status: 'invalid',
-  targets: {},
+  targets: {}
 })
 
-const lookupFailureStatus = (error: RegistryLookupError): DependencyStatus =>
-  error.code === 'not-found' ? 'missing' : 'invalid'
+const lookupFailureStatus = (error: RegistryLookupError): DependencyStatus => error.code === 'not-found' ? 'missing' : 'unavailable'
 
 const createLookupFailureAnalysis = (
   dependency: DependencyEntry,
   displaySpec: string,
   packageName: string,
-  error: RegistryLookupError,
+  error: RegistryLookupError
 ): DependencyAnalysis => ({
   dependency,
   displaySpec,
@@ -68,7 +70,7 @@ const createLookupFailureAnalysis = (
   message: error.message,
   packageUrl: createNpmPackageUrl(packageName),
   status: lookupFailureStatus(error),
-  targets: {},
+  targets: {}
 })
 
 const createInvalidTargetAnalysis = (
@@ -77,7 +79,7 @@ const createInvalidTargetAnalysis = (
   packageName: string,
   range: string,
   metadata: NpmPackageMetadata,
-  targets: DependencyUpdateTargets,
+  targets: DependencyUpdateTargets
 ): DependencyAnalysis => ({
   dependency,
   displaySpec,
@@ -87,12 +89,12 @@ const createInvalidTargetAnalysis = (
   packageUrl: createNpmPackageUrl(packageName),
   registry: metadata,
   status: 'invalid',
-  targets,
+  targets
 })
 
 const withVulnerability = (
   analysis: DependencyAnalysis,
-  vulnerability: VulnerabilitySummary | undefined,
+  vulnerability: VulnerabilitySummary | undefined
 ): DependencyAnalysis => {
   if (!vulnerability) return analysis
 
@@ -100,7 +102,7 @@ const withVulnerability = (
     exists: analysis.exists,
     isLatestSatisfied: analysis.isLatestSatisfied,
     statusBeforeVulnerability: analysis.status,
-    vulnerability,
+    vulnerability
   })
 
   const label = vulnerability.severity === 'unknown' ? 'known' : vulnerability.severity
@@ -109,14 +111,14 @@ const withVulnerability = (
     ...analysis,
     message: `${analysis.message} OSV reports ${label} vulnerability data for this version.`,
     status,
-    vulnerability,
+    vulnerability
   }
 }
 
 const createVersionMessage = (
   exists: boolean,
   isLatestSatisfied: boolean,
-  latestMessage: string,
+  latestMessage: string
 ): string => {
   if (!exists) return `The declared version floor is not published. ${latestMessage}`
 
@@ -135,7 +137,7 @@ const createVersionAnalysis = (
     range: string
     targets: DependencyUpdateTargets
     vulnerability?: VulnerabilitySummary
-  },
+  }
 ): DependencyAnalysis => {
   const exists = specLooksPublished(args.range, args.metadata)
   const isLatestSatisfied = specSatisfiesLatest(args.range, args.targets.latest, args.includePrerelease, args.metadata)
@@ -144,7 +146,7 @@ const createVersionAnalysis = (
     exists,
     isLatestSatisfied,
     statusBeforeVulnerability: exists ? 'outdated' : 'missing',
-    vulnerability: args.vulnerability,
+    vulnerability: args.vulnerability
   })
 
   const latestMessage = args.targets.latest ? `Latest is ${args.targets.latest}.` : 'No latest npm version was found.'
@@ -159,7 +161,7 @@ const createVersionAnalysis = (
     packageUrl: createNpmPackageUrl(args.packageName),
     registry: args.metadata,
     status,
-    targets: args.targets,
+    targets: args.targets
   }, args.vulnerability)
 }
 
@@ -168,16 +170,14 @@ export const analyzeDependency = async (
   options: AnalyzeDependencyOptions & {
     registryClient?: NpmRegistryClient
     vulnerability?: VulnerabilitySummary
-  } = {},
+  } = {}
 ): Promise<DependencyAnalysis> => {
   const normalized = normalizeDependencySpec(dependency, options.catalogSnapshot)
   const includePrerelease = options.includePrerelease ?? false
 
   if (normalized.protocol === 'unsupported') {
     return createProtocolAnalysis(
-      dependency,
-      normalized.displaySpec,
-      unsupportedProtocolMessage(dependency),
+      dependency, normalized.displaySpec, unsupportedProtocolMessage(dependency)
     )
   }
 
@@ -197,7 +197,14 @@ export const analyzeDependency = async (
   const targets = computeUpdateTargets(range, lookup.metadata, includePrerelease)
 
   if (!targets.current) {
-    return createInvalidTargetAnalysis(dependency, normalized.displaySpec, normalized.packageName, range, lookup.metadata, targets)
+    return createInvalidTargetAnalysis(
+      dependency,
+      normalized.displaySpec,
+      normalized.packageName,
+      range,
+      lookup.metadata,
+      targets
+    )
   }
 
   return createVersionAnalysis({
@@ -208,8 +215,40 @@ export const analyzeDependency = async (
     packageName: normalized.packageName,
     range,
     targets,
-    vulnerability: options.vulnerability,
+    vulnerability: options.vulnerability
   })
+}
+
+const MAX_CONCURRENT_REGISTRY_LOOKUPS = 8
+
+const analyzeWithConcurrencyLimit = async (
+  dependencies: readonly DependencyEntry[],
+  options: AnalyzeManyOptions & { registryClient: NpmRegistryClient }
+): Promise<DependencyAnalysis[]> => {
+  const analyses = new Array<DependencyAnalysis>(dependencies.length)
+  let nextIndex = 0
+
+  const worker = async (): Promise<void> => {
+    while (nextIndex < dependencies.length) {
+      const index = nextIndex
+      const dependency = dependencies[index]
+
+      nextIndex += 1
+
+      if (!dependency) continue
+
+      analyses[index] = await analyzeDependency(dependency, {
+        ...options,
+        vulnerability: undefined
+      })
+    }
+  }
+
+  const workerCount = Math.min(MAX_CONCURRENT_REGISTRY_LOOKUPS, dependencies.length)
+
+  await Promise.all(Array.from({ length: workerCount }, worker))
+
+  return analyses
 }
 
 export const analyzeDependencies = async (
@@ -217,36 +256,33 @@ export const analyzeDependencies = async (
   options: AnalyzeManyOptions & {
     osvClient?: OsvClient
     registryClient?: NpmRegistryClient
-  } = {},
+  } = {}
 ): Promise<DependencyAnalysis[]> => {
   const registryClient = options.registryClient ?? new NpmRegistryClient({ registryUrl: options.registryUrl })
 
-  const baseAnalyses = await Promise.all(
-    dependencies.map((dependency) => analyzeDependency(dependency, {
-      ...options,
-      registryClient,
-      vulnerability: undefined,
-    })),
-  )
+  const baseAnalyses = await analyzeWithConcurrencyLimit(dependencies, {
+    ...options,
+    registryClient
+  })
 
   if (!options.vulnerabilities) return baseAnalyses
 
   const osvClient = options.osvClient ?? new OsvClient()
 
-  const queries: OsvQuery[] = baseAnalyses.flatMap((analysis) => {
+  const queries: OsvQuery[] = baseAnalyses.flatMap(analysis => {
     const version = analysis.targets.current
 
     if (!version || analysis.status === 'protocol' || analysis.status === 'invalid') return []
 
     return [{
       name: analysis.registry?.name ?? analysis.dependency.packageName,
-      version,
+      version
     }]
   })
 
   const vulnerabilities = await osvClient.queryMany(queries)
 
-  return baseAnalyses.map((analysis) => {
+  return baseAnalyses.map(analysis => {
     const version = analysis.targets.current
 
     if (!version) return analysis

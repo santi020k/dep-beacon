@@ -3,16 +3,16 @@ const SORTABLE_SECTIONS = [
   'devDependencies',
   'optionalDependencies',
   'peerDependencies',
-  'resolutions',
+  'resolutions'
 ] as const
 
 type JsonObject = Record<string, unknown>
 
-const isJsonObject = (value: unknown): value is JsonObject =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
+const isJsonObject = (value: unknown): value is JsonObject => typeof value === 'object' && value !== null && !Array.isArray(value)
 
-const sortObjectByKey = (value: JsonObject): JsonObject =>
+const sortObjectByKey = (value: JsonObject): JsonObject => (
   Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
+)
 
 const detectIndent = (text: string): string | number => {
   const match = /\n([ \t]+)/u.exec(text)
@@ -42,7 +42,7 @@ export const sortPackageJsonDependencies = (text: string): string => {
   if (isJsonObject(pnpm) && isJsonObject(pnpm.overrides)) {
     sorted.pnpm = {
       ...pnpm,
-      overrides: sortObjectByKey(pnpm.overrides),
+      overrides: sortObjectByKey(pnpm.overrides)
     }
   }
 
@@ -55,7 +55,7 @@ export const sortPackageJsonDependencies = (text: string): string => {
 
 export const replaceDependencySpec = (text: string, start: number, end: number, nextSpec: string): string => {
   const current = text.slice(start, end)
-  const quote = current.trimStart().startsWith("'") ? "'" : '"'
+  const quote = current.trimStart().startsWith('\'') ? '\'' : '"'
 
   return `${text.slice(0, start)}${quote}${nextSpec}${quote}${text.slice(end)}`
 }

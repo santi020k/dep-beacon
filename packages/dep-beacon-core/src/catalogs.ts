@@ -2,7 +2,7 @@ import type { CatalogSnapshot } from './types.js'
 
 export const createEmptyCatalogSnapshot = (): CatalogSnapshot => ({
   default: new Map(),
-  named: new Map(),
+  named: new Map()
 })
 
 export const mergeCatalogSnapshots = (...snapshots: readonly CatalogSnapshot[]): CatalogSnapshot => {
@@ -30,7 +30,7 @@ export const mergeCatalogSnapshots = (...snapshots: readonly CatalogSnapshot[]):
 export const resolveCatalogSpec = (
   snapshot: CatalogSnapshot | undefined,
   packageName: string,
-  spec: string,
+  spec: string
 ): string | undefined => {
   if (!snapshot) return undefined
 

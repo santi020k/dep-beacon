@@ -3,18 +3,18 @@ export type DependencySourceKind = 'package-json' | 'pnpm-workspace'
 export type DependencyManager = 'npm' | 'pnpm' | 'yarn'
 
 export type DependencySection =
-  | 'catalog'
-  | 'catalogs'
-  | 'dependencies'
-  | 'devDependencies'
-  | 'optionalDependencies'
-  | 'overrides'
-  | 'packageExtensions'
-  | 'peerDependencies'
-  | 'pnpm.overrides'
-  | 'resolutions'
+  | 'catalog' |
+  'catalogs' |
+  'dependencies' |
+  'devDependencies' |
+  'optionalDependencies' |
+  'overrides' |
+  'packageExtensions' |
+  'peerDependencies' |
+  'pnpm.overrides' |
+  'resolutions'
 
-export type DependencyStatus = 'invalid' | 'missing' | 'outdated' | 'protocol' | 'up-to-date' | 'vulnerable'
+export type DependencyStatus = 'invalid' | 'missing' | 'outdated' | 'protocol' | 'unavailable' | 'up-to-date' | 'vulnerable'
 
 export type Severity = 'critical' | 'high' | 'low' | 'medium' | 'none' | 'unknown'
 
@@ -76,8 +76,8 @@ export type RegistryLookupResult =
   | {
     metadata: NpmPackageMetadata
     ok: true
-  }
-  | {
+  } |
+  {
     error: RegistryLookupError
     ok: false
   }

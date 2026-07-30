@@ -10,7 +10,7 @@ import {
   hoverMarkdown,
   inlayHintLabel,
   statusTitle,
-  updateTargets,
+  updateTargets
 } from '../src/presentation.js'
 
 const analysis = (overrides: Partial<DependencyAnalysis> = {}): DependencyAnalysis => ({
@@ -23,7 +23,7 @@ const analysis = (overrides: Partial<DependencyAnalysis> = {}): DependencyAnalys
     section: 'dependencies',
     source: 'package-json',
     spec: '^18.0.0',
-    specRange: { end: 16, endPosition: { character: 16, line: 0 }, start: 9, startPosition: { character: 9, line: 0 } },
+    specRange: { end: 16, endPosition: { character: 16, line: 0 }, start: 9, startPosition: { character: 9, line: 0 } }
   },
   displaySpec: '^18.0.0',
   exists: true,
@@ -32,7 +32,7 @@ const analysis = (overrides: Partial<DependencyAnalysis> = {}): DependencyAnalys
   packageUrl: 'https://www.npmjs.com/package/react',
   status: 'outdated',
   targets: { current: '18.3.1', latest: '19.1.0', nextMajor: '19.1.0', nextMinor: '18.4.0', nextPatch: '18.3.2' },
-  ...overrides,
+  ...overrides
 })
 
 describe('diagnosticSeverity', () => {
@@ -41,7 +41,8 @@ describe('diagnosticSeverity', () => {
     ['missing', 'error'],
     ['outdated', 'warning'],
     ['protocol', undefined],
-    ['up-to-date', undefined],
+    ['unavailable', 'warning'],
+    ['up-to-date', undefined]
   ] as const)('maps %s to %s', (status, expected) => {
     expect(diagnosticSeverity(analysis({ status }))).toBe(expected)
   })
@@ -56,7 +57,7 @@ describe('diagnosticSeverity', () => {
     expect(diagnosticSeverity(analysis({ status: 'invalid' }), { showUpdates: false })).toBe('error')
     expect(diagnosticSeverity(analysis({
       status: 'vulnerable',
-      vulnerability: { aliases: [], ids: ['A'], severity: 'low', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['A'], severity: 'low', source: 'osv' }
     }), { showUpdates: false })).toBe('warning')
   })
 })
@@ -102,6 +103,7 @@ describe('statusTitle', () => {
     expect(statusTitle(analysis({ status: 'missing', targets: {} }))).toContain('missing')
     expect(statusTitle(analysis({ status: 'invalid', targets: {} }))).toContain('invalid')
     expect(statusTitle(analysis({ status: 'protocol', targets: {} }))).toContain('catalog-managed')
+    expect(statusTitle(analysis({ status: 'unavailable', targets: {} }))).toContain('registry unavailable')
   })
 
   test('uses fallback labels when version and vulnerability details are unavailable', () => {
@@ -118,11 +120,12 @@ describe('inlayHintLabel', () => {
     expect(inlayHintLabel(analysis({ isLatestSatisfied: true, status: 'up-to-date' }))).toBe('✓ 18.3.1')
     expect(inlayHintLabel(analysis({
       status: 'vulnerable',
-      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' }
     }))).toBe('⚠ high risk · 18.3.1 → 19.1.0')
     expect(inlayHintLabel(analysis({ status: 'missing', targets: {} }))).toBe('✕ missing')
     expect(inlayHintLabel(analysis({ status: 'invalid', targets: {} }))).toBe('✕ invalid')
     expect(inlayHintLabel(analysis({ status: 'protocol', targets: {} }))).toBe('◆ managed')
+    expect(inlayHintLabel(analysis({ status: 'unavailable', targets: {} }))).toBe('⚠ unavailable')
   })
 })
 
@@ -134,7 +137,7 @@ describe('diagnosticMessage', () => {
   test('puts security severity, package, advisory, and target first', () => {
     expect(diagnosticMessage(analysis({
       status: 'vulnerable',
-      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' }
     }))).toBe('Security · HIGH: react@18.3.1 · GHSA-demo. Update target: 19.1.0.')
   })
 
@@ -142,7 +145,7 @@ describe('diagnosticMessage', () => {
     expect(diagnosticMessage(analysis({
       status: 'vulnerable',
       targets: {},
-      vulnerability: { aliases: [], ids: [], severity: 'unknown', source: 'osv' },
+      vulnerability: { aliases: [], ids: [], severity: 'unknown', source: 'osv' }
     }))).toBe('Security · UNKNOWN: react.')
   })
 
@@ -155,7 +158,7 @@ describe('hoverMarkdown', () => {
   test('shows dependency status and every available update target', () => {
     const markdown = hoverMarkdown(analysis({
       dependency: { ...analysis().dependency, spec: 'catalog:' },
-      displaySpec: 'catalog: (^18.0.0)',
+      displaySpec: 'catalog: (^18.0.0)'
     }))
 
     expect(markdown).toContain('Dep Beacon — Update available')
@@ -170,7 +173,7 @@ describe('hoverMarkdown', () => {
     const markdown = hoverMarkdown(analysis({
       isLatestSatisfied: true,
       status: 'up-to-date',
-      targets: { current: '1.0.13', latest: '1.0.12' },
+      targets: { current: '1.0.13', latest: '1.0.12' }
     }))
 
     expect(markdown).toContain('Range resolves up to `1.0.13` · npm `latest` tag: `1.0.12`')
@@ -180,7 +183,7 @@ describe('hoverMarkdown', () => {
   test('includes vulnerability details', () => {
     expect(hoverMarkdown(analysis({
       status: 'vulnerable',
-      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' },
+      vulnerability: { aliases: [], ids: ['GHSA-demo'], severity: 'high', source: 'osv' }
     }))).toContain('high severity · GHSA-demo')
   })
 
@@ -199,7 +202,7 @@ describe('hoverMarkdown', () => {
   test('uses a fallback label for vulnerabilities without advisory IDs', () => {
     expect(hoverMarkdown(analysis({
       status: 'vulnerable',
-      vulnerability: { aliases: [], ids: [], severity: 'unknown', source: 'osv' },
+      vulnerability: { aliases: [], ids: [], severity: 'unknown', source: 'osv' }
     }))).toContain('unknown severity · known vulnerability')
   })
 })
@@ -209,7 +212,7 @@ describe('updateTargets', () => {
     expect(updateTargets(analysis()).map(({ kind, spec }) => [kind, spec])).toEqual([
       ['patch', '^18.3.2'],
       ['minor', '^18.4.0'],
-      ['major', '^19.1.0'],
+      ['major', '^19.1.0']
     ])
   })
 
@@ -220,7 +223,7 @@ describe('updateTargets', () => {
     expect(updateTargets(catalogAnalysis, '~18.0.0').map(({ kind, spec }) => [kind, spec])).toEqual([
       ['patch', '~18.3.2'],
       ['minor', '~18.4.0'],
-      ['major', '~19.1.0'],
+      ['major', '~19.1.0']
     ])
   })
 
@@ -231,8 +234,8 @@ describe('updateTargets', () => {
         current: '18.0.0',
         latest: '19.0.0',
         nextMajor: '19.0.0',
-        nextMinor: '18.0.0',
-      },
+        nextMinor: '18.0.0'
+      }
     }))
 
     expect(targets.map(({ kind, spec }) => [kind, spec])).toEqual([['major', '^19.0.0']])

@@ -24,7 +24,7 @@ const {
   imageAlt = `${SITE.name} social preview`,
   keywords = SITE.keywords,
   noindex = false,
-  title = SITE.name,
+  title = SITE.name
 } = Astro.props
 
 const pageTitle = title === 'Dep Beacon' ? title : `${title} | Dep Beacon`
@@ -42,11 +42,11 @@ const structuredData = [
     offers: {
       '@type': 'Offer',
       price: '0',
-      priceCurrency: 'USD',
+      priceCurrency: 'USD'
     },
     operatingSystem: 'Windows, macOS, Linux',
     sameAs: [SITE.githubUrl, SITE.marketplaceUrl, SITE.openVsxUrl, SITE.personalUrl],
-    url: SITE.url,
+    url: SITE.url
   },
   {
     '@context': 'https://schema.org',
@@ -56,11 +56,11 @@ const structuredData = [
     isPartOf: {
       '@type': 'WebSite',
       name: SITE.name,
-      url: SITE.url,
+      url: SITE.url
     },
     name: pageTitle,
-    url: canonicalUrl,
-  },
+    url: canonicalUrl
+  }
 ]
 ---
 
@@ -95,8 +95,7 @@ const structuredData = [
         root.classList.toggle('dark', theme === 'dark')
 
         document.querySelector('meta[name="theme-color"]')?.setAttribute(
-          'content',
-          theme === 'dark' ? '#0b1115' : '#f5f8fa',
+          'content', theme === 'dark' ? '#0b1115' : '#f5f8fa'
         )
       })()
     </script>

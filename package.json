@@ -11,10 +11,10 @@
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "check:astro": "pnpm --filter @santi020k/dep-beacon-docs check",
-    "lint": "pnpm run lint:repo && turbo run lint",
-    "lint:repo": "eslint . --cache --no-warn-ignored",
+    "lint": "pnpm run lint:repo && turbo run lint -- --max-warnings=0",
+    "lint:repo": "eslint . --cache --no-warn-ignored --max-warnings=0",
     "lint:fix": "pnpm run lint:repo:fix && turbo run lint:fix",
-    "lint:repo:fix": "eslint . --cache --fix --no-warn-ignored",
+    "lint:repo:fix": "eslint . --cache --fix --no-warn-ignored --max-warnings=0",
     "lint:spell": "cspell \"**\" --gitignore --cache --show-suggestions --show-context",
     "lint:knip": "knip",
     "validate": "pnpm run build && pnpm run typecheck && pnpm run test:coverage && pnpm run lint && pnpm run lint:spell && pnpm run lint:knip && pnpm run package:extension",
@@ -32,38 +32,40 @@
     "prepare": "husky",
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run check:astro && pnpm run typecheck && pnpm run test && pnpm run lint",
-    "commit": "czg"
+    "commit": "commitprompt"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
-    "@commitlint/cli": "catalog:",
-    "@commitlint/config-conventional": "catalog:",
+    "@santi020k/commitprompt": "catalog:",
+    "@santi020k/eslint-config-astro": "catalog:",
     "@santi020k/eslint-config-basic": "catalog:",
+    "@santi020k/eslint-config-extensions": "catalog:",
+    "@santi020k/eslint-config-formats": "catalog:",
+    "@santi020k/eslint-config-libraries": "catalog:",
+    "@santi020k/eslint-config-testing": "catalog:",
+    "@santi020k/eslint-config-tools": "catalog:",
     "@types/node": "catalog:",
     "cspell": "catalog:",
-    "czg": "catalog:",
     "eslint": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
     "lint-staged": "catalog:",
     "sharp": "catalog:",
-    "tailwindcss": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
     "wrangler": "catalog:"
   },
   "lint-staged": {
     "*.{astro,js,mjs,ts,mts}": [
-      "eslint --fix --no-warn-ignored"
+      "eslint --fix --no-warn-ignored --max-warnings=0"
     ],
     "*.{json,jsonc,md,yml,yaml}": [
-      "eslint --fix --no-warn-ignored"
+      "eslint --fix --no-warn-ignored --max-warnings=0"
     ]
   },
   "engines": {
-    "node": "^20.19.0 || >=22.13.0"
+    "node": ">=22.19.0"
   },
   "packageManager": "pnpm@11.1.2"
 }

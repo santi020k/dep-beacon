@@ -8,7 +8,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/'
 
 <aside class="docs-sidebar">
   <nav aria-label="Documentation navigation">
-    {DOCS_NAV.map((item) => {
+    {DOCS_NAV.map(item => {
       const href = item.href.replace(/\/$/u, '')
       const active = currentPath === href
 

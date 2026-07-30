@@ -26,8 +26,7 @@ const versionSummary = (analysis: DependencyAnalysis): string => {
   return ''
 }
 
-const withVersionSummary = (label: string, summary: string): string =>
-  summary ? `${label} | ${summary}` : label
+const withVersionSummary = (label: string, summary: string): string => summary ? `${label} | ${summary}` : label
 
 const versionSignal = (analysis: DependencyAnalysis): string => {
   const current = analysis.targets.current
@@ -44,6 +43,9 @@ export const statusTone = (status: DependencyStatus): DecorationTone => {
       return 'green'
 
     case 'outdated':
+      return 'yellow'
+
+    case 'unavailable':
       return 'yellow'
 
     case 'vulnerable':
@@ -82,13 +84,15 @@ export const statusTitle = (analysis: DependencyAnalysis): string => {
     case 'invalid':
       return '$(error) invalid range'
 
+    case 'unavailable':
+      return '$(warning) registry unavailable'
+
     case 'protocol':
       return '$(symbol-key) local or catalog-managed'
   }
 }
 
-export const packageLensTitle = (analysis: DependencyAnalysis): string =>
-  `$(link-external)\u00A0open ${analysis.dependency.packageName}`
+export const packageLensTitle = (analysis: DependencyAnalysis): string => `$(link-external)\u00A0open ${analysis.dependency.packageName}`
 
 const hoverVersionLine = (analysis: DependencyAnalysis): string | undefined => {
   const current = analysis.targets.current
@@ -110,8 +114,9 @@ const STATUS_LABELS: Record<DependencyStatus, string> = {
   missing: 'Package or version not found',
   outdated: 'Update available',
   protocol: 'Locally managed dependency',
+  unavailable: 'Registry temporarily unavailable',
   'up-to-date': 'Up to date',
-  vulnerable: 'Security update recommended',
+  vulnerable: 'Security update recommended'
 }
 
 export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
@@ -132,7 +137,7 @@ export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
   const lines = [
     `### Dep Beacon — ${STATUS_LABELS[analysis.status]}`,
     '',
-    `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`,
+    `**[${analysis.dependency.packageName}](${analysis.packageUrl})** · ${analysis.displaySpec}`
   ]
 
   const versionLine = hoverVersionLine(analysis)
@@ -157,13 +162,13 @@ export const hoverMarkdown = (analysis: DependencyAnalysis): string => {
 export const bulkUpdateSpec = (
   analysis: DependencyAnalysis,
   editableSpec: string,
-  strategy: BulkUpdateStrategy,
+  strategy: BulkUpdateStrategy
 ): string | undefined => {
   if (analysis.status !== 'outdated' && analysis.status !== 'vulnerable') return undefined
 
-  const version = strategy === 'latest'
-    ? analysis.targets.latest
-    : analysis.targets.nextMinor ?? analysis.targets.nextPatch
+  const version = strategy === 'latest' ?
+    analysis.targets.latest :
+    analysis.targets.nextMinor ?? analysis.targets.nextPatch
 
   if (!version) return undefined
 
@@ -172,29 +177,23 @@ export const bulkUpdateSpec = (
   return targetSpec === editableSpec.trim() ? undefined : targetSpec
 }
 
+type DecorationTextBuilder = (analysis: DependencyAnalysis, suffix: string) => string
+
+const DECORATION_TEXT_BUILDERS: Record<DependencyStatus, DecorationTextBuilder> = {
+  invalid: () => ' invalid',
+  missing: () => ' missing',
+  outdated: (_analysis, suffix) => ` update${suffix}`,
+  protocol: () => ' managed',
+  unavailable: () => ' unavailable',
+  'up-to-date': (_analysis, suffix) => ` ok${suffix}`,
+  vulnerable: (analysis, suffix) => ` ${analysis.vulnerability?.severity ?? 'known'} risk${suffix}`
+}
+
 export const decorationText = (analysis: DependencyAnalysis): string => {
   const signal = versionSignal(analysis)
   const suffix = signal ? ` ${signal}` : ''
 
-  switch (analysis.status) {
-    case 'up-to-date':
-      return ` ok${suffix}`
-
-    case 'outdated':
-      return ` update${suffix}`
-
-    case 'vulnerable':
-      return ` ${analysis.vulnerability?.severity ?? 'known'} risk${suffix}`
-
-    case 'missing':
-      return ' missing'
-
-    case 'invalid':
-      return ' invalid'
-
-    case 'protocol':
-      return ' managed'
-  }
+  return DECORATION_TEXT_BUILDERS[analysis.status](analysis, suffix)
 }
 
 const updateActionsForSpec = (analysis: DependencyAnalysis, spec: string): UpdateAction[] => {
@@ -236,8 +235,8 @@ export const resolvedUpdateActions = (analysis: DependencyAnalysis, spec?: strin
 
   const currentSpec = spec ?? analysis.dependency.spec
 
-  return updateActionsForSpec(analysis, currentSpec).map((action) => ({
+  return updateActionsForSpec(analysis, currentSpec).map(action => ({
     ...action,
-    targetSpec: createTargetSpec(currentSpec, action.version),
+    targetSpec: createTargetSpec(currentSpec, action.version)
   }))
 }

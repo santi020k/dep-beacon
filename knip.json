@@ -5,9 +5,6 @@
       "entry": [
         "scripts/*.mjs"
       ],
-      "ignoreDependencies": [
-        "tailwindcss"
-      ],
       "project": [
         "scripts/**/*.mjs"
       ]

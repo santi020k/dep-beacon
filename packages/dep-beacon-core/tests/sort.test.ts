@@ -16,8 +16,8 @@ describe('package.json edits', () => {
   }
 }`)
 
-    expect(sorted).toContain(`"dependencies": {\n    "astro": "^7.0.0",\n    "zod": "^4.0.0"\n  }`)
-    expect(sorted).toContain(`"devDependencies": {\n    "typescript": "^6.0.0",\n    "vitest": "^4.0.0"\n  }`)
+    expect(sorted).toContain('"dependencies": {\n    "astro": "^7.0.0",\n    "zod": "^4.0.0"\n  }')
+    expect(sorted).toContain('"devDependencies": {\n    "typescript": "^6.0.0",\n    "vitest": "^4.0.0"\n  }')
   })
 
   test('replaces a quoted spec while preserving the surrounding text', () => {

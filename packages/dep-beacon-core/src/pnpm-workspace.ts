@@ -65,7 +65,7 @@ const getMapValue = (node: YamlNode | null | undefined, key: string): YamlNode |
 const mapEntries = (node: YamlNode | null | undefined): YamlMapEntry[] => {
   if (!isYamlMapNode(node)) return []
 
-  return node.items.flatMap((item) => {
+  return node.items.flatMap(item => {
     const keyNode = item.key as YamlNode | null
     const valueNode = item.value as YamlNode | null
     const keyText = scalarText(keyNode)
@@ -85,7 +85,7 @@ const createEntry = (
     path: string[]
     section: DependencySection
     specNode: YamlNode
-  },
+  }
 ): DependencyEntry | undefined => {
   const spec = scalarText(args.specNode)
   const nameRange = scalarRange(args.lineStarts, args.nameNode)
@@ -103,7 +103,7 @@ const createEntry = (
     section: args.section,
     source: 'pnpm-workspace',
     spec,
-    specRange,
+    specRange
   }
 }
 
@@ -117,7 +117,7 @@ const createStringMapEntry = (args: CollectStringMapArgs, item: YamlMapEntry): D
     packageName,
     path: [...args.path, item.keyText],
     section: args.section,
-    specNode: item.value,
+    specNode: item.value
   })
 }
 
@@ -156,7 +156,7 @@ const collectPackageExtensions = (
     entries: DependencyEntry[]
     lineStarts: readonly number[]
     node: YamlNode | null | undefined
-  },
+  }
 ): void => {
   for (const extension of mapEntries(args.node)) {
     if (!isYamlMapNode(extension.value)) continue
@@ -167,21 +167,20 @@ const collectPackageExtensions = (
         lineStarts: args.lineStarts,
         node: getMapValue(extension.value, section),
         path: ['packageExtensions', extension.keyText, section],
-        section: 'packageExtensions',
+        section: 'packageExtensions'
       })
     }
   }
 }
 
-const yamlErrorRange = (lineStarts: readonly number[], offset: number | undefined): TextRange | undefined =>
-  typeof offset === 'number' ? createTextRange(lineStarts, offset, offset + 1) : undefined
+const yamlErrorRange = (lineStarts: readonly number[], offset: number | undefined): TextRange | undefined => typeof offset === 'number' ? createTextRange(lineStarts, offset, offset + 1) : undefined
 
 export const parsePnpmWorkspaceManifest = (text: string): ManifestParseResult => {
   const lineStarts = createLineStarts(text)
 
   const document = parseDocument(text, {
     keepSourceTokens: true,
-    prettyErrors: false,
+    prettyErrors: false
   })
 
   const root = document.contents as YamlNode | null
@@ -194,7 +193,7 @@ export const parsePnpmWorkspaceManifest = (text: string): ManifestParseResult =>
     lineStarts,
     node: getMapValue(root, 'catalog'),
     path: ['catalog'],
-    section: 'catalog',
+    section: 'catalog'
   })
 
   for (const catalog of mapEntries(getMapValue(root, 'catalogs'))) {
@@ -205,7 +204,7 @@ export const parsePnpmWorkspaceManifest = (text: string): ManifestParseResult =>
       lineStarts,
       node: catalog.value,
       path: ['catalogs', catalog.keyText],
-      section: 'catalogs',
+      section: 'catalogs'
     })
   }
 
@@ -215,24 +214,24 @@ export const parsePnpmWorkspaceManifest = (text: string): ManifestParseResult =>
     node: getMapValue(root, 'overrides'),
     packageNameTransform: getOverridePackageName,
     path: ['overrides'],
-    section: 'overrides',
+    section: 'overrides'
   })
 
   collectPackageExtensions({
     entries,
     lineStarts,
-    node: getMapValue(root, 'packageExtensions'),
+    node: getMapValue(root, 'packageExtensions')
   })
 
-  const errors: ManifestParseError[] = document.errors.map((error) => ({
+  const errors: ManifestParseError[] = document.errors.map(error => ({
     message: error.message,
-    range: yamlErrorRange(lineStarts, error.pos.at(0)),
+    range: yamlErrorRange(lineStarts, error.pos.at(0))
   }))
 
   return {
     catalogs,
     dependencies: entries,
     errors,
-    source: 'pnpm-workspace',
+    source: 'pnpm-workspace'
   }
 }

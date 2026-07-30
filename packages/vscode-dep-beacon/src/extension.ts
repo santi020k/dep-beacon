@@ -13,7 +13,7 @@ import {
   OsvClient,
   parseManifest,
   sortPackageJsonDependencies,
-  type TextRange,
+  type TextRange
 } from '@santi020k/dep-beacon-core'
 
 import * as vscode from 'vscode'
@@ -28,7 +28,7 @@ import {
   packageLensTitle,
   type ResolvedUpdateAction,
   resolvedUpdateActions,
-  statusTone,
+  statusTone
 } from './presentation.js'
 
 interface CachedAnalysis {
@@ -91,36 +91,27 @@ interface BulkUpdateEdit {
 const DOCUMENT_SELECTOR: vscode.DocumentSelector = [
   { language: 'json', scheme: 'file' },
   { language: 'jsonc', scheme: 'file' },
-  { language: 'yaml', scheme: 'file' },
+  { language: 'yaml', scheme: 'file' }
 ]
 
 const LOCAL_LOG_FILE_NAME = 'dep-beacon-extension-host.log'
 const LOCAL_DIAGNOSTIC_SIGNALS = ['SIGHUP', 'SIGINT', 'SIGTERM'] as const satisfies readonly NodeJS.Signals[]
 let localRuntimeDiagnosticsRegistered = false
 
-const toVscodeRange = (range: TextRange): vscode.Range =>
-  new vscode.Range(
-    range.startPosition.line,
-    range.startPosition.character,
-    range.endPosition.line,
-    range.endPosition.character,
-  )
+const toVscodeRange = (range: TextRange): vscode.Range => new vscode.Range(
+  range.startPosition.line, range.startPosition.character, range.endPosition.line, range.endPosition.character
+)
 
-const toCodeLensRange = (range: TextRange): vscode.Range =>
-  new vscode.Range(
-    range.startPosition.line,
-    range.startPosition.character,
-    range.startPosition.line,
-    range.startPosition.character,
-  )
+const toCodeLensRange = (range: TextRange): vscode.Range => new vscode.Range(
+  range.startPosition.line, range.startPosition.character, range.startPosition.line, range.startPosition.character
+)
 
 const toUpdateRange = (range: TextRange): UpdateDependencyArgs['range'] => ({
   end: range.endPosition,
-  start: range.startPosition,
+  start: range.startPosition
 })
 
-const isSupportedDocument = (document: vscode.TextDocument): boolean =>
-  document.uri.scheme === 'file' && isSupportedManifestPath(document.fileName)
+const isSupportedDocument = (document: vscode.TextDocument): boolean => document.uri.scheme === 'file' && isSupportedManifestPath(document.fileName)
 
 const isWorkspaceManifestDocument = (document: vscode.TextDocument): boolean => {
   const name = basename(document.fileName)
@@ -128,8 +119,7 @@ const isWorkspaceManifestDocument = (document: vscode.TextDocument): boolean => 
   return name === 'pnpm-workspace.yaml' || name === 'pnpm-workspace.yml'
 }
 
-const isLocalExtensionHost = (): boolean =>
-  process.env.DEP_BEACON_EXTENSION_ENV === 'local'
+const isLocalExtensionHost = (): boolean => process.env.DEP_BEACON_EXTENSION_ENV === 'local'
 
 const configuredLogFilePath = (): string | undefined => {
   const filePath = process.env.DEP_BEACON_LOG_FILE?.trim()
@@ -137,11 +127,13 @@ const configuredLogFilePath = (): string | undefined => {
   return filePath || undefined
 }
 
-const shouldRegisterLocalRuntimeDiagnostics = (): boolean =>
+const shouldRegisterLocalRuntimeDiagnostics = (): boolean => (
   isLocalExtensionHost() || configuredLogFilePath() !== undefined
+)
 
-const localLogFilePath = (context: vscode.ExtensionContext): string | undefined =>
+const localLogFilePath = (context: vscode.ExtensionContext): string | undefined => (
   configuredLogFilePath() ?? (isLocalExtensionHost() ? join(context.logUri.fsPath, LOCAL_LOG_FILE_NAME) : undefined)
+)
 
 const isDepBeaconWarning = (warning: ProcessWarning, context: vscode.ExtensionContext): boolean => {
   const stack = warning.stack ?? ''
@@ -150,27 +142,27 @@ const isDepBeaconWarning = (warning: ProcessWarning, context: vscode.ExtensionCo
   return stack.includes(extensionPath) || stack.includes('/vscode-dep-beacon/') || stack.includes('\\vscode-dep-beacon\\')
 }
 
-const describeDocument = (document: vscode.TextDocument): string =>
-  vscode.workspace.asRelativePath(document.uri, false)
+const describeDocument = (document: vscode.TextDocument): string => vscode.workspace.asRelativePath(document.uri, false)
 
 const formatReplacement = (currentText: string, targetSpec: string): string => {
   const trimmed = currentText.trimStart()
 
-  if (trimmed.startsWith("'")) return `'${targetSpec}'`
+  if (trimmed.startsWith('\'')) return `'${targetSpec}'`
 
   if (trimmed.startsWith('"')) return `"${targetSpec}"`
 
   return targetSpec
 }
 
-const createDecoration = (color: vscode.ThemeColor): vscode.TextEditorDecorationType =>
+const createDecoration = (color: vscode.ThemeColor): vscode.TextEditorDecorationType => (
   vscode.window.createTextEditorDecorationType({
     after: {
       color,
-      margin: '0 0 0 1rem',
+      margin: '0 0 0 1rem'
     },
-    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
   })
+)
 
 const updateLensTitle = (actions: readonly ResolvedUpdateAction[]): string => {
   const action = actions[0]
@@ -208,14 +200,11 @@ const catalogReferenceName = (spec: string): string | undefined => {
   return /^catalog:(?<catalogName>[a-z0-9_-]+)$/iu.exec(spec)?.groups?.catalogName
 }
 
-const isCatalogReference = (analysis: DependencyAnalysis): boolean =>
-  analysis.dependency.source === 'package-json' && analysis.dependency.spec.startsWith('catalog:')
+const isCatalogReference = (analysis: DependencyAnalysis): boolean => analysis.dependency.source === 'package-json' && analysis.dependency.spec.startsWith('catalog:')
+const catalogNamesEqual = (left: string | undefined, right: string | undefined): boolean => (left ?? '') === (right ?? '')
 
-const catalogNamesEqual = (left: string | undefined, right: string | undefined): boolean =>
-  (left ?? '') === (right ?? '')
-
-const catalogEditTargets = (uri: vscode.Uri, manifest: ManifestParseResult): CatalogEditTarget[] =>
-  manifest.dependencies.flatMap((dependency) => {
+const catalogEditTargets = (uri: vscode.Uri, manifest: ManifestParseResult): CatalogEditTarget[] => (
+  manifest.dependencies.flatMap(dependency => {
     if (dependency.section !== 'catalog' && dependency.section !== 'catalogs') return []
 
     return [{
@@ -223,9 +212,10 @@ const catalogEditTargets = (uri: vscode.Uri, manifest: ManifestParseResult): Cat
       packageName: dependency.packageName,
       range: toUpdateRange(dependency.specRange),
       spec: dependency.spec,
-      uri: uri.toString(),
+      uri: uri.toString()
     }]
   })
+)
 
 const diagnosticSeverity = (analysis: DependencyAnalysis): vscode.DiagnosticSeverity | undefined => {
   switch (analysis.status) {
@@ -236,12 +226,15 @@ const diagnosticSeverity = (analysis: DependencyAnalysis): vscode.DiagnosticSeve
       return vscode.DiagnosticSeverity.Error
 
     case 'vulnerable':
-      return isHighRiskSeverity(analysis.vulnerability?.severity)
-        ? vscode.DiagnosticSeverity.Error
-        : vscode.DiagnosticSeverity.Warning
+      return isHighRiskSeverity(analysis.vulnerability?.severity) ?
+        vscode.DiagnosticSeverity.Error :
+        vscode.DiagnosticSeverity.Warning
 
     case 'outdated':
       return vscode.DiagnosticSeverity.Information
+
+    case 'unavailable':
+      return vscode.DiagnosticSeverity.Warning
 
     case 'protocol':
       return undefined
@@ -251,16 +244,14 @@ const diagnosticSeverity = (analysis: DependencyAnalysis): vscode.DiagnosticSeve
   }
 }
 
-const createFingerprint = (document: vscode.TextDocument, config: DepBeaconConfig): string =>
-  [
-    document.version,
-    config.includePrerelease,
-    config.checkVulnerabilities,
-    config.registryUrl,
-  ].join(':')
+const createFingerprint = (document: vscode.TextDocument, config: DepBeaconConfig): string => [
+  document.version,
+  config.includePrerelease,
+  config.checkVulnerabilities,
+  config.registryUrl
+].join(':')
 
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.stack ?? error.message : String(error)
+const errorMessage = (error: unknown): string => error instanceof Error ? error.stack ?? error.message : String(error)
 
 const fileExists = async (uri: vscode.Uri): Promise<boolean> => {
   try {
@@ -325,18 +316,23 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       muted: createDecoration(new vscode.ThemeColor('descriptionForeground')),
       orange: createDecoration(new vscode.ThemeColor('charts.orange')),
       red: createDecoration(new vscode.ThemeColor('charts.red')),
-      yellow: createDecoration(new vscode.ThemeColor('charts.yellow')),
+      yellow: createDecoration(new vscode.ThemeColor('charts.yellow'))
     }
 
-    context.subscriptions.push(this.#diagnostics, this.#output, this.#onDidChangeCodeLenses, ...Object.values(this.#decorationTypes))
+    context.subscriptions.push(
+      this.#diagnostics,
+      this.#output,
+      this.#onDidChangeCodeLenses,
+      ...Object.values(this.#decorationTypes)
+    )
 
     this.#subscriptions.push(
       vscode.languages.registerCodeActionsProvider(DOCUMENT_SELECTOR, this, {
-        providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
+        providedCodeActionKinds: [vscode.CodeActionKind.QuickFix]
       }),
       vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, this),
       vscode.languages.registerHoverProvider(DOCUMENT_SELECTOR, this),
-      vscode.workspace.onDidChangeTextDocument((event) => {
+      vscode.workspace.onDidChangeTextDocument(event => {
         if (isWorkspaceManifestDocument(event.document)) {
           this.clearCatalogData()
 
@@ -345,7 +341,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
         this.schedule(event.document, false, 'document changed')
       }),
-      vscode.workspace.onDidOpenTextDocument((document) => {
+      vscode.workspace.onDidOpenTextDocument(document => {
         if (this.#catalogDiscoveryUris.has(document.uri.toString())) return
 
         if (isWorkspaceManifestDocument(document)) {
@@ -356,7 +352,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
         this.schedule(document, false, 'document opened')
       }),
-      vscode.workspace.onDidSaveTextDocument((document) => {
+      vscode.workspace.onDidSaveTextDocument(document => {
         if (isWorkspaceManifestDocument(document)) {
           this.clearCatalogData()
 
@@ -369,7 +365,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
           this.logError(error, `Install-on-save failed for ${describeDocument(document)}.`)
         })
       }),
-      vscode.workspace.onDidChangeConfiguration((event) => {
+      vscode.workspace.onDidChangeConfiguration(event => {
         if (!event.affectsConfiguration('depBeacon')) return
 
         this.clearCache()
@@ -378,8 +374,12 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
         this.refreshVisibleEditors(false, 'configuration changed')
       }),
-      vscode.window.onDidChangeVisibleTextEditors(() => { this.updateVisibleDecorations(); }),
-      vscode.commands.registerCommand('depBeacon.refresh', () => { this.refreshVisibleEditors(true, 'manual refresh command'); }),
+      vscode.window.onDidChangeVisibleTextEditors(() => {
+        this.updateVisibleDecorations()
+      }),
+      vscode.commands.registerCommand('depBeacon.refresh', () => {
+        this.refreshVisibleEditors(true, 'manual refresh command')
+      }),
       vscode.commands.registerCommand('depBeacon.clearCache', () => {
         this.clearCache()
 
@@ -400,7 +400,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       }),
       vscode.commands.registerCommand('depBeacon.openPackage', (url: string) => vscode.env.openExternal(vscode.Uri.parse(url))),
       vscode.commands.registerCommand('depBeacon.pickDependencyUpdate', (args: PickDependencyUpdateArgs) => this.pickDependencyUpdate(args)),
-      vscode.commands.registerCommand('depBeacon.updateDependency', (args: UpdateDependencyArgs) => this.updateDependency(args)),
+      vscode.commands.registerCommand('depBeacon.updateDependency', (args: UpdateDependencyArgs) => this.updateDependency(args))
     )
 
     this.log('Registered Dep Beacon commands and providers.')
@@ -496,7 +496,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         }
 
         localRuntimeDiagnosticsRegistered = false
-      },
+      }
     })
   }
 
@@ -509,7 +509,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       const analyses = await this.analyzeDocument(document)
       const catalogEditTargets = this.#cache.get(document.uri.toString())?.catalogEditTargets ?? []
 
-      return analyses.flatMap((analysis) => this.createCodeLenses(document, analysis, catalogEditTargets))
+      return analyses.flatMap(analysis => this.createCodeLenses(document, analysis, catalogEditTargets))
     } catch (error) {
       this.logError(error, `Failed to provide CodeLens for ${describeDocument(document)}.`)
 
@@ -525,9 +525,8 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     try {
       const analyses = await this.analyzeDocument(document)
 
-      const analysis = analyses.find((candidate) =>
-        toVscodeRange(candidate.dependency.nameRange).contains(position)
-        || toVscodeRange(candidate.dependency.specRange).contains(position))
+      const analysis = analyses.find(candidate => toVscodeRange(candidate.dependency.nameRange).contains(position) ||
+        toVscodeRange(candidate.dependency.specRange).contains(position))
 
       if (!analysis) return undefined
 
@@ -535,7 +534,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         analysis.dependency.nameRange.startPosition.line,
         analysis.dependency.nameRange.startPosition.character,
         analysis.dependency.specRange.endPosition.line,
-        analysis.dependency.specRange.endPosition.character,
+        analysis.dependency.specRange.endPosition.character
       )
 
       return new vscode.Hover(new vscode.MarkdownString(hoverMarkdown(analysis)), range)
@@ -548,7 +547,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
   async provideCodeActions(
     document: vscode.TextDocument,
-    range: vscode.Range,
+    range: vscode.Range
   ): Promise<vscode.CodeAction[]> {
     const config = getDepBeaconConfig()
 
@@ -558,13 +557,14 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       const analyses = await this.analyzeDocument(document)
       const catalogTargets = this.#cache.get(document.uri.toString())?.catalogEditTargets ?? []
 
-      const selectedAnalyses = analyses.filter((analysis) =>
-        toVscodeRange(analysis.dependency.nameRange).intersection(range) !== undefined
-        || toVscodeRange(analysis.dependency.specRange).intersection(range) !== undefined)
+      const selectedAnalyses = analyses.filter(analysis => (
+        toVscodeRange(analysis.dependency.nameRange).intersection(range) !== undefined ||
+        toVscodeRange(analysis.dependency.specRange).intersection(range) !== undefined
+      ))
 
-      const bulkActions = selectedAnalyses.some((analysis) => analysis.status === 'outdated' || analysis.status === 'vulnerable')
-        ? await this.createBulkCodeActions(document, analyses, catalogTargets)
-        : []
+      const bulkActions = selectedAnalyses.some(analysis => analysis.status === 'outdated' || analysis.status === 'vulnerable') ?
+        await this.createBulkCodeActions(document, analyses, catalogTargets) :
+        []
 
       const dependencyActions = await this.createDependencyCodeActions(document, selectedAnalyses, catalogTargets)
 
@@ -579,13 +579,13 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
   async createBulkCodeActions(
     document: vscode.TextDocument,
     analyses: readonly DependencyAnalysis[],
-    catalogTargets: readonly CatalogEditTarget[],
+    catalogTargets: readonly CatalogEditTarget[]
   ): Promise<vscode.CodeAction[]> {
     const actions: vscode.CodeAction[] = []
 
     for (const [strategy, title] of [
       ['compatible', 'Update all compatible dependencies'],
-      ['latest', 'Update all dependencies to latest'],
+      ['latest', 'Update all dependencies to latest']
     ] as const) {
       const update = await this.createBulkUpdateEdit(document, analyses, catalogTargets, strategy)
 
@@ -604,7 +604,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
   async createDependencyCodeActions(
     document: vscode.TextDocument,
     analyses: readonly DependencyAnalysis[],
-    catalogTargets: readonly CatalogEditTarget[],
+    catalogTargets: readonly CatalogEditTarget[]
   ): Promise<vscode.CodeAction[]> {
     const actions: vscode.CodeAction[] = []
 
@@ -617,8 +617,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         const catalogSuffix = isCatalogReference(analysis) ? ' in pnpm catalog' : ''
 
         const action = new vscode.CodeAction(
-          `Dep Beacon: Update ${analysis.dependency.packageName} to ${update.title.toLowerCase()} (${update.targetSpec})${catalogSuffix}`,
-          vscode.CodeActionKind.QuickFix,
+          `Dep Beacon: Update ${analysis.dependency.packageName} to ${update.title.toLowerCase()} (${update.targetSpec})${catalogSuffix}`, vscode.CodeActionKind.QuickFix
         )
 
         action.edit = await this.createUpdateEdit(document, updateTarget, update.targetSpec)
@@ -754,7 +753,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     document: vscode.TextDocument,
     key: string,
     fingerprint: string,
-    force: boolean,
+    force: boolean
   ): DependencyAnalysis[] | Promise<DependencyAnalysis[]> | undefined {
     const inflight = this.#inflightAnalyses.get(key)
 
@@ -775,7 +774,12 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     return undefined
   }
 
-  async runAnalysis(document: vscode.TextDocument, config: DepBeaconConfig, fingerprint: string, force: boolean): Promise<DependencyAnalysis[]> {
+  async runAnalysis(
+    document: vscode.TextDocument,
+    config: DepBeaconConfig,
+    fingerprint: string,
+    force: boolean
+  ): Promise<DependencyAnalysis[]> {
     this.log(`Analyzing ${describeDocument(document)}${force ? ' with cache bypass' : ''}.`)
 
     const parseResult = parseManifest(document.fileName, document.getText())
@@ -791,7 +795,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       osvClient: this.getOsvClient(),
       registryClient,
       registryUrl: config.registryUrl,
-      vulnerabilities: config.checkVulnerabilities,
+      vulnerabilities: config.checkVulnerabilities
     })
 
     this.log(`Analyzed ${describeDocument(document)}: ${analyses.length} dependency signal(s).`)
@@ -809,7 +813,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       catalogEditTargets: catalogData.editTargets,
       expiresAt: Date.now() + (config.cacheTtlMinutes * 60 * 1000),
       fingerprint,
-      parseResult,
+      parseResult
     })
 
     this.updateDiagnostics(document.uri, parseResult, analyses)
@@ -824,7 +828,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
   createCodeLenses(
     document: vscode.TextDocument,
     analysis: DependencyAnalysis,
-    catalogTargets: readonly CatalogEditTarget[],
+    catalogTargets: readonly CatalogEditTarget[]
   ): vscode.CodeLens[] {
     const nameRange = toCodeLensRange(analysis.dependency.nameRange)
     const specRange = toCodeLensRange(analysis.dependency.specRange)
@@ -835,8 +839,8 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       new vscode.CodeLens(nameRange, {
         arguments: [analysis.packageUrl],
         command: 'depBeacon.openPackage',
-        title: packageLensTitle(analysis),
-      }),
+        title: packageLensTitle(analysis)
+      })
     ]
 
     if (!updateTarget) return lenses
@@ -850,10 +854,10 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         arguments: [{
           range: updateTarget.range,
           targetSpec: action.targetSpec,
-          uri: updateTarget.uri,
+          uri: updateTarget.uri
         } satisfies UpdateDependencyArgs],
         command: 'depBeacon.updateDependency',
-        title: updateLensTitle(actions),
+        title: updateLensTitle(actions)
       }))
     } else if (actions.length > 1) {
       lenses.push(new vscode.CodeLens(specRange, {
@@ -861,10 +865,10 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
           actions,
           packageName: analysis.dependency.packageName,
           range: updateTarget.range,
-          uri: updateTarget.uri,
+          uri: updateTarget.uri
         } satisfies PickDependencyUpdateArgs],
         command: 'depBeacon.pickDependencyUpdate',
-        title: updateLensTitle(actions),
+        title: updateLensTitle(actions)
       }))
     }
 
@@ -874,19 +878,16 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
   async createUpdateEdit(
     currentDocument: vscode.TextDocument,
     target: DependencyUpdateTarget,
-    targetSpec: string,
+    targetSpec: string
   ): Promise<vscode.WorkspaceEdit> {
     const uri = vscode.Uri.parse(target.uri)
 
-    const targetDocument = uri.toString() === currentDocument.uri.toString()
-      ? currentDocument
-      : await this.openCatalogDocument(uri)
+    const targetDocument = uri.toString() === currentDocument.uri.toString() ?
+      currentDocument :
+      await this.openCatalogDocument(uri)
 
     const range = new vscode.Range(
-      target.range.start.line,
-      target.range.start.character,
-      target.range.end.line,
-      target.range.end.character,
+      target.range.start.line, target.range.start.character, target.range.end.line, target.range.end.character
     )
 
     const edit = new vscode.WorkspaceEdit()
@@ -900,7 +901,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     document: vscode.TextDocument,
     analyses: readonly DependencyAnalysis[],
     catalogTargets: readonly CatalogEditTarget[],
-    strategy: BulkUpdateStrategy,
+    strategy: BulkUpdateStrategy
   ): Promise<BulkUpdateEdit | undefined> {
     const edit = new vscode.WorkspaceEdit()
     const editedRanges = new Set<string>()
@@ -921,7 +922,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         target.range.start.line,
         target.range.start.character,
         target.range.end.line,
-        target.range.end.character,
+        target.range.end.character
       ].join(':')
 
       if (editedRanges.has(key)) continue
@@ -938,10 +939,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       }
 
       const range = new vscode.Range(
-        target.range.start.line,
-        target.range.start.character,
-        target.range.end.line,
-        target.range.end.character,
+        target.range.start.line, target.range.start.character, target.range.end.line, target.range.end.character
       )
 
       edit.replace(uri, range, formatReplacement(targetDocument.getText(range), targetSpec))
@@ -955,13 +953,13 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
   getDependencyUpdateTarget(
     document: vscode.TextDocument,
     analysis: DependencyAnalysis,
-    catalogTargets: readonly CatalogEditTarget[],
+    catalogTargets: readonly CatalogEditTarget[]
   ): DependencyUpdateTarget | undefined {
     if (!isCatalogReference(analysis)) {
       return {
         range: toUpdateRange(analysis.dependency.specRange),
         spec: analysis.dependency.spec,
-        uri: document.uri.toString(),
+        uri: document.uri.toString()
       }
     }
 
@@ -973,13 +971,13 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       if (!target) continue
 
       if (
-        target.packageName === analysis.dependency.packageName
-        && catalogNamesEqual(target.catalogName, catalogName)
+        target.packageName === analysis.dependency.packageName &&
+        catalogNamesEqual(target.catalogName, catalogName)
       ) {
         return {
           range: target.range,
           spec: target.spec,
-          uri: target.uri,
+          uri: target.uri
         }
       }
     }
@@ -992,17 +990,17 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       action: ResolvedUpdateAction
     }
 
-    const items: UpdateQuickPickItem[] = args.actions.map((action) => ({
+    const items: UpdateQuickPickItem[] = args.actions.map(action => ({
       action,
       description: action.targetSpec,
       detail: `Use ${action.version} for ${args.packageName}.`,
-      label: updateQuickPickLabel(action),
+      label: updateQuickPickLabel(action)
     }))
 
     const selection = await vscode.window.showQuickPick(items, {
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: `Update ${args.packageName}`,
+      placeHolder: `Update ${args.packageName}`
     })
 
     if (!selection) return
@@ -1010,7 +1008,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     await this.updateDependency({
       range: args.range,
       targetSpec: selection.action.targetSpec,
-      uri: args.uri,
+      uri: args.uri
     })
   }
 
@@ -1065,13 +1063,16 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     }
   }
 
-  async collectCatalogWorkspaceData(currentDocument: vscode.TextDocument, generation: number): Promise<CatalogWorkspaceData> {
+  async collectCatalogWorkspaceData(
+    currentDocument: vscode.TextDocument,
+    generation: number
+  ): Promise<CatalogWorkspaceData> {
     const uris = [
       ...await vscode.workspace.findFiles('**/pnpm-workspace.yaml', '**/node_modules/**', 20),
-      ...await vscode.workspace.findFiles('**/pnpm-workspace.yml', '**/node_modules/**', 20),
+      ...await vscode.workspace.findFiles('**/pnpm-workspace.yml', '**/node_modules/**', 20)
     ]
 
-    const uniqueUris = [...new Map(uris.map((uri) => [uri.toString(), uri])).values()]
+    const uniqueUris = [...new Map(uris.map(uri => [uri.toString(), uri])).values()]
     const editTargets: CatalogEditTarget[] = []
     const manifests: ManifestParseResult[] = []
 
@@ -1079,9 +1080,9 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
     for (const uri of uniqueUris) {
       try {
-        const document = uri.toString() === currentDocument.uri.toString()
-          ? currentDocument
-          : await this.openCatalogDocument(uri)
+        const document = uri.toString() === currentDocument.uri.toString() ?
+          currentDocument :
+          await this.openCatalogDocument(uri)
 
         const manifest = parseManifest(document.fileName, document.getText())
 
@@ -1094,7 +1095,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     }
 
     if (basename(currentDocument.fileName) === 'pnpm-workspace.yaml' || basename(currentDocument.fileName) === 'pnpm-workspace.yml') {
-      const alreadyIncluded = uniqueUris.some((uri) => uri.toString() === currentDocument.uri.toString())
+      const alreadyIncluded = uniqueUris.some(uri => uri.toString() === currentDocument.uri.toString())
 
       if (!alreadyIncluded) {
         const manifest = parseManifest(currentDocument.fileName, currentDocument.getText())
@@ -1111,7 +1112,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
     const data: CatalogWorkspaceData = {
       editTargets,
-      snapshot: catalogSnapshot,
+      snapshot: catalogSnapshot
     }
 
     if (generation === this.#catalogGeneration) {
@@ -1123,22 +1124,26 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
   updateDiagnostics(uri: vscode.Uri, parseResult: ManifestParseResult, analyses: readonly DependencyAnalysis[]): void {
     const diagnostics = [
-      ...parseResult.errors.flatMap((error) => error.range
-        ? [new vscode.Diagnostic(toVscodeRange(error.range), error.message, vscode.DiagnosticSeverity.Error)]
-        : []),
-      ...analyses.flatMap((analysis) => {
+      ...parseResult.errors.flatMap(error => error.range ?
+        [new vscode.Diagnostic(toVscodeRange(error.range), error.message, vscode.DiagnosticSeverity.Error)] :
+        []),
+      ...analyses.flatMap(analysis => {
         const severity = diagnosticSeverity(analysis)
 
         if (severity === undefined) return []
 
-        const diagnostic = new vscode.Diagnostic(toVscodeRange(analysis.dependency.specRange), analysis.message, severity)
+        const diagnostic = new vscode.Diagnostic(
+          toVscodeRange(analysis.dependency.specRange),
+          analysis.message,
+          severity
+        )
 
         diagnostic.code = analysis.status
 
         diagnostic.source = 'Dep Beacon'
 
         return [diagnostic]
-      }),
+      })
     ]
 
     this.#diagnostics.set(uri, diagnostics)
@@ -1165,7 +1170,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         muted: [],
         orange: [],
         red: [],
-        yellow: [],
+        yellow: []
       }
 
       for (const analysis of cached.analyses) {
@@ -1177,9 +1182,9 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
           renderOptions: {
             after: {
               contentText: decorationText(analysis),
-              fontStyle: 'italic',
-            },
-          },
+              fontStyle: 'italic'
+            }
+          }
         })
       }
 
@@ -1203,7 +1208,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
     this.#registryClient = new NpmRegistryClient({
       cacheTtlMs,
-      registryUrl: config.registryUrl,
+      registryUrl: config.registryUrl
     })
 
     this.#registryClientKey = key
@@ -1215,7 +1220,14 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     const uri = vscode.Uri.parse(args.uri)
     const document = await vscode.workspace.openTextDocument(uri)
     const editor = await vscode.window.showTextDocument(document)
-    const range = new vscode.Range(args.range.start.line, args.range.start.character, args.range.end.line, args.range.end.character)
+
+    const range = new vscode.Range(
+      args.range.start.line,
+      args.range.start.character,
+      args.range.end.line,
+      args.range.end.character
+    )
+
     const replacement = formatReplacement(document.getText(range), args.targetSpec)
     const edit = new vscode.WorkspaceEdit()
 
@@ -1253,11 +1265,10 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
       const sorted = sortPackageJsonDependencies(editor.document.getText())
 
       const fullRange = new vscode.Range(
-        editor.document.positionAt(0),
-        editor.document.positionAt(editor.document.getText().length),
+        editor.document.positionAt(0), editor.document.positionAt(editor.document.getText().length)
       )
 
-      await editor.edit((editBuilder) => {
+      await editor.edit(editBuilder => {
         editBuilder.replace(fullRange, sorted)
       })
 
@@ -1315,7 +1326,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
 
     this.log(`Starting ${manager} install in ${folder.uri.fsPath}.`)
 
-    const existing = vscode.window.terminals.find((t) => t.name === terminalName && t.exitStatus === undefined)
+    const existing = vscode.window.terminals.find(t => t.name === terminalName && t.exitStatus === undefined)
     const terminal = existing ?? vscode.window.createTerminal({ cwd: folder.uri.fsPath, name: terminalName })
 
     terminal.show()
