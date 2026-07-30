@@ -32,6 +32,7 @@
     "vscode-languageserver-textdocument": "catalog:"
   },
   "devDependencies": {
+    "@typescript/native": "catalog:",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "esbuild": "catalog:",

@@ -42,6 +42,7 @@
     "@santi020k/dep-beacon-core": "workspace:*"
   },
   "devDependencies": {
+    "@typescript/native": "catalog:",
     "@vscode/vsce": "catalog:",
     "@types/node": "catalog:",
     "@types/vscode": "catalog:",

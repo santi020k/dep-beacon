@@ -46,6 +46,7 @@
     "@santi020k/eslint-config-libraries": "catalog:",
     "@santi020k/eslint-config-testing": "catalog:",
     "@santi020k/eslint-config-tools": "catalog:",
+    "@typescript/native": "catalog:",
     "@types/node": "catalog:",
     "cspell": "catalog:",
     "czg": "catalog:",

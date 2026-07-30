@@ -83,10 +83,12 @@ const DEFAULT_SETTINGS: DepBeaconSettings = {
   showUpdateDiagnostics: true
 }
 
+const TRANSIENT_FAILURE_RETRY_MS = 30_000
 const connection = createConnection(ProposedFeatures.all)
 const documents = new TextDocuments(TextDocument)
 const results = new Map<string, DocumentAnalysis>()
 const revisions = new Map<string, number>()
+const retryTimers = new Map<string, ReturnType<typeof setTimeout>>()
 let settings = DEFAULT_SETTINGS
 let workspaceRoots: string[] = []
 
@@ -266,7 +268,72 @@ const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis
   return { analyses, catalogLocations, manifest }
 }
 
+const clearRetry = (uri: string): void => {
+  const timer = retryTimers.get(uri)
+
+  if (!timer) return
+
+  clearTimeout(timer)
+
+  retryTimers.delete(uri)
+}
+
+const scheduleTransientFailureRetry = (
+  document: TextDocument,
+  retry: (currentDocument: TextDocument) => Promise<void>
+): void => {
+  clearRetry(document.uri)
+
+  retryTimers.set(document.uri, setTimeout(() => {
+    retryTimers.delete(document.uri)
+
+    const currentDocument = documents.get(document.uri)
+
+    if (!currentDocument) return
+
+    retry(currentDocument).catch((error: unknown) => {
+      connection.console.error(error instanceof Error ? error.stack ?? error.message : String(error))
+    })
+  }, TRANSIENT_FAILURE_RETRY_MS))
+}
+
+const updateTransientFailureRetry = (
+  document: TextDocument,
+  shouldRetry: boolean,
+  retry: (currentDocument: TextDocument) => Promise<void>
+): void => {
+  if (shouldRetry) scheduleTransientFailureRetry(document, retry)
+}
+
+const documentDiagnostics = (result: DocumentAnalysis): Diagnostic[] => [
+  ...result.manifest.errors.map(parseErrorDiagnostic),
+  ...result.analyses.flatMap(analysis => {
+    const diagnostic = analysisDiagnostic(analysis)
+
+    return diagnostic ? [diagnostic] : []
+  })
+]
+
+const publishDocumentAnalysis = async (
+  document: TextDocument,
+  result: DocumentAnalysis,
+  revision: number
+): Promise<boolean> => {
+  results.set(document.uri, result)
+
+  await connection.sendDiagnostics({
+    diagnostics: documentDiagnostics(result),
+    uri: document.uri
+  })
+
+  if (revisions.get(document.uri) !== revision) return false
+
+  return result.analyses.some(({ status }) => status === 'unavailable')
+}
+
 const refreshDocument = async (document: TextDocument): Promise<void> => {
+  clearRetry(document.uri)
+
   const revision = (revisions.get(document.uri) ?? 0) + 1
 
   revisions.set(document.uri, revision)
@@ -284,18 +351,9 @@ const refreshDocument = async (document: TextDocument): Promise<void> => {
 
     if (revisions.get(document.uri) !== revision || !result) return
 
-    results.set(document.uri, result)
+    const shouldRetry = await publishDocumentAnalysis(document, result, revision)
 
-    const diagnostics = [
-      ...result.manifest.errors.map(parseErrorDiagnostic),
-      ...result.analyses.flatMap(analysis => {
-        const diagnostic = analysisDiagnostic(analysis)
-
-        return diagnostic ? [diagnostic] : []
-      })
-    ]
-
-    await connection.sendDiagnostics({ diagnostics, uri: document.uri })
+    updateTransientFailureRetry(document, shouldRetry, refreshDocument)
   } catch (error) {
     connection.console.error(error instanceof Error ? error.stack ?? error.message : String(error))
 
@@ -531,6 +589,8 @@ documents.onDidChangeContent(async ({ document }) => refreshAffectedDocuments(do
 documents.onDidSave(async ({ document }) => refreshAffectedDocuments(document))
 
 documents.onDidClose(async ({ document }) => {
+  clearRetry(document.uri)
+
   results.delete(document.uri)
 
   revisions.delete(document.uri)
