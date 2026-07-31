@@ -1,6 +1,6 @@
 id = "dep-beacon"
 name = "Dep Beacon"
-version = "1.0.0"
+version = "1.0.1"
 schema_version = 1
 authors = ["Santiago Molina <hi@santi020k.com>"]
 description = "Dependency updates, pnpm workspace catalogs, and OSV security signals for npm projects."
