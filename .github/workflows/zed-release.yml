@@ -59,7 +59,7 @@ jobs:
           manifest_version="$(
             node -e "
               const fs = require('node:fs');
-              const toml = fs.readFileSync('extensions/zed-dep-beacon/extension.toml', 'utf8');
+              const toml = fs.readFileSync('extensions/dep-beacon/extension.toml', 'utf8');
               console.log(toml.match(/^version = \"([^\"]+)\"$/m)[1]);
             "
           )"
@@ -149,7 +149,7 @@ jobs:
           version = os.environ['ZED_VERSION']
           entry = (
               f'''[dep-beacon]\nsubmodule = "extensions/dep-beacon"\n'''
-              f'''path = "extensions/zed-dep-beacon"\nversion = "{version}"\n'''
+              f'''path = "extensions/dep-beacon"\nversion = "{version}"\n'''
           )
           marker = '[dep-beacon]'
 
@@ -201,7 +201,7 @@ jobs:
             --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
             --base main \
             --title "Add dep-beacon ${ZED_VERSION}" \
-            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/zed-dep-beacon"
+            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/dep-beacon"
         env:
           GH_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
           ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}

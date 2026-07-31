@@ -198,12 +198,7 @@ export const analyzeDependency = async (
 
   if (!targets.current) {
     return createInvalidTargetAnalysis(
-      dependency,
-      normalized.displaySpec,
-      normalized.packageName,
-      range,
-      lookup.metadata,
-      targets
+      dependency, normalized.displaySpec, normalized.packageName, range, lookup.metadata, targets
     )
   }
 

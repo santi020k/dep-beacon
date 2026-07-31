@@ -1,19 +1,25 @@
 import { defineConfig } from '@santi020k/eslint-config-basic'
 
 export default defineConfig({
-  features: {
-    boundaries: true,
-    unicorn: true,
-  },
   ignores: ['**/CHANGELOG.md', 'packages/vscode-dep-beacon/resources/*.svg'],
-  workspacePrefixes: ['@santi020k'],
-}, {
-  files: ['packages/{vscode-dep-beacon,dep-beacon-lsp}/scripts/**/*.{cjs,mjs}'],
-  name: 'local-extension-scripts',
-  rules: {
-    'no-console': 'off',
-    'unicorn/prefer-module': 'off',
+  projects: {
+    'apps/docs': {
+      tailwind: {
+        entryPoint: 'src/styles/global.css',
+        ignore: [
+          '^(?:active|compact|dark|primary|secondary|tertiary)$',
+          '^(?:brand-(?:link|mark)|button|cta-(?:actions|inner|section)|eyebrow)$',
+          '^docs-(?:actions|callout|content|file-grid|hero-panel|idea-grid|link-grid|media|shell|sidebar|signal-card|stage)$',
+          '^(?:editor-demo(?:-bar|-body)?|feature-(?:grid|icon|tile)|hero(?:-actions|-copy|-inner|-proof|-summary)?)$',
+          '^(?:alt-section|key|line-no|section(?:-heading|-inner)?|split-layout|version-value|workflow-(?:grid|item))$',
+          '^(?:header-actions|mobile-(?:menu|menu-heading|menu-links|menu-trigger|nav)|site-(?:footer|header|header-inner)|top-nav)$',
+          '^(?:dot|lens(?:-row)?|signal-(?:band|band-inner|orbit|stack|stat)|status-pill)$',
+          '^(?:blue|catalog|danger|green|ok|orange|red|warning|yellow)$',
+        ],
+      },
+    },
   },
+  workspacePrefixes: ['@santi020k'],
 }, {
   name: 'local-rule-preferences',
   rules: {
@@ -37,8 +43,8 @@ export default defineConfig({
 }, {
   files: ['**/*.astro'],
   rules: {
-    'better-tailwindcss/no-unknown-classes': 'off',
     // Astro's inline scripts conflict with JSX tag indentation during autofix.
     '@stylistic/indent': 'off',
+    '@stylistic/jsx-closing-tag-location': 'off',
   },
 })

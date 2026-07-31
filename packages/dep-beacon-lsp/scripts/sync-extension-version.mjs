@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const packageRoot = resolve(import.meta.dirname, '..')
-const extensionRoot = resolve(packageRoot, '../../extensions/zed-dep-beacon')
+const extensionRoot = resolve(packageRoot, '../../extensions/dep-beacon')
 const packageJson = JSON.parse(readFileSync(resolve(packageRoot, 'package.json'), 'utf8'))
 const manifestPath = resolve(extensionRoot, 'extension.toml')
 const cargoPath = resolve(extensionRoot, 'Cargo.toml')
@@ -18,9 +18,9 @@ const syncVersion = path => {
 
 const syncCargoLockVersion = () => {
   const source = readFileSync(cargoLockPath, 'utf8')
-  const packagePattern = /(\[\[package\]\]\nname = "dep-beacon-zed"\nversion = ")[^"]+("\n)/
+  const packagePattern = /(\[\[package\]\]\nname = "dep-beacon"\nversion = ")[^"]+("\n)/
 
-  if (!packagePattern.test(source)) throw new Error(`Could not find dep-beacon-zed in ${cargoLockPath}.`)
+  if (!packagePattern.test(source)) throw new Error(`Could not find dep-beacon in ${cargoLockPath}.`)
 
   writeFileSync(cargoLockPath, source.replace(packagePattern, `$1${packageJson.version}$2`))
 }

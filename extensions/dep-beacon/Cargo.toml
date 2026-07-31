@@ -1,5 +1,5 @@
 [package]
-name = "dep-beacon-zed"
+name = "dep-beacon"
 version = "1.0.0"
 edition = "2024"
 rust-version = "1.85"
