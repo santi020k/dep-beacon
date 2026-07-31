@@ -7,7 +7,7 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 - `@santi020k/dep-beacon-core` analyzes package manifests, npm registry metadata, semver ranges, and OSV advisories.
 - `vscode-dep-beacon` adds CodeLens, inline status decorations, diagnostics, update commands, sorting, cache control, and install-on-save workflows to VS Code.
 - `@santi020k/dep-beacon-lsp` provides the language server that powers dependency diagnostics, hovers, npm links, and individual or bulk update actions in Zed.
-- `extensions/zed-dep-beacon` contains the thin Rust/WASM adapter distributed through the Zed extension registry.
+- `extensions/dep-beacon` contains the thin Rust/WASM adapter distributed through the Zed extension registry.
 - `@santi020k/dep-beacon-docs` is the Astro documentation site.
 
 ## Quick Start

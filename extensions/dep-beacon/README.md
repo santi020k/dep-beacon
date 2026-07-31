@@ -32,7 +32,7 @@ Compile the adapter directly with:
 
 ```sh
 cargo check \
-  --manifest-path extensions/zed-dep-beacon/Cargo.toml \
+  --manifest-path extensions/dep-beacon/Cargo.toml \
   --target wasm32-wasip1
 ```
 
@@ -40,7 +40,7 @@ cargo check \
 
 1. Install Rust with `rustup` and add the `wasm32-wasip1` target.
 2. Build and publish the corresponding `@santi020k/dep-beacon-lsp` version.
-3. Run `zed: install dev extension` and select `extensions/zed-dep-beacon`.
+3. Run `zed: install dev extension` and select `extensions/dep-beacon`.
 
 The adapter always uses Zed's managed `@santi020k/dep-beacon-lsp` installation so a stale global binary cannot override the released server. Publish the language-server package before testing or releasing an adapter that depends on new server behavior.
 
@@ -127,7 +127,7 @@ This hides only update warnings. Security findings, invalid ranges, and missing 
 
 ## Publishing
 
-The npm language server is published as `@santi020k/dep-beacon-lsp`. The Zed registry points its Dep Beacon entry at `extensions/zed-dep-beacon` in this repository.
+The npm language server is published as `@santi020k/dep-beacon-lsp`. The Zed registry points its Dep Beacon entry at `extensions/dep-beacon` in this repository.
 
 For `0.0.3`, publish `@santi020k/dep-beacon-lsp@0.0.3` first, confirm that npm's `latest` tag resolves to it, and then update the Zed extension registry. Publishing the adapter first can leave users temporarily running the older language server without the documented workflow.
 

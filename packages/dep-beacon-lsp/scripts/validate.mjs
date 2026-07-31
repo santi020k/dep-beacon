@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const packageRoot = resolve(import.meta.dirname, '..')
-const extensionRoot = resolve(packageRoot, '../../extensions/zed-dep-beacon')
+const extensionRoot = resolve(packageRoot, '../../extensions/dep-beacon')
 const packageJson = JSON.parse(readFileSync(resolve(packageRoot, 'package.json'), 'utf8'))
 const manifest = readFileSync(resolve(extensionRoot, 'extension.toml'), 'utf8')
 const cargo = readFileSync(resolve(extensionRoot, 'Cargo.toml'), 'utf8')
@@ -10,7 +10,7 @@ const cargoLock = readFileSync(resolve(extensionRoot, 'Cargo.lock'), 'utf8')
 const adapterSource = readFileSync(resolve(extensionRoot, 'src/lib.rs'), 'utf8')
 const manifestVersion = /^version = "([^"]+)"$/m.exec(manifest)?.[1]
 const cargoVersion = /^version = "([^"]+)"$/m.exec(cargo)?.[1]
-const cargoLockVersion = /\[\[package\]\]\nname = "dep-beacon-zed"\nversion = "([^"]+)"\n/.exec(cargoLock)?.[1]
+const cargoLockVersion = /\[\[package\]\]\nname = "dep-beacon"\nversion = "([^"]+)"\n/.exec(cargoLock)?.[1]
 
 if (
   manifestVersion !== packageJson.version ||

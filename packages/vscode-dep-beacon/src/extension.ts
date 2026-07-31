@@ -320,10 +320,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     }
 
     context.subscriptions.push(
-      this.#diagnostics,
-      this.#output,
-      this.#onDidChangeCodeLenses,
-      ...Object.values(this.#decorationTypes)
+      this.#diagnostics, this.#output, this.#onDidChangeCodeLenses, ...Object.values(this.#decorationTypes)
     )
 
     this.#subscriptions.push(
@@ -1133,9 +1130,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
         if (severity === undefined) return []
 
         const diagnostic = new vscode.Diagnostic(
-          toVscodeRange(analysis.dependency.specRange),
-          analysis.message,
-          severity
+          toVscodeRange(analysis.dependency.specRange), analysis.message, severity
         )
 
         diagnostic.code = analysis.status
@@ -1222,10 +1217,7 @@ export class DepBeaconController implements vscode.CodeActionProvider, vscode.Co
     const editor = await vscode.window.showTextDocument(document)
 
     const range = new vscode.Range(
-      args.range.start.line,
-      args.range.start.character,
-      args.range.end.line,
-      args.range.end.character
+      args.range.start.line, args.range.start.character, args.range.end.line, args.range.end.character
     )
 
     const replacement = formatReplacement(document.getText(range), args.targetSpec)

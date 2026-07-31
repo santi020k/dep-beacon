@@ -217,10 +217,7 @@ export class OsvClient {
   async #requestVulnerability(id: string): Promise<OsvVulnerability | undefined> {
     try {
       const response = await fetchWithTimeout(
-        this.#fetch,
-        `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`,
-        {},
-        this.#requestTimeoutMs
+        this.#fetch, `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`, {}, this.#requestTimeoutMs
       )
 
       if (!response.ok) return undefined
