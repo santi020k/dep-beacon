@@ -32,7 +32,7 @@ catalog:
   "@santi020k/eslint-config-libraries": ^3.1.0
   "@santi020k/eslint-config-testing": ^3.1.0
   "@santi020k/eslint-config-tools": ^3.1.0
-  "@santi020k/lumen-astro": ^0.4.0
+  "@santi020k/lumen-astro": ^1.0.0
   "@tailwindcss/vite": ^4.3.1
   "@typescript/native": npm:typescript@^7.0.2
   "@types/node": ^26.0.0
@@ -70,7 +70,6 @@ overrides:
   "yaml@<2.8.3": 2.8.3
 
 minimumReleaseAgeExclude:
-  - '@santi020k/eslint-config-basic@3.2.0'
   - '@santi020k/eslint-config-typescript'
   - yaml@2.8.3
   - brace-expansion@5.0.8
