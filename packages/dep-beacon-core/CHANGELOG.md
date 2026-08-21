@@ -1,5 +1,11 @@
 # @santi020k/dep-beacon-core
 
+## 1.2.1
+
+### Patch Changes
+
+- [#15](https://github.com/santi020k/dep-beacon/pull/15) [`ab88a3b`](https://github.com/santi020k/dep-beacon/commit/ab88a3b9527602b40fcb456de18dd0e973ce1a4c) Thanks [@santi020k](https://github.com/santi020k)! - Normalize OSV base URLs in linear time to prevent pathological input from causing excessive regular-expression backtracking.
+
 ## 1.2.0
 
 ### Minor Changes
