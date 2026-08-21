@@ -22,9 +22,9 @@ jobs:
       url: https://beacon.santi020k.com/docs/zed-extension
     permissions:
       contents: read
-      id-token: write
     env:
       SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
@@ -84,16 +84,6 @@ jobs:
           pnpm --filter @santi020k/dep-beacon-lsp typecheck
           pnpm --filter @santi020k/dep-beacon-lsp test
           pnpm --filter @santi020k/dep-beacon-lsp validate:extension
-      - name: Fetch publishing secrets
-        if: steps.npm-version.outputs.available == 'true'
-        uses: Infisical/secrets-action@77ab1f4ccd183a543cb5b42435fbd181189f4995 # v1.0.16
-        with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
-          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
-          env-slug: prod
-          secret-path: /
-          recursive: true
       - name: Validate Zed publishing configuration
         if: steps.npm-version.outputs.available == 'true'
         env:

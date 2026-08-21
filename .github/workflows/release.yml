@@ -1,17 +1,12 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".changeset/**"
-      - "packages/*/package.json"
-      - "packages/*/CHANGELOG.md"
-      - "extensions/dep-beacon/Cargo.toml"
-      - "extensions/dep-beacon/Cargo.lock"
-      - "extensions/dep-beacon/extension.toml"
-      - ".github/workflows/release.yml"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Validated commit to release; defaults to the selected ref
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -38,6 +33,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
         with:
           fetch-depth: 0
+          ref: ${{ inputs.commit_sha || github.sha }}
       - name: Install pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Setup Node.js
@@ -46,23 +42,14 @@ jobs:
           node-version: 22.x
           registry-url: https://registry.npmjs.org
           cache: pnpm
-      - name: Fetch publishing secrets
-        uses: Infisical/secrets-action@77ab1f4ccd183a543cb5b42435fbd181189f4995 # v1.0.16
-        with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
-          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
-          env-slug: prod
-          secret-path: /
-          recursive: true
       - name: Prepare publishing authentication
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           test -n "$NPM_TOKEN"
           printf 'NODE_AUTH_TOKEN=%s\n' "$NPM_TOKEN" >> "$GITHUB_ENV"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Validate release artifacts
-        run: pnpm run validate
       - name: Create release pull request or publish
         id: changesets
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
@@ -104,6 +91,9 @@ jobs:
           git push origin "v${VERSION}"
       - name: Publish VS Code extension
         if: steps.changesets.outputs.published == 'true'
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           test -n "$VSCE_PAT"
           test -n "$OVSX_PAT"
