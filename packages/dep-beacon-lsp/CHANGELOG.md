@@ -1,5 +1,12 @@
 # @santi020k/dep-beacon-lsp
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [[`ab88a3b`](https://github.com/santi020k/dep-beacon/commit/ab88a3b9527602b40fcb456de18dd0e973ce1a4c)]:
+  - @santi020k/dep-beacon-core@1.2.1
+
 ## 1.1.0
 
 ### Minor Changes
