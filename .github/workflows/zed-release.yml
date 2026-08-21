@@ -19,127 +19,113 @@ jobs:
     timeout-minutes: 20
     environment:
       name: zed
-      url: https://zed.dev/extensions
+      url: https://beacon.santi020k.com/docs/zed-extension
     permissions:
       contents: read
+      id-token: write
     env:
       SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
         with:
           fetch-depth: 0
           ref: ${{ env.SOURCE_SHA }}
-
+      - name: Read Zed extension version
+        id: zed-version
+        run: |
+          version="$(node -p "require('./packages/dep-beacon-lsp/package.json').version")"
+          manifest_version="$(sed -n 's/^version = "\([^"]*\)"$/\1/p' extensions/dep-beacon/extension.toml)"
+          if [[ "$version" != "$manifest_version" ]]; then
+            echo "package.json version ($version) does not match extension.toml version ($manifest_version)."
+            exit 1
+          fi
+          previous_version="$(
+            git show "${SOURCE_SHA}^:packages/dep-beacon-lsp/package.json" 2>/dev/null |
+              node -p "JSON.parse(require('node:fs').readFileSync(0, 'utf8')).version" 2>/dev/null || true
+          )"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "$version" != "$previous_version" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Language server version is unchanged; skipping Zed registry publication."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verify matching language server is published
+        id: npm-version
+        if: steps.zed-version.outputs.changed == 'true'
+        env:
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
+        run: |
+          published_version="$(npm view "@santi020k/dep-beacon-lsp@${ZED_VERSION}" version 2>/dev/null || true)"
+          if [[ "$published_version" != "$ZED_VERSION" ]]; then
+            echo "Matching language server ${ZED_VERSION} is not available on npm; skipping."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
+        if: steps.npm-version.outputs.available == 'true'
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        if: steps.npm-version.outputs.available == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22.x
           cache: pnpm
-
       - name: Install dependencies
+        if: steps.npm-version.outputs.available == 'true'
         run: pnpm install --frozen-lockfile
-
       - name: Validate Zed package
+        if: steps.npm-version.outputs.available == 'true'
         run: |
           pnpm --filter @santi020k/dep-beacon-core build
           pnpm --filter @santi020k/dep-beacon-lsp build
           pnpm --filter @santi020k/dep-beacon-lsp typecheck
           pnpm --filter @santi020k/dep-beacon-lsp test
           pnpm --filter @santi020k/dep-beacon-lsp validate:extension
-
-      - name: Read Zed extension version
-        id: zed-version
-        run: |
-          version="$(node -p "require('./packages/dep-beacon-lsp/package.json').version")"
-          manifest_version="$(
-            node -e "
-              const fs = require('node:fs');
-              const toml = fs.readFileSync('extensions/dep-beacon/extension.toml', 'utf8');
-              console.log(toml.match(/^version = \"([^\"]+)\"$/m)[1]);
-            "
-          )"
-          if [ "$version" != "$manifest_version" ]; then
-            echo "package.json version ($version) does not match extension.toml version ($manifest_version)."
-            exit 1
-          fi
-          previous_version="$(
-            git show "${SOURCE_SHA}^:packages/dep-beacon-lsp/package.json" 2>/dev/null |
-              node -e "
-                let input = '';
-                process.stdin.on('data', chunk => input += chunk);
-                process.stdin.on('end', () => console.log(JSON.parse(input).version));
-              " 2>/dev/null || true
-          )"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$version" != "$previous_version" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Language server version is unchanged; skipping Zed registry publication."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Verify matching language server is published
-        id: npm-version
-        if: steps.zed-version.outputs.version != '0.0.0' && steps.zed-version.outputs.changed == 'true'
-        run: |
-          published_version="$(npm view "@santi020k/dep-beacon-lsp@${ZED_VERSION}" version 2>/dev/null || true)"
-          if [ "$published_version" != "$ZED_VERSION" ]; then
-            echo "Matching language server ${ZED_VERSION} is not available on npm; skipping Zed registry publication."
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "available=true" >> "$GITHUB_OUTPUT"
-        env:
-          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
-
+      - name: Fetch publishing secrets
+        if: steps.npm-version.outputs.available == 'true'
+        uses: Infisical/secrets-action@77ab1f4ccd183a543cb5b42435fbd181189f4995 # v1.0.16
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: prod
+          secret-path: /
+          recursive: true
       - name: Validate Zed publishing configuration
         if: steps.npm-version.outputs.available == 'true'
-        run: |
-          if [ -z "${ZED_EXTENSIONS_TOKEN}" ]; then
-            echo 'ZED_EXTENSIONS_TOKEN is required to push to your fork and open the registry PR.'
-            exit 1
-          fi
-          if [ -z "${ZED_EXTENSIONS_FORK}" ]; then
-            echo 'ZED_EXTENSIONS_FORK is required, for example: santi020k/extensions.'
-            exit 1
-          fi
         env:
-          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
           ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
-
+        run: |
+          test -n "$ZED_EXTENSIONS_TOKEN"
+          test -n "$ZED_EXTENSIONS_FORK"
       - name: Check out Zed extensions fork
         if: steps.npm-version.outputs.available == 'true'
+        env:
+          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
         run: |
           git clone "https://x-access-token:${ZED_EXTENSIONS_TOKEN}@github.com/${ZED_EXTENSIONS_FORK}.git" zed-extensions
           cd zed-extensions
           git remote add upstream https://github.com/zed-industries/extensions.git
           git fetch upstream main
           git checkout -B "dep-beacon-${ZED_VERSION}" upstream/main
-        env:
-          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
-          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
-          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
-
       - name: Update registry entry
         id: registry-update
         if: steps.npm-version.outputs.available == 'true'
         working-directory: zed-extensions
+        env:
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
         run: |
           git config user.name "Santiago Molina"
           git config user.email "17752391+santi020k@users.noreply.github.com"
-
-          if [ ! -d extensions/dep-beacon ]; then
+          if [[ ! -d extensions/dep-beacon ]]; then
             git submodule add https://github.com/santi020k/dep-beacon extensions/dep-beacon
           fi
-
-          git -C extensions/dep-beacon fetch origin "${SOURCE_SHA}"
-          git -C extensions/dep-beacon checkout "${SOURCE_SHA}"
-
+          git -C extensions/dep-beacon fetch origin "$SOURCE_SHA"
+          git -C extensions/dep-beacon checkout "$SOURCE_SHA"
           python - <<'PY'
           from pathlib import Path
           import os
@@ -148,8 +134,10 @@ jobs:
           text = path.read_text()
           version = os.environ['ZED_VERSION']
           entry = (
-              f'''[dep-beacon]\nsubmodule = "extensions/dep-beacon"\n'''
-              f'''path = "extensions/dep-beacon"\nversion = "{version}"\n'''
+              '[dep-beacon]\n'
+              'submodule = "extensions/dep-beacon"\n'
+              'path = "extensions/dep-beacon"\n'
+              f'version = "{version}"\n'
           )
           marker = '[dep-beacon]'
 
@@ -165,35 +153,34 @@ jobs:
 
           path.write_text(text)
           PY
-
           pnpm install --frozen-lockfile
           pnpm run sort-extensions
-
           git add .gitmodules extensions.toml extensions/dep-beacon
           if git diff --cached --quiet; then
-            echo 'Zed registry entry is already up to date.'
+            echo "Zed registry entry is already up to date."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "dep-beacon ${ZED_VERSION}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
           git push --force-with-lease origin "dep-beacon-${ZED_VERSION}"
-        env:
-          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
-
       - name: Open Zed registry pull request
         if: steps.registry-update.outputs.changed == 'true'
         working-directory: zed-extensions
+        env:
+          ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
         run: |
-          existing_pr="$(gh api --method GET repos/zed-industries/extensions/pulls \
-            -f state=open \
-            -f "head=${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
-            --jq '.[0].number // empty')"
-          if [ -n "$existing_pr" ]; then
+          export GH_TOKEN="$ZED_EXTENSIONS_TOKEN"
+          existing_pr="$(
+            gh api --method GET repos/zed-industries/extensions/pulls \
+              -f state=open \
+              -f "head=${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
+              --jq '.[0].number // empty'
+          )"
+          if [[ -n "$existing_pr" ]]; then
             echo "Zed registry pull request #${existing_pr} already exists."
-            gh pr comment "$existing_pr" \
-              --repo zed-industries/extensions \
-              --body '@cla-bot check'
+            gh pr comment "$existing_pr" --repo zed-industries/extensions --body '@cla-bot check'
             exit 0
           fi
           gh pr create \
@@ -202,7 +189,3 @@ jobs:
             --base main \
             --title "Add dep-beacon ${ZED_VERSION}" \
             --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/dep-beacon"
-        env:
-          GH_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
-          ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}
-          ZED_VERSION: ${{ steps.zed-version.outputs.version }}

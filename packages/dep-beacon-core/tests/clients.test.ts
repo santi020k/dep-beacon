@@ -165,7 +165,7 @@ describe('OSV client', () => {
     let batchInit: RequestInit | undefined
     const detailRequests: string[] = []
     const client = new OsvClient({
-      baseUrl: 'https://osv.example.test/',
+      baseUrl: `https://osv.example.test${'/'.repeat(100_000)}`,
       fetch: (url, init) => {
         if (url.endsWith('/v1/querybatch')) {
           batchInit = init

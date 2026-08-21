@@ -4,6 +4,7 @@ coverage
 target
 .astro
 .turbo
+.pnpm-store
 .eslintcache
 .cspellcache
 *.vsix

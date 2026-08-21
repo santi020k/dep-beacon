@@ -1,19 +1,34 @@
 version: 2
 
 updates:
-  - package-ecosystem: github-actions
+  - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
-      time: "09:00"
-      timezone: "UTC"
+      interval: monthly
     commit-message:
       prefix: "chore(deps)"
     labels:
-      - "type: chore"
-      - "type: ci"
+      - dependencies
+    groups:
+      development-dependencies:
+        dependency-type: development
+      production-dependencies:
+        dependency-type: production
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+      - skip-changelog
     groups:
       actions:
-        patterns:
-          - "*"
+        patterns: ["*"]
+    ignore:
+      - dependency-name: changesets/action
+        versions: [">=2.0.0"]
+    open-pull-requests-limit: 2
