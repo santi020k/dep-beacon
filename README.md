@@ -2,6 +2,20 @@
 
 Dep Beacon is a dependency intelligence engine for npm projects with integrations for VS Code and Zed. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
 
+[![CI](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml)
+[![npm](https://img.shields.io/npm/v/%40santi020k%2Fdep-beacon-core)](https://www.npmjs.com/package/@santi020k/dep-beacon-core)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+## Install
+
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon)
+- [Open VSX Registry](https://open-vsx.org/extension/santi020k/vscode-dep-beacon)
+- [Zed installation guide](https://beacon.santi020k.com/docs/zed-extension)
+- Core library: `pnpm add @santi020k/dep-beacon-core`
+
+The editor extensions work without project configuration. Open a `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` file to see dependency status and security findings.
+
 ## Packages
 
 - `@santi020k/dep-beacon-core` analyzes package manifests, npm registry metadata, semver ranges, and OSV advisories.
@@ -11,6 +25,8 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 - `@santi020k/dep-beacon-docs` is the Astro documentation site.
 
 ## Quick Start
+
+Local development requires Node.js 22.19 or newer and the pnpm version declared in `package.json`.
 
 ```sh
 pnpm install
@@ -86,6 +102,8 @@ Copy `.env.example` to `.env` for local release or deploy commands. Use these na
 - `CLOUDFLARE_ACCOUNT_ID`
 - optional `CLOUDFLARE_PAGES_PROJECT_NAME`
 - optional `TURBO_TOKEN` and `TURBO_TEAM`
+
+Production GitHub workflows fetch publishing and deployment credentials from Infisical through OIDC. Keep `.env` files local and never commit credentials.
 
 ## What It Tracks
 

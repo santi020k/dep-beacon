@@ -419,7 +419,6 @@ connection.onDidChangeConfiguration(({ settings: configuredSettings }) => {
   results.clear()
 
   // LSP notification handlers cannot await background refresh work.
-  // eslint-disable-next-line no-void
   void refreshAllDocuments()
 })
 

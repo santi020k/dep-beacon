@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -14,77 +16,192 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  changes:
+    name: Detect affected areas
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.paths.outputs.docs }}
+      packages: ${{ steps.paths.outputs.packages }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          fetch-depth: 2
+      - id: paths
+        name: Classify changed paths
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "docs=true" >> "$GITHUB_OUTPUT"
+            echo "packages=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            BASE_SHA="$(git rev-parse HEAD^)"
+          fi
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git diff --name-only "$BASE_SHA" HEAD > /tmp/changed-files
+          docs_pattern='^(apps/docs/|packages/|scripts/generate-assets\.mjs$|'
+          docs_pattern+='pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.github/workflows/ci\.yml$)'
+          if grep -Eq "$docs_pattern" /tmp/changed-files; then
+            echo "docs=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs=false" >> "$GITHUB_OUTPUT"
+          fi
+          packages_pattern='^(packages/|extensions/|scripts/|package\.json$|pnpm-lock\.yaml$|'
+          packages_pattern+='pnpm-workspace\.yaml$|turbo\.json$|tsconfig\.|eslint\.config\.|\.github/workflows/)'
+          if grep -Eq "$packages_pattern" /tmp/changed-files; then
+            echo "packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  validation:
+    name: Full validation (22.x)
+    needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
-    strategy:
-      matrix:
-        node-version: [22.x, 24.x]
-
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
-
-      - name: Turborepo cache
-        uses: actions/cache@v5
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ matrix.node-version }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json') }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ matrix.node-version }}-
-            ${{ runner.os }}-turbo-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Run CI checks
-        run: pnpm exec turbo run typecheck lint test:coverage
-
-      - name: Repository checks
-        if: matrix.node-version == '22.x'
-        run: pnpm exec turbo run //#lint:repo //#lint:spell //#lint:knip
-
-  package-extension:
-    runs-on: ubuntu-latest
-    needs: build
-    timeout-minutes: 15
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+          fetch-depth: 0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22.x
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Audit dependencies
+        run: pnpm audit --audit-level moderate
+      - name: Validate pull request title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitprompt validate --input -
+      - name: Require a changeset
+        if: >-
+          github.event_name == 'pull_request' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changelog') &&
+          !startsWith(github.head_ref, 'changeset-release/')
+        run: |
+          pnpm changeset status --since=origin/main --output=/tmp/changeset-status.json
+          jq -e '.releases | length > 0' /tmp/changeset-status.json >/dev/null
+      - name: Run repository validation
+        run: pnpm run validate
+      - name: Check the Zed adapter
+        run: cargo check --locked --manifest-path extensions/dep-beacon/Cargo.toml
 
-      - name: Package VSIX
-        run: pnpm run package:extension
-
-      - name: Upload VSIX artifact
-        uses: actions/upload-artifact@v6
+  compatibility:
+    name: Package compatibility (24.x)
+    needs: changes
+    if: needs.changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          name: dep-beacon-vsix
-          path: packages/vscode-dep-beacon/dep-beacon.vsix
+          node-version: 24.x
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build, typecheck, and test published packages
+        run: >-
+          pnpm exec turbo run build typecheck test
+          --filter=@santi020k/dep-beacon-core
+          --filter=@santi020k/dep-beacon-lsp
+          --filter=vscode-dep-beacon
+
+  deploy-docs:
+    name: Deploy documentation
+    needs: [changes, validation, compatibility]
+    if: >-
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.changes.outputs.docs == 'true' &&
+      needs.validation.result == 'success' &&
+      (needs.compatibility.result == 'success' || needs.compatibility.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: docs-production
+      url: ${{ vars.DEP_BEACON_DOCS_URL || 'https://beacon.santi020k.com' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.x
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Fetch production secrets
+        uses: Infisical/secrets-action@77ab1f4ccd183a543cb5b42435fbd181189f4995 # v1.0.16
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: prod
+          secret-path: /
+          recursive: true
+      - name: Build and deploy documentation
+        env:
+          CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'dep-beacon-docs' }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          pnpm run assets
+          pnpm --filter @santi020k/dep-beacon-docs build
+          pnpm exec wrangler pages deploy apps/docs/dist \
+            --project-name="$CLOUDFLARE_PAGES_PROJECT_NAME" \
+            --branch="$GITHUB_REF_NAME" \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-dirty=true
+
+  gate:
+    name: Required checks
+    if: always()
+    needs: [changes, validation, compatibility, deploy-docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify relevant jobs
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          VALIDATION: ${{ needs.validation.result }}
+          COMPATIBILITY: ${{ needs.compatibility.result }}
+          DEPLOY: ${{ needs.deploy-docs.result }}
+        run: |
+          for result in "$CHANGES" "$VALIDATION" "$COMPATIBILITY" "$DEPLOY"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              exit 1
+            fi
+          done
+
+  report-dispatched-validation:
+    name: Report dispatched validation
+    if: github.event_name == 'workflow_dispatch'
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Report successful validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh api --method POST
+          "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
+          -f state=success
+          -f context='Required checks'
+          -f description='Dispatched CI validation passed'
+          -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

@@ -116,6 +116,14 @@ const toBatchResponse = (value: unknown): OsvBatchResponse => {
 const queryKey = (query: OsvQuery): string => `${query.name}@${query.version}`
 const vulnerabilityIds = (result: OsvBatchResult | undefined): string[] => (result?.vulns ?? []).flatMap(vulnerability => (typeof vulnerability.id === 'string' ? [vulnerability.id] : []))
 
+const withoutTrailingSlashes = (value: string): string => {
+  let end = value.length
+
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end -= 1
+
+  return value.slice(0, end)
+}
+
 const vulnerabilityAliases = (details: readonly (OsvVulnerability | undefined)[]): string[] => {
   const aliases = new Set<string>()
 
@@ -141,7 +149,7 @@ export class OsvClient {
   readonly #requestTimeoutMs: number
 
   constructor(options: { baseUrl?: string, fetch?: FetchLike, requestTimeoutMs?: number } = {}) {
-    this.#baseUrl = (options.baseUrl ?? 'https://api.osv.dev').replace(/\/+$/u, '')
+    this.#baseUrl = withoutTrailingSlashes(options.baseUrl ?? 'https://api.osv.dev')
 
     this.#fetch = options.fetch ?? fetch
 
