@@ -98,3 +98,9 @@ jobs:
           test -n "$VSCE_PAT"
           test -n "$OVSX_PAT"
           pnpm --filter vscode-dep-beacon publish:ext
+      - name: Publish Zed extension
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.commit_sha || github.sha }}
+        run: gh workflow run zed-release.yml --ref main -f source_sha="$SOURCE_SHA"
