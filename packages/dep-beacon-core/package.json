@@ -2,6 +2,10 @@
   "name": "@santi020k/dep-beacon-core",
   "version": "1.2.0",
   "description": "Dependency manifest parsing, npm version intelligence, and OSV advisory checks for Dep Beacon.",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

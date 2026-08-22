@@ -44,7 +44,6 @@ catalog:
   cspell: ^10.0.1
   esbuild: ^0.28.1
   eslint: ^10.5.0
-  husky: ^9.1.7
   jsonc-parser: ^3.3.1
   knip: ^6.18.0
   lint-staged: ^17.0.8

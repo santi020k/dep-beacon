@@ -2,13 +2,29 @@
 
 Dep Beacon is a dependency intelligence engine for npm projects with integrations for VS Code and Zed. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
 
+[Documentation](https://beacon.santi020k.com) ·
+[VS Code](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) ·
+[Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) ·
+[npm packages](#packages) ·
+[Releases](https://github.com/santi020k/dep-beacon/releases) ·
+[Issues](https://github.com/santi020k/dep-beacon/issues)
+
+[![CI](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml)
+[![npm core](https://img.shields.io/npm/v/@santi020k/dep-beacon-core.svg?label=core)](https://www.npmjs.com/package/@santi020k/dep-beacon-core)
+[![VS Marketplace](https://badgen.net/vs-marketplace/v/santi020k.vscode-dep-beacon?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon)
+[![Open VSX](https://img.shields.io/open-vsx/v/santi020k/vscode-dep-beacon)](https://open-vsx.org/extension/santi020k/vscode-dep-beacon)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ## Packages
 
-- `@santi020k/dep-beacon-core` analyzes package manifests, npm registry metadata, semver ranges, and OSV advisories.
-- `vscode-dep-beacon` adds CodeLens, inline status decorations, diagnostics, update commands, sorting, cache control, and install-on-save workflows to VS Code.
-- `@santi020k/dep-beacon-lsp` provides the language server that powers dependency diagnostics, hovers, npm links, and individual or bulk update actions in Zed.
-- `extensions/dep-beacon` contains the thin Rust/WASM adapter distributed through the Zed extension registry.
-- `@santi020k/dep-beacon-docs` is the Astro documentation site.
+| Package or surface | Purpose | Distribution |
+| --- | --- | --- |
+| [`@santi020k/dep-beacon-core`](packages/dep-beacon-core) | Manifest analysis, npm metadata, semver ranges, and OSV advisories | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-core) |
+| [`vscode-dep-beacon`](packages/vscode-dep-beacon) | CodeLens, status decorations, diagnostics, update commands, sorting, caching, and install-on-save workflows | [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) · [Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) |
+| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp) | Language server for dependency diagnostics, hovers, npm links, and update actions | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-lsp) |
+| [`extensions/dep-beacon`](extensions/dep-beacon) | Thin Rust/WASM adapter for Zed | Zed registry source |
+| [`apps/docs`](apps/docs) | Guides, configuration, and product documentation | [Documentation](https://beacon.santi020k.com) |
 
 ## Quick Start
 
@@ -100,3 +116,7 @@ Copy `.env.example` to `.env` for local release or deploy commands. Use these na
 - Yellow: a newer version exists.
 - Orange: low or moderate vulnerabilities are present.
 - Red: the package/version is invalid, missing from npm, or has high or critical vulnerabilities.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
