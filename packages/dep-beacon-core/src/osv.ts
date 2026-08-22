@@ -138,6 +138,7 @@ export class OsvClient {
   readonly #baseUrl: string
   readonly #detailCache = new Map<string, Promise<OsvVulnerability | undefined>>()
   readonly #fetch: FetchLike
+  readonly #queryCache = new Map<string, Promise<VulnerabilitySummary | undefined>>()
   readonly #requestTimeoutMs: number
 
   constructor(options: { baseUrl?: string, fetch?: FetchLike, requestTimeoutMs?: number } = {}) {
@@ -151,6 +152,41 @@ export class OsvClient {
   async queryMany(queries: readonly OsvQuery[]): Promise<Map<string, VulnerabilitySummary>> {
     if (queries.length === 0) return new Map()
 
+    const uniqueQueries = [...new Map(queries.map(query => [queryKey(query), query])).values()]
+    const missingQueries = uniqueQueries.filter(query => !this.#queryCache.has(queryKey(query)))
+
+    if (missingQueries.length > 0) {
+      const batchRequest = this.#queryBatch(missingQueries)
+
+      for (const query of missingQueries) {
+        const key = queryKey(query)
+        const request = this.#queryResult(key, batchRequest)
+
+        this.#queryCache.set(key, request)
+      }
+    }
+
+    const summaries = await Promise.all(uniqueQueries.map(async query => {
+      const summary = await this.#queryCache.get(queryKey(query))
+
+      return summary ? [queryKey(query), summary] as const : undefined
+    }))
+
+    return new Map(summaries.flatMap(summary => (summary ? [summary] : [])))
+  }
+
+  async #queryResult(
+    key: string,
+    batchRequest: Promise<Map<string, VulnerabilitySummary> | undefined>
+  ): Promise<VulnerabilitySummary | undefined> {
+    const summaries = await batchRequest
+
+    if (summaries === undefined) this.#queryCache.delete(key)
+
+    return summaries?.get(key)
+  }
+
+  async #queryBatch(queries: readonly OsvQuery[]): Promise<Map<string, VulnerabilitySummary> | undefined> {
     let batch: OsvBatchResponse
 
     try {
@@ -170,11 +206,11 @@ export class OsvClient {
         method: 'POST'
       }, this.#requestTimeoutMs)
 
-      if (!response.ok) return new Map()
+      if (!response.ok) return undefined
 
       batch = toBatchResponse(await response.json())
     } catch {
-      return new Map()
+      return undefined
     }
 
     const summaries = await Promise.all(
