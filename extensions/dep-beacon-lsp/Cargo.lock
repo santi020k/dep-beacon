@@ -48,7 +48,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dep-beacon"
+name = "dep-beacon-lsp"
 version = "1.1.1"
 dependencies = [
  "zed_extension_api",

@@ -35,7 +35,7 @@ jobs:
         id: zed-version
         run: |
           version="$(node -p "require('./packages/dep-beacon-lsp/package.json').version")"
-          manifest_version="$(sed -n 's/^version = "\([^"]*\)"$/\1/p' extensions/dep-beacon/extension.toml)"
+          manifest_version="$(sed -n 's/^version = "\([^"]*\)"$/\1/p' extensions/dep-beacon-lsp/extension.toml)"
           if [[ "$version" != "$manifest_version" ]]; then
             echo "package.json version ($version) does not match extension.toml version ($manifest_version)."
             exit 1
@@ -101,7 +101,7 @@ jobs:
           cd zed-extensions
           git remote add upstream https://github.com/zed-industries/extensions.git
           git fetch upstream main
-          git checkout -B "dep-beacon-${ZED_VERSION}" upstream/main
+          git checkout -B "dep-beacon-lsp-${ZED_VERSION}" upstream/main
       - name: Update registry entry
         id: registry-update
         if: steps.npm-version.outputs.available == 'true'
@@ -111,11 +111,11 @@ jobs:
         run: |
           git config user.name "Santiago Molina"
           git config user.email "17752391+santi020k@users.noreply.github.com"
-          if [[ ! -d extensions/dep-beacon ]]; then
-            git submodule add https://github.com/santi020k/dep-beacon extensions/dep-beacon
+          if [[ ! -d extensions/dep-beacon-lsp ]]; then
+            git submodule add https://github.com/santi020k/dep-beacon extensions/dep-beacon-lsp
           fi
-          git -C extensions/dep-beacon fetch origin "$SOURCE_SHA"
-          git -C extensions/dep-beacon checkout "$SOURCE_SHA"
+          git -C extensions/dep-beacon-lsp fetch origin "$SOURCE_SHA"
+          git -C extensions/dep-beacon-lsp checkout "$SOURCE_SHA"
           python - <<'PY'
           from pathlib import Path
           import os
@@ -124,12 +124,12 @@ jobs:
           text = path.read_text()
           version = os.environ['ZED_VERSION']
           entry = (
-              '[dep-beacon]\n'
-              'submodule = "extensions/dep-beacon"\n'
-              'path = "extensions/dep-beacon"\n'
+              '[dep-beacon-lsp]\n'
+              'submodule = "extensions/dep-beacon-lsp"\n'
+              'path = "extensions/dep-beacon-lsp"\n'
               f'version = "{version}"\n'
           )
-          marker = '[dep-beacon]'
+          marker = '[dep-beacon-lsp]'
 
           if marker in text:
               start = text.index(marker)
@@ -145,15 +145,15 @@ jobs:
           PY
           pnpm install --frozen-lockfile
           pnpm run sort-extensions
-          git add .gitmodules extensions.toml extensions/dep-beacon
+          git add .gitmodules extensions.toml extensions/dep-beacon-lsp
           if git diff --cached --quiet; then
             echo "Zed registry entry is already up to date."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git commit -m "dep-beacon ${ZED_VERSION}"
+          git commit -m "dep-beacon-lsp ${ZED_VERSION}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          git push --force-with-lease origin "dep-beacon-${ZED_VERSION}"
+          git push --force-with-lease origin "dep-beacon-lsp-${ZED_VERSION}"
       - name: Open Zed registry pull request
         if: steps.registry-update.outputs.changed == 'true'
         working-directory: zed-extensions
@@ -165,7 +165,7 @@ jobs:
           existing_pr="$(
             gh api --method GET repos/zed-industries/extensions/pulls \
               -f state=open \
-              -f "head=${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
+              -f "head=${ZED_EXTENSIONS_HEAD}:dep-beacon-lsp-${ZED_VERSION}" \
               --jq '.[0].number // empty'
           )"
           if [[ -n "$existing_pr" ]]; then
@@ -175,7 +175,7 @@ jobs:
           fi
           gh pr create \
             --repo zed-industries/extensions \
-            --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-${ZED_VERSION}" \
+            --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-lsp-${ZED_VERSION}" \
             --base main \
-            --title "Add dep-beacon ${ZED_VERSION}" \
-            --body "Publishes dep-beacon ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/dep-beacon"
+            --title "Add dep-beacon-lsp ${ZED_VERSION}" \
+            --body "Publishes dep-beacon-lsp ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/dep-beacon-lsp"

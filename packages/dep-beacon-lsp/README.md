@@ -62,7 +62,7 @@ The TypeScript server is implemented in `src/server.ts` and bundled to `dist/ser
 
 ## Related extension
 
-The Rust/WASM Zed adapter is maintained separately in [`extensions/dep-beacon`](../../extensions/dep-beacon).
+The Rust/WASM Zed adapter is maintained separately in [`extensions/dep-beacon-lsp`](../../extensions/dep-beacon-lsp).
 
 ## License
 
