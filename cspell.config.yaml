@@ -41,6 +41,7 @@ words:
   - rustup
   - semver
   - Snyk
+  - smol
   - undici
   - unrs
   - vite
