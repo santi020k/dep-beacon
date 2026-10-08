@@ -163,3 +163,7 @@ Existing matching tags and published GitHub releases are reused; missing records
 are created, and editor publication resumes with duplicate-version handling.
 Inspect the individual delivery surfaces after every recovery. Preserve published artifacts and tags;
 do not move tags to the later workflow-fix commit or overwrite npm versions.
+
+Normal releases require `commit_sha` to equal the workflow selected-ref SHA.
+This prevents the Changesets version-PR path from resetting to a different commit.
+Use the explicitly pinned recovery mode for the already published v1.3.0 source.

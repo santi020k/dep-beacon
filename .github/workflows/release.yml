@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Validated commit to release; defaults to the selected ref
+        description: Source commit; normal releases require the selected ref SHA
         required: false
         type: string
       recover_published:
@@ -42,6 +42,14 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.commit_sha || github.sha }}
+      - name: Verify source for normal release
+        if: '!inputs.recover_published'
+        env:
+          EXPECTED_SOURCE_SHA: ${{ inputs.commit_sha || github.sha }}
+          SELECTED_REF_SHA: ${{ github.sha }}
+        run: |
+          test "$EXPECTED_SOURCE_SHA" = "$SELECTED_REF_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
       - name: Set up pnpm workspace
         uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
         with:
