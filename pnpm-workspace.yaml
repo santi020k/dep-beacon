@@ -25,13 +25,13 @@ catalog:
   "@changesets/changelog-github": ^0.7.0
   "@changesets/cli": ^2.31.0
   "@santi020k/commitprompt": ^1.0.0
-  "@santi020k/eslint-config-astro": ^3.1.0
-  "@santi020k/eslint-config-basic": ^3.4.0
-  "@santi020k/eslint-config-extensions": ^3.1.0
-  "@santi020k/eslint-config-formats": ^3.1.0
-  "@santi020k/eslint-config-libraries": ^3.1.0
-  "@santi020k/eslint-config-testing": ^3.1.0
-  "@santi020k/eslint-config-tools": ^3.1.0
+  "@santi020k/eslint-config-astro": ^3.1.5
+  "@santi020k/eslint-config-basic": ^3.6.0
+  "@santi020k/eslint-config-extensions": ^3.1.4
+  "@santi020k/eslint-config-formats": ^3.1.4
+  "@santi020k/eslint-config-libraries": ^3.1.4
+  "@santi020k/eslint-config-testing": ^3.1.4
+  "@santi020k/eslint-config-tools": ^3.1.4
   "@santi020k/lumen-astro": ^1.4.0
   "@tailwindcss/vite": ^4.3.1
   "@typescript/native": npm:typescript@^7.0.2
@@ -43,7 +43,7 @@ catalog:
   astro: ^7.1.6
   cspell: ^10.0.1
   esbuild: ^0.28.1
-  eslint: ^10.5.0
+  eslint: ^10.12.0
   jsonc-parser: ^3.3.1
   knip: ^6.18.0
   lint-staged: ^17.0.8
