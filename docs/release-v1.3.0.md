@@ -139,3 +139,31 @@ relevant focused commits if needed. After publication, preserve the published ta
 and issue a new patch version through the same workflow; do not overwrite artifacts.
 For a documentation-only regression, revert the affected source and let the normal
 validated deployment workflow rebuild it.
+
+### Recovering the 1.3 release records
+
+Changesets CLI 3 requires Changesets action 2 to consume structured publication
+and tag events. The original publication run delivered core 1.3.0 and LSP 1.1.2
+but the older action missed those events and skipped the GitHub and editor steps.
+The published package files match merge commit
+`2105e4efacd90e81b242bb058378382c9d03bdbc`.
+
+After the workflow correction passes checks and review, run the Release workflow
+from `main` with `commit_sha` set to that exact original source and
+`recover_published=true`. The workflow rejects any other recovery source SHA,
+including later commits with unchanged npm files but different editor code.
+Recovery rebuilds the original source, verifies registry
+tarball integrity and all package file contents, and reconciles missing package
+tags and GitHub release records. Existing tags must match the verified source. Git CLI pushes keep those tags on the checked-out source. It does not
+republish the npm versions. The downstream steps create the GitHub releases,
+publish the matching VS Code/Open VSX artifact, and open the Zed registry PR.
+
+If recovery partially completes, rerun it with the same verified source SHA.
+Existing matching tags and published GitHub releases are reused; missing records
+are created, and editor publication resumes with duplicate-version handling.
+Inspect the individual delivery surfaces after every recovery. Preserve published artifacts and tags;
+do not move tags to the later workflow-fix commit or overwrite npm versions.
+
+Normal releases require `commit_sha` to equal the workflow selected-ref SHA.
+This prevents the Changesets version-PR path from resetting to a different commit.
+Use the explicitly pinned recovery mode for the already published v1.3.0 source.
