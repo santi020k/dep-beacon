@@ -31,14 +31,12 @@ const currentState = (href: string): 'location' | 'page' | undefined => {
       <LogoMark class="brand-mark" />
       <span class="brand-copy">
         <span class="brand-name">Dep <strong>Beacon</strong></span>
-        <span class="brand-tagline">Dependency intelligence</span>
       </span>
     </Link>
     <div class="header-actions">
       <NavigationMenu class="top-nav" aria-label="Primary navigation" variant="unstyled">
-        {primaryLinks.map((item, index) => (
+        {primaryLinks.map(item => (
           <Link href={item.href} aria-current={currentState(item.href)}>
-            <span class="nav-link-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
             {item.label}
           </Link>
         ))}
@@ -49,7 +47,7 @@ const currentState = (href: string): 'location' | 'page' | undefined => {
         </Link>
         <ThemeToggle class="site-theme-toggle" storageKey="dep-beacon-theme" />
         <ButtonLink class="header-install" href="/docs/installation" variant="unstyled" aria-label="Install Dep Beacon">
-          Install <span class="install-arrow"><Icon name="arrow-right" /></span>
+          Install <Icon name="arrow-right" />
         </ButtonLink>
         <Button
           class="mobile-menu-trigger"

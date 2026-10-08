@@ -12,6 +12,7 @@ words:
   - commitlint
   - commitprompt
   - Consolas
+  - dasharray
   - dep
   - depbeacon
   - domexception
@@ -24,6 +25,7 @@ words:
   - katex
   - keytar
   - knip
+  - labelledby
   - linecap
   - linejoin
   - linkify
@@ -44,6 +46,7 @@ words:
   - rstrip
   - rustup
   - santi
+  - Segoe
   - semver
   - Snyk
   - smol

@@ -14,11 +14,12 @@ release-workflow setup change is included while its source worktree remains unto
 
 Dep Beacon keeps its blue, teal, and four status colors, with darker light-theme
 status tokens where accessibility checks found insufficient contrast. The website
-and theme project's sculpted direction supplies the shared 72rem alignment, raised
-identity tab, restrained surfaces, open numbered rows, and clear typography.
+and theme project's sculpted direction supplies the shared 72rem alignment,
+restrained surfaces, open numbered rows, and clear typography.
 The system font stack remains. The refined connected-node beacon retains its four signal colors and is shared by the
 favicon, brand lettering, package icon, and editor toolbar. The navbar separates primary
-navigation from source/theme controls and routes installation to both editor guides.
+navigation from source/theme controls within one floating capsule, with a blue
+installation action that routes to both editor guides.
 A Lumen tabbed showcase presents authentic VS Code and Zed sample-workspace captures
 over a decorative AI-generated backdrop. The editor UI is not AI-generated; asset
 provenance and the generation prompt live in `assets/brand/README.md`.
