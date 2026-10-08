@@ -142,7 +142,13 @@ test.each([
   ['parent@>=1>child@>=2 <3', 'child'],
   ['@scope/parent@>=1>@scope/child@>=2', '@scope/child'],
   ['demo@>1.0.0', 'demo'],
-  ['parent>123-child@^1', '123-child']
+  ['parent>123-child@^1', '123-child'],
+  ['parent>123-child', '123-child'],
+  ['parent>123', '123'],
+  ['parent@>=1>123-child', '123-child'],
+  ['demo@>1.0.0-beta', 'demo'],
+  ['demo@>=1.0.0 >2.0.0', 'demo'],
+  ['demo@>=1.0.0||>2.0.0', 'demo']
 ])('parses override selectors without treating comparators as package names: %s', (key, name) => {
   const json = parsePackageJsonManifest(JSON.stringify({ pnpm: { overrides: { [key]: '2.0.0' } } }))
   const yaml = parsePnpmWorkspaceManifest(`overrides:\n  "${key}": 2.0.0\n`)

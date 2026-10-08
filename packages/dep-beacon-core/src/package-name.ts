@@ -41,7 +41,7 @@ export const getResolutionPackageName = (key: string): string => {
 
 export const getOverridePackageName = (key: string): string => {
   // A comparator such as >= is part of the range, not a parent selector.
-  const packageSelector = key.split(/>(?=@|[a-z_]|[0-9][a-z0-9._-]*@)/iu).at(-1) ?? key
+  const packageSelector = key.split(/(?<![@\s|])>(?=@|[a-z_]|[0-9][a-z0-9._-]*(?:@|$))/iu).at(-1) ?? key
   const atIndex = packageSelector.indexOf('@', packageSelector.startsWith('@') ? packageSelector.indexOf('/') + 1 : 0)
 
   return atIndex > 0 ? packageSelector.slice(0, atIndex) : packageSelector
