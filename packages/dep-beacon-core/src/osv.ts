@@ -1,8 +1,9 @@
-import { fetchWithTimeout } from './fetch.js'
+import { fetchJsonWithTimeout } from './fetch.js'
+import { RequestLimiter } from './request-limiter.js'
 import type { FetchLike, OsvQuery, Severity, VulnerabilitySummary } from './types.js'
 
 interface OsvBatchResponse {
-  results?: OsvBatchResult[]
+  results: OsvBatchResult[]
 }
 
 interface OsvBatchResult {
@@ -95,18 +96,26 @@ const toVulnerability = (value: unknown): OsvVulnerability | undefined => {
   return value
 }
 
-const toBatchResponse = (value: unknown): OsvBatchResponse => {
-  if (!isRecord(value) || !Array.isArray(value.results)) return { results: [] }
+const toBatchResponse = (value: unknown, queryCount: number): OsvBatchResponse => {
+  if (!isRecord(value) || !Array.isArray(value.results) || value.results.length !== queryCount) {
+    throw new Error('OSV batch response did not match the requested queries.')
+  }
 
   return {
     results: value.results.map(result => {
-      if (!isRecord(result) || !Array.isArray(result.vulns)) return { vulns: [] }
+      if (!isRecord(result) || (result.vulns !== undefined && !Array.isArray(result.vulns))) {
+        throw new Error('OSV batch response contained an invalid result.')
+      }
+
+      const vulnerabilities: unknown[] = result.vulns ?? []
 
       return {
-        vulns: result.vulns.flatMap(vulnerability => {
-          if (!isRecord(vulnerability) || typeof vulnerability.id !== 'string') return []
+        vulns: vulnerabilities.map(vulnerability => {
+          if (!isRecord(vulnerability) || typeof vulnerability.id !== 'string' || vulnerability.id.length === 0) {
+            throw new Error('OSV batch response contained an invalid advisory.')
+          }
 
-          return [{ id: vulnerability.id }]
+          return { id: vulnerability.id }
         })
       }
     })
@@ -141,6 +150,8 @@ const vulnerabilityAliases = (details: readonly (OsvVulnerability | undefined)[]
 const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined)[]): Severity[] => (
   details.flatMap(detail => (detail ? [vulnerabilitySeverity(detail)] : []))
 )
+
+const osvRequestLimiter = new RequestLimiter(8)
 
 export class OsvClient {
   readonly #baseUrl: string
@@ -225,7 +236,7 @@ export class OsvClient {
     let batch: OsvBatchResponse
 
     try {
-      const response = await fetchWithTimeout(this.#fetch, `${this.#baseUrl}/v1/querybatch`, {
+      const response = await osvRequestLimiter.run(async () => fetchJsonWithTimeout(this.#fetch, `${this.#baseUrl}/v1/querybatch`, {
         body: JSON.stringify({
           queries: queries.map(query => ({
             package: {
@@ -239,17 +250,17 @@ export class OsvClient {
           'content-type': 'application/json'
         },
         method: 'POST'
-      }, this.#requestTimeoutMs)
+      }, this.#requestTimeoutMs))
 
       if (!response.ok) return undefined
 
-      batch = toBatchResponse(await response.json())
+      batch = toBatchResponse(response.body, queries.length)
     } catch {
       return undefined
     }
 
     const summaries = await Promise.all(
-      queries.map((query, index) => this.#summarizeQuery(query, batch.results?.[index]))
+      queries.map((query, index) => this.#summarizeQuery(query, batch.results[index]))
     )
 
     return new Map(summaries.flatMap(summary => (summary ? [summary] : [])))
@@ -278,7 +289,7 @@ export class OsvClient {
 
     if (cached) return cached
 
-    const request = this.#requestVulnerability(id)
+    const request = osvRequestLimiter.run(async () => this.#requestVulnerability(id))
 
     this.#detailCache.set(id, request)
 
@@ -287,13 +298,13 @@ export class OsvClient {
 
   async #requestVulnerability(id: string): Promise<OsvVulnerability | undefined> {
     try {
-      const response = await fetchWithTimeout(
+      const response = await fetchJsonWithTimeout(
         this.#fetch, `${this.#baseUrl}/v1/vulns/${encodeURIComponent(id)}`, {}, this.#requestTimeoutMs
       )
 
       if (!response.ok) return undefined
 
-      return toVulnerability(await response.json())
+      return toVulnerability(response.body)
     } catch {
       return undefined
     }

@@ -241,3 +241,10 @@ describe('updateTargets', () => {
     expect(targets.map(({ kind, spec }) => [kind, spec])).toEqual([['major', '^19.0.0']])
   })
 })
+
+test('keeps catalog npm aliases in Zed update actions', () => {
+  const spec = 'npm:@scope/real@~18.0.0'
+
+  expect(bulkUpdateSpec(analysis(), spec, 'latest')).toBe('npm:@scope/real@~19.1.0')
+  expect(updateTargets(analysis(), spec).find(target => target.spec === 'npm:@scope/real@~19.1.0')?.spec).toBe('npm:@scope/real@~19.1.0')
+})

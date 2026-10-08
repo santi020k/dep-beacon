@@ -238,3 +238,11 @@ describe('presentation helpers', () => {
     expect(updateActions(analysis)).toEqual([])
   })
 })
+
+test('keeps catalog npm aliases in VS Code update actions', () => {
+  const analysis = baseAnalysis('outdated')
+  const spec = 'npm:@scope/real@^1.0.0'
+
+  expect(bulkUpdateSpec(analysis, spec, 'latest')).toBe('npm:@scope/real@^2.0.0')
+  expect(resolvedUpdateActions(analysis, spec).find(action => action.version === '2.0.0')?.targetSpec).toBe('npm:@scope/real@^2.0.0')
+})

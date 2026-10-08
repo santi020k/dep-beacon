@@ -19,7 +19,7 @@ export const stripNpmAlias = (packageName: string, spec: string): { packageName:
   const separatorIndex = withoutProtocol.lastIndexOf('@')
 
   if (separatorIndex <= 0) {
-    return { packageName, spec: withoutProtocol }
+    return { packageName: withoutProtocol, spec: 'latest' }
   }
 
   return {
@@ -40,7 +40,8 @@ export const getResolutionPackageName = (key: string): string => {
 }
 
 export const getOverridePackageName = (key: string): string => {
-  const packageSelector = key.slice(key.lastIndexOf('>') + 1)
+  // A comparator such as >= is part of the range, not a parent selector.
+  const packageSelector = key.split(/>(?=@|[a-z_]|[0-9][a-z0-9._-]*@)/iu).at(-1) ?? key
   const atIndex = packageSelector.indexOf('@', packageSelector.startsWith('@') ? packageSelector.indexOf('/') + 1 : 0)
 
   return atIndex > 0 ? packageSelector.slice(0, atIndex) : packageSelector

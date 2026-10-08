@@ -85,6 +85,22 @@ Temporary before/after screenshots and the 28-case documentation accessibility s
 live outside Git in `/tmp/dep-beacon-redesign`. All seven chapters passed the rendered
 desktop/mobile, light/dark axe sweep without violations, page errors, or overflow.
 
+## Large workspace reliability
+
+The shared engine now resolves npm aliases inside default and named catalogs before
+querying registry metadata, and update actions preserve the alias package and range
+prefix in both editors. Override selectors distinguish parent separators from semver
+comparators such as `>=`; nested npm `.` overrides query the actual parent package.
+Npm aliases without a version resolve their target package using the npm latest tag.
+
+Registry and OSV timeouts cover JSON response downloads as well as headers. OSV
+requests share an eight-request limit across clients, and malformed or truncated
+batch results are retried instead of being cached as successful empty findings.
+
+Zed honors an explicit `lsp.dep-beacon.binary` command for local development or
+custom installations. Without an explicit path it keeps the managed npm server;
+it does not silently prefer a possibly stale executable from `PATH`.
+
 ## Publication and recovery
 
 The integrated Zed registry fix changes the adapter ID and source directory to

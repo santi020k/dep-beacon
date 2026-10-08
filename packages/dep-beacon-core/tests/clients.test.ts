@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { createNpmPackageUrl, type FetchLike, NpmRegistryClient, OsvClient } from '../src/index.js'
 import { getOsvQueryKey } from '../src/osv.js'
@@ -174,9 +174,8 @@ describe('OSV client', () => {
 
           return Promise.resolve(new Response(JSON.stringify({
             results: [
-              { vulns: [{ id: 'OSV-1' }, { id: 123 }, {}] },
               { vulns: [{ id: 'OSV-1' }] },
-              { invalid: true }
+              { vulns: [{ id: 'OSV-1' }] }
             ]
           }), { status: 200 }))
         }
@@ -264,6 +263,8 @@ describe('OSV client', () => {
     const query = [{ name: 'demo', version: '1.0.0' }]
     const first = client.queryMany(query)
     const second = client.queryMany(query)
+
+    await Promise.resolve()
 
     resolveBatch?.(new Response(JSON.stringify({ results: [{}] }), { status: 200 }))
 
@@ -364,5 +365,97 @@ describe('OSV client', () => {
       severity: 'unknown',
       source: 'osv'
     })
+  })
+})
+
+describe('large workspace network regressions', () => {
+  test('keeps the timeout active while reading registry response bodies', async () => {
+    vi.useFakeTimers()
+
+    try {
+      const client = new NpmRegistryClient({
+        fetch: (_url, init) => Promise.resolve(new Response(new ReadableStream<Uint8Array>({
+          start(controller) {
+            init?.signal?.addEventListener('abort', () => {
+              controller.error(new Error('Body download aborted'))
+            }, { once: true })
+          }
+        }))),
+        requestTimeoutMs: 25
+      })
+      const request = client.getPackage('demo')
+
+      await vi.advanceTimersByTimeAsync(25)
+
+      await expect(request).resolves.toMatchObject({
+        error: { code: 'network-error', message: 'Request timed out after 25ms.' },
+        ok: false
+      })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  test.each([
+    {},
+    { results: [] },
+    { results: [null] },
+    { results: [{ vulns: 'invalid' }] },
+    { results: [{ vulns: [{}] }] }
+  ])('retries malformed OSV batch responses: %j', async malformed => {
+    let calls = 0
+    const client = new OsvClient({
+      fetch: () => {
+        calls += 1
+
+        return Promise.resolve(new Response(JSON.stringify(calls === 1 ? malformed : { results: [{}] })))
+      }
+    })
+    const queries = [{ name: 'demo', version: '1.0.0' }]
+
+    await client.queryMany(queries)
+    await client.queryMany(queries)
+    await client.queryMany(queries)
+
+    expect(calls).toBe(2)
+  })
+
+  test('bounds OSV traffic across clients and preserves all advisory results', async () => {
+    let active = 0
+    let peak = 0
+    const fetcher: FetchLike = async (url, init) => {
+      active += 1
+      peak = Math.max(peak, active)
+
+      await new Promise<void>(resolve => {
+        setTimeout(resolve, 1)
+      })
+
+      active -= 1
+
+      if (url.endsWith('/querybatch')) {
+        if (typeof init?.body !== 'string') throw new Error('Expected JSON request body')
+
+        const body: unknown = JSON.parse(init.body)
+
+        if (typeof body !== 'object' || body === null || !('queries' in body) || !Array.isArray(body.queries)) {
+          throw new Error('Expected OSV queries')
+        }
+
+        return new Response(JSON.stringify({
+          results: body.queries.map((_query, index) => ({ vulns: [{ id: `OSV-${index}` }] }))
+        }))
+      }
+
+      return new Response(JSON.stringify({ id: url.split('/').at(-1), database_specific: { severity: 'HIGH' } }))
+    }
+    const queries = Array.from({ length: 40 }, (_value, index) => ({ name: `package-${index}`, version: '1.0.0' }))
+    const results = await Promise.all(Array.from({ length: 3 }, async () => (
+      new OsvClient({ fetch: fetcher }).queryMany(queries)
+    )))
+
+    expect(peak).toBeLessThanOrEqual(8)
+    expect(results.map(result => result.size)).toEqual([40, 40, 40])
+    expect(results[0]?.get('package-39@1.0.0')?.severity).toBe('high')
   })
 })
