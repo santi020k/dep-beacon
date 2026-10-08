@@ -139,3 +139,25 @@ relevant focused commits if needed. After publication, preserve the published ta
 and issue a new patch version through the same workflow; do not overwrite artifacts.
 For a documentation-only regression, revert the affected source and let the normal
 validated deployment workflow rebuild it.
+
+### Recovering the 1.3 release records
+
+Changesets CLI 3 requires Changesets action 2 to consume structured publication
+and tag events. The original publication run delivered core 1.3.0 and LSP 1.1.2
+but the older action missed those events and skipped the GitHub and editor steps.
+The published package files match merge commit
+`2105e4efacd90e81b242bb058378382c9d03bdbc`.
+
+After the workflow correction passes checks and review, run the Release workflow
+from `main` with `commit_sha` set to that exact original source and
+`recover_published=true`. Recovery rebuilds the original source, verifies registry
+tarball integrity and all package file contents, and creates only missing package
+tags. Git CLI pushes keep those tags on the checked-out source. It does not
+republish the npm versions. The downstream steps create the GitHub releases,
+publish the matching VS Code/Open VSX artifact, and open the Zed registry PR.
+
+Inspect existing tags and release records before recovery. If recovery partially
+completes, inspect the individual surfaces and recover only the missing delivery
+steps. Existing tags emit no new Changesets events, so rerunning recovery alone
+may skip missing GitHub releases or editors. Preserve published artifacts and tags;
+do not move tags to the later workflow-fix commit or overwrite npm versions.
