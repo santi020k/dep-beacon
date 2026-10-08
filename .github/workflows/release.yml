@@ -7,6 +7,11 @@ on:
         description: Validated commit to release; defaults to the selected ref
         required: false
         type: string
+      recover_published:
+        description: Recover missing tags, GitHub releases, and editors after verifying existing npm artifacts
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -29,6 +34,7 @@ jobs:
       name: release
       url: https://www.npmjs.com/package/@santi020k/dep-beacon-core
     env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Check out repository
@@ -43,28 +49,84 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Verify publishing authentication
         run: test -n "$NODE_AUTH_TOKEN"
+      - name: Verify published artifacts before recovery
+        if: inputs.recover_published
+        env:
+          EXPECTED_SOURCE_SHA: ${{ inputs.commit_sha }}
+        run: |
+          test -n "$EXPECTED_SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          pnpm run build
+          python3 - <<'PYTHON'
+          import base64
+          import hashlib
+          import io
+          import json
+          import subprocess
+          import tarfile
+          import tempfile
+          from pathlib import Path
+          from urllib.parse import urlparse
+          from urllib.request import urlopen
+
+          def fetch(url):
+              with urlopen(url, timeout=30) as response:
+                  return response.read()
+
+          def contents(data):
+              with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as archive:
+                  files = {}
+                  for entry in archive.getmembers():
+                      if entry.isfile():
+                          if entry.name in files:
+                              raise ValueError('Duplicate package file')
+                          files[entry.name] = archive.extractfile(entry).read()
+                  return files
+
+          for slug in ('dep-beacon-core', 'dep-beacon-lsp'):
+              package_dir = Path('packages') / slug
+              manifest = json.loads((package_dir / 'package.json').read_text())
+              name, version = manifest['name'], manifest['version']
+              metadata = json.loads(fetch(f'https://registry.npmjs.org/{name}/{version}'))
+              if metadata['name'] != name or metadata['version'] != version:
+                  raise ValueError('Published package identity differs')
+              tarball = metadata['dist']['tarball']
+              if urlparse(tarball).scheme != 'https' or urlparse(tarball).netloc != 'registry.npmjs.org':
+                  raise ValueError('Unexpected package registry')
+              published = fetch(tarball)
+              integrity = 'sha512-' + base64.b64encode(hashlib.sha512(published).digest()).decode()
+              if integrity != metadata['dist']['integrity']:
+                  raise ValueError('Published artifact integrity differs')
+              with tempfile.TemporaryDirectory() as directory:
+                  packed = Path(directory) / 'package.tgz'
+                  subprocess.run(['pnpm', 'pack', '--out', str(packed)], cwd=package_dir, check=True)
+                  if contents(packed.read_bytes()) != contents(published):
+                      raise ValueError(f'{name}@{version} does not match the release source')
+              print(f'Verified exact published artifact: {name}@{version}')
+          PYTHON
       - name: Create release pull request or publish
         id: changesets
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          publish: pnpm run release
-          version: pnpm run version-packages
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-          createGithubReleases: true
+          publish-script: ${{ inputs.recover_published && 'pnpm exec changeset git-tag' || 'pnpm run release' }}
+          version-script: pnpm run version-packages
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
+          create-github-releases: true
+          push-with-git-cli: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HUSKY: 0
           NPM_CONFIG_PROVENANCE: "true"
       - name: Validate release pull request
-        if: steps.changesets.outputs.pullRequestNumber != ''
+        if: steps.changesets.outputs['pr-number'] != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run ci.yml --ref changeset-release/main
       - name: Create umbrella version tag
         if: steps.changesets.outputs.published == 'true'
         env:
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs['published-packages'] }}
         run: |
           VERSION="$(node -p "require('./packages/dep-beacon-core/package.json').version")"
           if ! jq -e \
