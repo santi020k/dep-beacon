@@ -15,30 +15,41 @@ const primaryLinks = [
   { href: '/docs/zed-extension', label: 'Zed' }
 ]
 
-const isCurrent = (href: string) => href === '/docs' ?
-  pathname.startsWith('/docs') && !primaryLinks.some(link => link.href !== '/docs' && link.href === pathname) :
-  pathname === href
+const currentState = (href: string): 'location' | 'page' | undefined => {
+  if (pathname === href) return 'page'
+
+  const isDocsChapter = href === '/docs' && pathname.startsWith('/docs/') &&
+    !primaryLinks.some(link => link.href === pathname)
+
+  return isDocsChapter ? 'location' : undefined
+}
 ---
 
 <header class="site-header" transition:name="site-header">
   <div class="site-header-inner site-shell">
     <Link class="brand-link" href="/" aria-label="Dep Beacon home">
       <LogoMark class="brand-mark" />
-      <span>Dep <strong>Beacon</strong></span>
+      <span class="brand-copy">
+        <span class="brand-name">Dep <strong>Beacon</strong></span>
+        <span class="brand-tagline">Dependency intelligence</span>
+      </span>
     </Link>
     <div class="header-actions">
       <NavigationMenu class="top-nav" aria-label="Primary navigation" variant="unstyled">
-        {primaryLinks.map(item => (
-          <Link href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+        {primaryLinks.map((item, index) => (
+          <Link href={item.href} aria-current={currentState(item.href)}>
+            <span class="nav-link-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
             {item.label}
           </Link>
         ))}
-        <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub <Icon name="arrow-up-right" /></Link>
       </NavigationMenu>
       <div class="header-utilities">
+        <Link class="header-source" href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">
+          GitHub <Icon name="arrow-up-right" />
+        </Link>
         <ThemeToggle class="site-theme-toggle" storageKey="dep-beacon-theme" />
-        <ButtonLink class="header-install" href={SITE.marketplaceUrl} variant="unstyled" newTab>
-          Install <Icon name="arrow-up-right" />
+        <ButtonLink class="header-install" href="/docs/installation" variant="unstyled" aria-label="Install Dep Beacon">
+          Install <span class="install-arrow"><Icon name="arrow-right" /></span>
         </ButtonLink>
         <Button
           class="mobile-menu-trigger"
@@ -58,28 +69,37 @@ const isCurrent = (href: string) => href === '/docs' ?
 <Sheet id="site-navigation" class="mobile-menu" aria-labelledby="site-navigation-title">
   <div class="mobile-menu-heading">
     <Link href="/" class="mobile-menu-brand" data-ui-sheet-close>
-      <LogoMark class="brand-mark" />Dep Beacon
+      <LogoMark class="brand-mark" />
+      <span class="brand-copy"><span class="brand-name">Dep Beacon</span></span>
     </Link>
-    <Button class="mobile-menu-close" variant="ghost" type="button" data-ui-sheet-close autofocus>
-      Close <Icon name="x" />
-    </Button>
+    <div class="mobile-menu-controls">
+      <ThemeToggle class="site-theme-toggle" storageKey="dep-beacon-theme" />
+      <Button class="mobile-menu-close" variant="ghost" type="button" data-ui-sheet-close autofocus>
+        Close <Icon name="x" />
+      </Button>
+    </div>
   </div>
   <div class="mobile-menu-intro">
     <p class="eyebrow">Follow the signal</p>
     <h2 id="site-navigation-title">Find your next step.</h2>
   </div>
+  <div class="mobile-menu-label" aria-hidden="true"><span>Explore Dep Beacon</span><span>{pageLinks.length} pages</span></div>
   <NavigationMenu class="mobile-nav" aria-label="Mobile page navigation" variant="unstyled">
     {pageLinks.map((item, index) => (
       <Link href={item.href} aria-current={pathname === item.href ? 'page' : undefined} data-ui-sheet-close>
         <span class="nav-number" aria-hidden="true">{String(index).padStart(2, '0')}</span>
         <span>{item.label}</span>
-        <Icon name="arrow-right" />
+        {pathname === item.href ?
+          <span class="mobile-current" aria-hidden="true">Here</span> :
+          <Icon name="arrow-right" />}
       </Link>
     ))}
   </NavigationMenu>
   <div class="mobile-menu-links">
+    <ButtonLink class="mobile-install" href="/docs/installation" variant="unstyled" data-ui-sheet-close>
+      Choose your editor <Icon name="arrow-right" />
+    </ButtonLink>
     <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub <Icon name="arrow-up-right" /></Link>
     <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace <Icon name="arrow-up-right" /></Link>
-    <ThemeToggle class="site-theme-toggle" storageKey="dep-beacon-theme" />
   </div>
 </Sheet>

@@ -16,7 +16,12 @@ Dep Beacon keeps its blue, teal, and four status colors, with darker light-theme
 status tokens where accessibility checks found insufficient contrast. The website
 and theme project's sculpted direction supplies the shared 72rem alignment, raised
 identity tab, restrained surfaces, open numbered rows, and clear typography.
-The existing system font stack and real VS Code sample-workspace screenshot remain.
+The system font stack remains. A new blue/teal beacon monogram is shared by the
+favicon, wordmark, package icon, and editor toolbar. The navbar separates primary
+navigation from source/theme controls and routes installation to both editor guides.
+A Lumen tabbed showcase presents authentic VS Code and Zed sample-workspace captures
+over a decorative AI-generated backdrop. The editor UI is not AI-generated; asset
+provenance and the generation prompt live in `assets/brand/README.md`.
 
 Lumen 4 owns buttons, breadcrumbs, the mobile Sheet, theme controls, code tabs,
 and one-time reveals. Astro owns route transitions. Reduced motion disables decorative
@@ -67,7 +72,8 @@ Run `pnpm install --frozen-lockfile`, `pnpm run validate`, `pnpm run test:docs`,
 both themes at 320, 375, 768, and 1440 pixels, plus keyboard navigation, focus return,
 theme continuity after page swaps, and code-tab preferences in Chromium and WebKit.
 The test preview stays in the foreground so Playwright owns its startup and shutdown,
-including when Astro detects an agent environment.
+including when Astro detects an agent environment. Set `DEP_BEACON_DOCS_TEST_PORT`
+to an available port when another local task already owns the default 4398.
 
 Independent review corrections include stale editor ranges, queued requests during
 debounce, immediate catalog invalidation, release-check ordering after the build,

@@ -1,4 +1,6 @@
 ---
+import BeaconIcon from '../../../../packages/vscode-dep-beacon/resources/icon.svg'
+
 interface Props {
   class?: string
 }
@@ -6,12 +8,4 @@ interface Props {
 const { class: className = 'logo-mark' } = Astro.props
 ---
 
-<svg class={className} viewBox="0 0 32 32" role="img" aria-label="Dep Beacon logo">
-  <rect width="32" height="32" rx="8" fill="#111827"></rect>
-  <path d="M16 6.2 9.2 21.6h13.6L16 6.2Z" fill="#1f2a44"></path>
-  <path d="M16 6.2 9.2 21.6M16 6.2l6.8 15.4M9.2 21.6h13.6M16 14.4l-6.8 7.2M16 14.4l6.8 7.2" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-  <circle cx="16" cy="6.2" r="3.1" fill="#f8c65c"></circle>
-  <circle cx="16" cy="14.4" r="2.4" fill="#f8fafc"></circle>
-  <circle cx="9.2" cy="21.6" r="3" fill="#34d399"></circle>
-  <circle cx="22.8" cy="21.6" r="3" fill="#fb7185"></circle>
-</svg>
+<BeaconIcon class={className} role="img" aria-label="Dep Beacon logo" />

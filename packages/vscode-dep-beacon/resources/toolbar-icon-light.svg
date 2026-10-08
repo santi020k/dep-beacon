@@ -1,9 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="Dep Beacon">
-  <rect x="1" y="1" width="14" height="14" rx="3.5" fill="#111827" stroke="#475569" stroke-width=".8"/>
-  <path d="M8 3.3 4.3 11.7h7.4L8 3.3Z" fill="#1f2a44"/>
-  <path d="M8 3.3 4.3 11.7M8 3.3l3.7 8.4M4.3 11.7h7.4M8 7.9l-3.7 3.8M8 7.9l3.7 3.8" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
-  <circle cx="8" cy="3.3" r="1.85" fill="#f8c65c"/>
-  <circle cx="8" cy="7.9" r="1.65" fill="#f8fafc"/>
-  <circle cx="4.3" cy="11.7" r="1.8" fill="#34d399"/>
-  <circle cx="11.7" cy="11.7" r="1.8" fill="#fb7185"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 4 24 24" width="16" height="16" role="img" aria-label="Dep Beacon">
+  <g fill="#424c56">
+    <path d="M7 9 11 5v22H7V9Z"/>
+    <path d="M13 5h4a6 6 0 0 1 0 12h-4v-4h4a2 2 0 0 0 0-4h-4V5Z"/>
+    <path d="M13 15h5a6 6 0 0 1 0 12h-5v-4h5a2 2 0 0 0 0-4h-5v-4Z"/>
+    <circle cx="14.5" cy="11" r="1"/>
+    </g>
 </svg>

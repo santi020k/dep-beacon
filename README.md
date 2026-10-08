@@ -26,6 +26,15 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 
 **Explore:** [Packages](#packages) · [Quick Start](#quick-start) · [Use in Zed](#use-in-zed) · [Commits](#commits) · [Local Extension Debugging](#local-extension-debugging) · [Status Colors](#status-colors)
 
+## In your editor
+
+Real dependency signals from the public sample workspace. Select either preview to
+open the full capture; the [website](https://beacon.santi020k.com) includes both editors.
+
+| VS Code | Zed |
+| --- | --- |
+| [![Dep Beacon in VS Code](apps/docs/public/usage-preview.png)](apps/docs/public/usage-preview.png) | [![Dep Beacon in Zed](apps/docs/public/zed-preview.jpg)](apps/docs/public/zed-preview.jpg) |
+
 ## Packages
 
 | Package or surface | Purpose | Distribution |

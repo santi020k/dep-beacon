@@ -10,8 +10,8 @@
           "height": 630,
           "output": "home.png",
           "primary": true,
-          "url": "/og/home.png?v=a6c3750437c2",
-          "version": "a6c3750437c2",
+          "url": "/og/home.png?v=b91f22ef850c",
+          "version": "b91f22ef850c",
           "width": 1200
         },
         {
@@ -20,8 +20,8 @@
           "height": 630,
           "output": "social-card.png",
           "primary": false,
-          "url": "/social-card.png?v=a6c3750437c2",
-          "version": "a6c3750437c2",
+          "url": "/social-card.png?v=b91f22ef850c",
+          "version": "b91f22ef850c",
           "width": 1200
         },
         {
@@ -29,8 +29,8 @@
           "height": 630,
           "output": "home.svg",
           "primary": true,
-          "url": "/og/home.svg?v=d960c47838f3",
-          "version": "d960c47838f3",
+          "url": "/og/home.svg?v=a30e5b54d653",
+          "version": "a30e5b54d653",
           "width": 1200
         },
         {
@@ -39,8 +39,8 @@
           "height": 630,
           "output": "social-card.svg",
           "primary": false,
-          "url": "/social-card.svg?v=d960c47838f3",
-          "version": "d960c47838f3",
+          "url": "/social-card.svg?v=a30e5b54d653",
+          "version": "a30e5b54d653",
           "width": 1200
         }
       ],
@@ -56,8 +56,8 @@
           "height": 630,
           "output": "docs.png",
           "primary": true,
-          "url": "/og/docs.png?v=e20be471db42",
-          "version": "e20be471db42",
+          "url": "/og/docs.png?v=7c1f7ffac7f6",
+          "version": "7c1f7ffac7f6",
           "width": 1200
         },
         {
@@ -65,8 +65,8 @@
           "height": 630,
           "output": "docs.svg",
           "primary": true,
-          "url": "/og/docs.svg?v=d32744606a4a",
-          "version": "d32744606a4a",
+          "url": "/og/docs.svg?v=64b5b381db05",
+          "version": "64b5b381db05",
           "width": 1200
         }
       ],
@@ -82,8 +82,8 @@
           "height": 630,
           "output": "install.png",
           "primary": true,
-          "url": "/og/install.png?v=fe19a4c08960",
-          "version": "fe19a4c08960",
+          "url": "/og/install.png?v=8ea5f5df0549",
+          "version": "8ea5f5df0549",
           "width": 1200
         },
         {
@@ -91,8 +91,8 @@
           "height": 630,
           "output": "install.svg",
           "primary": true,
-          "url": "/og/install.svg?v=f1c978d9fd80",
-          "version": "f1c978d9fd80",
+          "url": "/og/install.svg?v=4ccfee4c44b0",
+          "version": "4ccfee4c44b0",
           "width": 1200
         }
       ],
@@ -108,8 +108,8 @@
           "height": 630,
           "output": "extension.png",
           "primary": true,
-          "url": "/og/extension.png?v=5c8d25708af8",
-          "version": "5c8d25708af8",
+          "url": "/og/extension.png?v=390eb1ed49f5",
+          "version": "390eb1ed49f5",
           "width": 1200
         },
         {
@@ -117,8 +117,8 @@
           "height": 630,
           "output": "extension.svg",
           "primary": true,
-          "url": "/og/extension.svg?v=4eeb31cb15af",
-          "version": "4eeb31cb15af",
+          "url": "/og/extension.svg?v=624f933865ec",
+          "version": "624f933865ec",
           "width": 1200
         }
       ],
@@ -134,8 +134,8 @@
           "height": 630,
           "output": "zed-extension.png",
           "primary": true,
-          "url": "/og/zed-extension.png?v=b44bc785ac62",
-          "version": "b44bc785ac62",
+          "url": "/og/zed-extension.png?v=f21f9adaf574",
+          "version": "f21f9adaf574",
           "width": 1200
         },
         {
@@ -143,8 +143,8 @@
           "height": 630,
           "output": "zed-extension.svg",
           "primary": true,
-          "url": "/og/zed-extension.svg?v=f3f1e7eb7eef",
-          "version": "f3f1e7eb7eef",
+          "url": "/og/zed-extension.svg?v=afa84ed8b10d",
+          "version": "afa84ed8b10d",
           "width": 1200
         }
       ],
@@ -160,8 +160,8 @@
           "height": 630,
           "output": "pnpm-workspaces.png",
           "primary": true,
-          "url": "/og/pnpm-workspaces.png?v=1f9108f1b426",
-          "version": "1f9108f1b426",
+          "url": "/og/pnpm-workspaces.png?v=37a210ac1323",
+          "version": "37a210ac1323",
           "width": 1200
         },
         {
@@ -169,8 +169,8 @@
           "height": 630,
           "output": "pnpm-workspaces.svg",
           "primary": true,
-          "url": "/og/pnpm-workspaces.svg?v=1af02ca05d6e",
-          "version": "1af02ca05d6e",
+          "url": "/og/pnpm-workspaces.svg?v=cecb8955e4b1",
+          "version": "cecb8955e4b1",
           "width": 1200
         }
       ],
@@ -186,8 +186,8 @@
           "height": 630,
           "output": "security.png",
           "primary": true,
-          "url": "/og/security.png?v=cc9ad4c36a1d",
-          "version": "cc9ad4c36a1d",
+          "url": "/og/security.png?v=de9c4d948f99",
+          "version": "de9c4d948f99",
           "width": 1200
         },
         {
@@ -195,8 +195,8 @@
           "height": 630,
           "output": "security.svg",
           "primary": true,
-          "url": "/og/security.svg?v=60133e80a22e",
-          "version": "60133e80a22e",
+          "url": "/og/security.svg?v=01c89fe2ff7a",
+          "version": "01c89fe2ff7a",
           "width": 1200
         }
       ],
@@ -212,8 +212,8 @@
           "height": 630,
           "output": "configuration.png",
           "primary": true,
-          "url": "/og/configuration.png?v=71a46e266bdb",
-          "version": "71a46e266bdb",
+          "url": "/og/configuration.png?v=9b3c7c412450",
+          "version": "9b3c7c412450",
           "width": 1200
         },
         {
@@ -221,8 +221,8 @@
           "height": 630,
           "output": "configuration.svg",
           "primary": true,
-          "url": "/og/configuration.svg?v=01605b9f44b4",
-          "version": "01605b9f44b4",
+          "url": "/og/configuration.svg?v=8e1ee2296738",
+          "version": "8e1ee2296738",
           "width": 1200
         }
       ],

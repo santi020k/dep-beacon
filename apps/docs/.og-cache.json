@@ -3,112 +3,112 @@
   "entries": {
     "home.png": {
       "baseDirectory": "public/og",
-      "digest": "e0d71f3723d8100471b2335cebbd59b16c7eb026ce333a2e10a2097f64d3691a",
-      "fingerprint": "a6c3750437c2c7789e8bdeac0b7adad47be2eea729ee782683472d1478ace9e6",
+      "digest": "1c923b380b8dafa769fa999e3ca200d049e942f883871dcde5c748f00e56e6f1",
+      "fingerprint": "b91f22ef850ca5616f8f08259fda87de413a6225516c9133b66854ea9f37b247",
       "output": "home.png"
     },
     "public:social-card.png": {
       "baseDirectory": "public",
-      "digest": "e0d71f3723d8100471b2335cebbd59b16c7eb026ce333a2e10a2097f64d3691a",
-      "fingerprint": "a6c3750437c2c7789e8bdeac0b7adad47be2eea729ee782683472d1478ace9e6",
+      "digest": "1c923b380b8dafa769fa999e3ca200d049e942f883871dcde5c748f00e56e6f1",
+      "fingerprint": "b91f22ef850ca5616f8f08259fda87de413a6225516c9133b66854ea9f37b247",
       "directory": "public",
       "output": "social-card.png"
     },
     "home.svg": {
       "baseDirectory": "public/og",
-      "digest": "9f09f19fc25e4aee8eb9b0f5d1c05ccca7a1c931231655491f30e25db21f880d",
-      "fingerprint": "d960c47838f3a0156a6445a734fab404162d96fda36291ea7991b63e1eaaee92",
+      "digest": "c4254bcb6de8992a6c5a0d5204c290f67dcd41bb9365441d838bff8cdf198518",
+      "fingerprint": "a30e5b54d65397a063f980affa65aeb0cd7d4bba99082edbbb7c97df510fa746",
       "output": "home.svg"
     },
     "public:social-card.svg": {
       "baseDirectory": "public",
-      "digest": "9f09f19fc25e4aee8eb9b0f5d1c05ccca7a1c931231655491f30e25db21f880d",
-      "fingerprint": "d960c47838f3a0156a6445a734fab404162d96fda36291ea7991b63e1eaaee92",
+      "digest": "c4254bcb6de8992a6c5a0d5204c290f67dcd41bb9365441d838bff8cdf198518",
+      "fingerprint": "a30e5b54d65397a063f980affa65aeb0cd7d4bba99082edbbb7c97df510fa746",
       "directory": "public",
       "output": "social-card.svg"
     },
     "docs.png": {
       "baseDirectory": "public/og",
-      "digest": "7a7a48f2753428545e2bc193d2ceeba44cf92528ef67fb7eeb57c105fa21b6a3",
-      "fingerprint": "e20be471db4209a0606a449451d4e2a07f1e16ab101625ae6c8ff4eb21176277",
+      "digest": "d69ef8dcd32891648047c91514144118b9274a7584996a38fe34a52aec253376",
+      "fingerprint": "7c1f7ffac7f6c5c84ff81812520c8a615020c0129438ff5b4002bf01d6c44066",
       "output": "docs.png"
     },
     "docs.svg": {
       "baseDirectory": "public/og",
-      "digest": "c75fe019b8d257b84ba73573fd1f37c50c19e8ba90ae4c30cae99fcf00ec0c8a",
-      "fingerprint": "d32744606a4a7466b27408bbf262900b59fd18e370adc75f9db6a4398a201a61",
+      "digest": "eac97333cbca9465af9ed437c0fd551a4d72f7290c46eb6b9c9ecf90f05fd7fa",
+      "fingerprint": "64b5b381db05fd4b4134519964d926d69a5b1ea7eda71ededef6893b87906314",
       "output": "docs.svg"
     },
     "install.png": {
       "baseDirectory": "public/og",
-      "digest": "8edb7b05f5b2b845c9823d1da5a1f31c7810f0ca20e1a04a79d9d7987ad10c24",
-      "fingerprint": "fe19a4c08960e7ed76b09b1f72a232b0cc63003fead5d99fa4a879db6b3f5f2c",
+      "digest": "b8d7b453d30f8e7afe1b7d880bdb018b3bb7b707762d4f56cf8de279ff9d833f",
+      "fingerprint": "8ea5f5df0549fc1931d8e8952f3cbeb35c378c147098060f6a4a67164f60d9e8",
       "output": "install.png"
     },
     "install.svg": {
       "baseDirectory": "public/og",
-      "digest": "cfb6721d2205b74bbd2d302a05c5cfec5be2ed1304c7d5594303e8226b648467",
-      "fingerprint": "f1c978d9fd80d5dd79a3a82bfb76ac0d4c01fe7178791c2f8808adfd4f1cece4",
+      "digest": "fed30045509f5603c9f098c64d3600c13d6785b236c70265d262627b268104fb",
+      "fingerprint": "4ccfee4c44b03535299d8cc6a3a1a8862a4d2f37a71a7ca2512a07e88ebce8c6",
       "output": "install.svg"
     },
     "extension.png": {
       "baseDirectory": "public/og",
-      "digest": "24e8cfbc03c9302c4e21c58698218fa10f027f8168b70f292ddde30dfe4ab5c5",
-      "fingerprint": "5c8d25708af8ee62a5944683d631b681a21a9a5feedc8ec00bc2d7145aec6220",
+      "digest": "93f3e09acf1c1b2179e9ce34735c850607711560a2d1cd80f98161ae0b116085",
+      "fingerprint": "390eb1ed49f596f0b0d6024be77152a3ff9fdc45417fdc266041a8571c4d66b7",
       "output": "extension.png"
     },
     "extension.svg": {
       "baseDirectory": "public/og",
-      "digest": "959f101f8b2220cce2ebdcce414c1c93bc26cd42bf17725a5f3db6c7b02bdb37",
-      "fingerprint": "4eeb31cb15af08c8b2420cc0ed3b0a044a19b1bfcf8578bf4057a9c8b71718b2",
+      "digest": "c75f3fab5de2ed709e3dd1cab51cda90c7d5f7f5bfb000c6354ed30b44ada3c0",
+      "fingerprint": "624f933865ecac30ddd245ba28d622e2061ee5d07530caf386a03de375b02d54",
       "output": "extension.svg"
     },
     "zed-extension.png": {
       "baseDirectory": "public/og",
-      "digest": "e6e95e36392aa0d352323f931be6795cff51a8474dcc4c601fb8f6111a94f9a6",
-      "fingerprint": "b44bc785ac62c73948e5af2d93c8374f51e1fc24e4f9af7f1997bc0228661ab4",
+      "digest": "187a8aaad1d569c4b200e8b7e20b5a464467c3eae3690c49e60bd2efe4821c1e",
+      "fingerprint": "f21f9adaf574ec4f2b0f4b5cb93ba1cf098371a22bd9e520c794914af37883a8",
       "output": "zed-extension.png"
     },
     "zed-extension.svg": {
       "baseDirectory": "public/og",
-      "digest": "b53c820499ef94a3d7b4f6cb4a874861ed02d7041472d5408722153f695ba45d",
-      "fingerprint": "f3f1e7eb7eefea15060ade28eede0980ea10e20515b5b453ca7262cf8e453d23",
+      "digest": "ecf08371fe7198e14c8fb4a6545fb59e3d14d3fd1f4d805a2f5e3847d4a3065d",
+      "fingerprint": "afa84ed8b10d36ced8d62487899faad26545112e87410e085a4f0a08478e2edc",
       "output": "zed-extension.svg"
     },
     "pnpm-workspaces.png": {
       "baseDirectory": "public/og",
-      "digest": "bd79ee2f67cfe1b6a66fc9b289fa6d4978845899b3c1d1daa0ea362b19c2352f",
-      "fingerprint": "1f9108f1b42667c414ac225a16307858b877ae92067946258575f0ed46ef4252",
+      "digest": "130d7d9c82831768db4d0dfbda6ff5922eb9310d389a00cdeb8234be3dcefae0",
+      "fingerprint": "37a210ac1323b9dca0bbadcb22fd5ee9ce82806dc4d6f87e585c166ba3757e7f",
       "output": "pnpm-workspaces.png"
     },
     "pnpm-workspaces.svg": {
       "baseDirectory": "public/og",
-      "digest": "d95bb22b110e5f747973f63aa1ab3c51e584f1f54860d5d7bc483783c2f2cea5",
-      "fingerprint": "1af02ca05d6eada16ce1e4bbe489ae8cdaaf32c4611cd8c26bdb29609d17c89f",
+      "digest": "3b57073b579b2f4fe60aa01589041bdb3a52baaf75421be72325f9009e44a4f3",
+      "fingerprint": "cecb8955e4b1b067b70cdbdaab379fad2d4f068f32a11ceceecf1a460214a70c",
       "output": "pnpm-workspaces.svg"
     },
     "security.png": {
       "baseDirectory": "public/og",
-      "digest": "7476e8a27daf56e36add07cfe4a9244146d2dc23aacafd108204aabfc69d63ce",
-      "fingerprint": "cc9ad4c36a1d46e29b98b8baa239c50779c30fceef7de8266a76a652c3bd0305",
+      "digest": "369550dd2cedf68b55e290ccaa7719f916e05fc255ae0d28102315d169febec8",
+      "fingerprint": "de9c4d948f99361cc4fb595a3a4b4394ebfc28dd834f83591e7b42ebd56555ee",
       "output": "security.png"
     },
     "security.svg": {
       "baseDirectory": "public/og",
-      "digest": "95b3a3d24b29250f57bd935372a2997d4562607731398a960bad82aa0cc42202",
-      "fingerprint": "60133e80a22e119f101cdc2b4553904110801d7065959c3bd593280f2acf7df7",
+      "digest": "6ae7dcc352d7e7fcb8f596f0ca0e98b680e53a2ca99483884464d458377d8e33",
+      "fingerprint": "01c89fe2ff7a583d97fa2350cd4c5f5c22d027b4b83c6a4e72aa5b6a06a8527d",
       "output": "security.svg"
     },
     "configuration.png": {
       "baseDirectory": "public/og",
-      "digest": "5c844cf435ad22c980d1a21eff0301d5c1fe7e6c487b482358a6da143b75eeaf",
-      "fingerprint": "71a46e266bdb83eb92702c8af8d22fd2266faefa6d22848347574a543ad8b870",
+      "digest": "340a4e1435c776d5b8027ff4f03cfdd8200b25c13253ae1547a09e5e1cf99be1",
+      "fingerprint": "9b3c7c412450c5cfde00530400e52a8a620d45c40ffceb427038bdd32b3d3da3",
       "output": "configuration.png"
     },
     "configuration.svg": {
       "baseDirectory": "public/og",
-      "digest": "b0abd3bfc7c193b91a291891d31b3b2173905ca1556f8ea22f12874a30d9052d",
-      "fingerprint": "01605b9f44b4ed9ce9878e1c04728546e4672f2f3f69a800623d23c81d53e790",
+      "digest": "91b655faa1bfaa0e692b3410d2073033e4a7e2c30fd73dd08391042f747340c8",
+      "fingerprint": "8e1ee2296738b6c14191717348a6b78443549f089f40c47a8854732d49784700",
       "output": "configuration.svg"
     }
   },

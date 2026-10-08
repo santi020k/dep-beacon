@@ -6,7 +6,7 @@
 
 .site-header {
   background: var(--bg);
-  padding-top: 1rem;
+  padding-top: 0.85rem;
   position: sticky;
   top: 0;
   z-index: 30;
@@ -26,8 +26,9 @@
 }
 
 .site-header-inner {
+  gap: 2rem;
   justify-content: space-between;
-  min-height: 4.6rem;
+  min-height: 5.25rem;
 }
 
 .brand-link {
@@ -37,9 +38,10 @@
   border-bottom: 0;
   border-radius: 1.25rem 1.25rem 0 0;
   flex-shrink: 0;
-  gap: 0.7rem;
+  gap: 0.8rem;
   letter-spacing: -0.04em;
-  padding: 1rem 1.5rem;
+  min-width: 14rem;
+  padding: 1rem 1.35rem;
   position: relative;
   z-index: 1;
 }
@@ -49,19 +51,41 @@
   border-bottom: 1px solid var(--dep-surface);
   clip-path: polygon(0 0, 100% 100%, 0 100%);
   content: "";
-  height: 1.5rem;
-  inset: auto -1.48rem 0 auto;
+  height: 1.75rem;
+  inset: auto -1.72rem 0 auto;
   position: absolute;
-  width: 1.5rem;
+  width: 1.75rem;
 }
 
-.brand-link span {
-  font-size: 1.1rem;
+.brand-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.brand-name {
+  font-size: 1.125rem;
   font-weight: 450;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.brand-link strong {
+.brand-name strong {
   font-weight: 650;
+}
+
+.brand-tagline {
+  color: var(--dep-ink-soft);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brand-link > .brand-mark {
+  height: 2.3rem;
+  width: 2.3rem;
 }
 
 .brand-mark {
@@ -75,7 +99,11 @@
 }
 
 .top-nav {
-  gap: 0.35rem;
+  background: var(--dep-surface);
+  border: 1px solid var(--dep-rule);
+  border-radius: 1rem;
+  gap: 0.15rem;
+  padding: 0.3rem;
 }
 
 .top-nav a,
@@ -90,20 +118,32 @@
 }
 
 .top-nav a {
-  border-radius: 0.6rem;
-  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+  font-weight: 500;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.9rem;
   position: relative;
+  white-space: nowrap;
+}
+
+.nav-link-number {
+  color: var(--dep-ink-soft);
+  font-family: var(--dep-font-mono);
+  font-size: 0.5625rem;
+  font-weight: 400;
 }
 
 .top-nav a:hover {
   background: var(--bg-soft);
 }
 
-.top-nav a[aria-current="page"] {
+.top-nav a[aria-current] {
+  background: color-mix(in srgb, var(--brand-bright) 8%, var(--dep-surface));
   color: var(--dep-ink);
 }
 
-.top-nav a[aria-current="page"]::after {
+.top-nav a[aria-current]::after {
   background: var(--brand-bright);
   border-radius: 1rem;
   content: "";
@@ -119,12 +159,30 @@
 }
 
 .header-utilities {
-  border-left: 1px solid var(--dep-rule);
-  padding-left: 1rem;
+  gap: 0.55rem;
+}
+
+.header-source {
+  align-items: center;
+  color: var(--dep-ink-soft);
+  display: inline-flex;
+  font-size: 0.75rem;
+  gap: 0.3rem;
+  min-height: 2.75rem;
+  padding-inline: 0.35rem;
+}
+
+.header-source:hover {
+  color: var(--brand-bright);
+}
+
+.header-source .ui-icon {
+  height: 0.875rem;
+  width: 0.875rem;
 }
 
 .site-theme-toggle {
-  background: transparent;
+  background: var(--dep-surface);
   border: 1px solid var(--dep-rule);
   border-radius: 0.85rem;
   height: 2.75rem;
@@ -137,14 +195,26 @@
   border-radius: 0.85rem;
   color: var(--bg);
   display: inline-flex;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 550;
-  gap: 0.6rem;
+  gap: 0.75rem;
   min-height: 2.75rem;
-  padding: 0.7rem 1rem;
+  padding: 0.35rem 0.35rem 0.35rem 1rem;
+}
+
+.install-arrow {
+  align-items: center;
+  background: color-mix(in srgb, var(--bg) 12%, transparent);
+  border-radius: 0.55rem;
+  display: inline-flex;
+  height: 2.05rem;
+  justify-content: center;
+  width: 2.05rem;
 }
 
 .mobile-menu-trigger {
+  background: var(--dep-surface);
+  border: 1px solid var(--dep-rule);
   border-radius: 0.85rem;
   display: none;
   min-height: 2.75rem;
@@ -192,13 +262,21 @@
   gap: 0.6rem;
 }
 
+.mobile-menu-controls {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.35rem;
+}
+
 .mobile-menu-close {
+  border-radius: 0.75rem;
   min-height: 2.75rem;
   padding-inline: 0.5rem;
 }
 
 .mobile-menu-intro {
-  padding-block: 1.5rem;
+  padding-block: 1.75rem 1.25rem;
 }
 
 .mobile-menu-intro h2 {
@@ -207,6 +285,17 @@
   letter-spacing: -0.06em;
   line-height: 1.1;
   margin: 0;
+}
+
+.mobile-menu-label {
+  color: var(--dep-ink-soft);
+  display: flex;
+  font-size: 0.5625rem;
+  font-weight: 500;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  padding-bottom: 0.75rem;
+  text-transform: uppercase;
 }
 
 .mobile-nav {
@@ -219,16 +308,28 @@
 .mobile-nav a {
   align-items: center;
   border-top: 1px solid var(--dep-rule);
+  border-radius: 0.65rem;
   display: grid;
-  font-size: 1rem;
-  gap: 1rem;
+  font-size: 0.9375rem;
+  gap: 0.75rem;
   grid-template-columns: 1.2rem 1fr auto;
-  min-height: 3.7rem;
-  padding-block: 0.8rem;
+  min-height: 3.4rem;
+  padding: 0.8rem 0.6rem;
+}
+
+.mobile-nav a:hover {
+  background: var(--bg-soft);
 }
 
 .mobile-nav a[aria-current="page"] {
+  background: color-mix(in srgb, var(--brand-bright) 8%, var(--dep-surface));
   color: var(--brand-bright);
+}
+
+.mobile-current {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .nav-number,
@@ -246,8 +347,22 @@
   padding-top: 1rem;
 }
 
-.mobile-menu-links .site-theme-toggle {
-  margin-left: auto;
+.mobile-menu-links .mobile-install {
+  align-items: center;
+  background: var(--dep-ink);
+  border-radius: 0.8rem;
+  color: var(--bg);
+  display: flex;
+  flex-basis: 100%;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  justify-content: space-between;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+}
+
+.mobile-menu-links .mobile-install:hover {
+  background: var(--brand-bright);
 }
 
 .eyebrow {
@@ -378,12 +493,6 @@
 
 .beacon-node {
   fill: currentColor;
-  stroke: var(--dep-surface);
-  stroke-width: 5;
-}
-
-.beacon-center {
-  fill: var(--dep-ink);
   stroke: var(--dep-surface);
   stroke-width: 5;
 }
@@ -794,6 +903,7 @@
 
 @media (max-width: 1000px) {
   .top-nav,
+  .header-source,
   .header-install {
     display: none;
   }
@@ -837,12 +947,28 @@
   }
 
   .site-header-inner {
-    min-height: 4.25rem;
+    gap: 0.6rem;
+    min-height: 4.5rem;
   }
 
   .brand-link {
-    gap: 0.55rem;
+    gap: 0.65rem;
+    min-width: 0;
     padding: 0.85rem 1rem;
+  }
+
+  .brand-link > .brand-mark {
+    height: 2rem;
+    width: 2rem;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .mobile-menu-brand .brand-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
   }
 
   .hero {
@@ -976,7 +1102,7 @@
     padding-inline: 0.75rem;
   }
 
-  .brand-link span {
+  .brand-link .brand-name {
     font-size: 1rem;
   }
 

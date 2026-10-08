@@ -136,3 +136,40 @@ test('editor examples support keyboard selection and keep the preference after n
 
   await expect(zed).toHaveAttribute('aria-selected', 'true')
 })
+
+
+test('authentic editor previews switch with the keyboard and link to their full captures', async ({ page }) => {
+  await page.goto('/')
+
+  const tabs = page.getByRole('tablist', { name: 'Editor screenshots' })
+  const vscode = tabs.getByRole('tab', { name: 'VS Code', exact: true })
+  const zed = tabs.getByRole('tab', { name: 'Zed', exact: true })
+
+  await vscode.focus()
+
+  await page.keyboard.press('ArrowRight')
+
+  await expect(zed).toBeFocused()
+
+  await expect(zed).toHaveAttribute('aria-selected', 'true')
+
+  const panel = page.getByRole('tabpanel', { name: 'Zed', exact: true })
+
+  await expect(panel).toBeVisible()
+
+  await expect(panel.getByRole('link', { name: 'View the full-size Zed screenshot' })).toHaveAttribute('href', '/zed-preview.jpg')
+
+  const image = panel.getByRole('img')
+
+  await expect(image).toBeVisible()
+
+  await expect.poll(() => image.evaluate(element => (
+    element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0
+  ))).toBe(true)
+
+  await page.keyboard.press('ArrowLeft')
+
+  await expect(vscode).toHaveAttribute('aria-selected', 'true')
+
+  await expect(panel).not.toBeVisible()
+})

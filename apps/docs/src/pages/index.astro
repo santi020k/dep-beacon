@@ -1,6 +1,7 @@
 ---
 import { ButtonLink, Card, Icon, RevealGroup, ScrollReveal, Stat } from '@santi020k/lumen-astro'
 
+import EditorShowcase from '../components/EditorShowcase.astro'
 import Base from '../layouts/Base.astro'
 import { SITE } from '../site.config'
 
@@ -28,11 +29,11 @@ const features = [
       </ScrollReveal>
       <div class="hero-signals">
         <svg class="beacon-graphic" viewBox="0 0 280 190" aria-hidden="true" focusable="false">
-          <path class="beacon-trace" d="M140 28 55 160h170L140 28Zm0 72-85 60m85-60 85 60m-85-60V28" />
-          <circle class="beacon-node signal-update" cx="140" cy="28" r="11" />
-          <circle class="beacon-node signal-ready" cx="55" cy="160" r="11" />
-          <circle class="beacon-node signal-danger" cx="225" cy="160" r="11" />
-          <circle class="beacon-center" cx="140" cy="100" r="8" />
+          <path class="beacon-trace" d="M88 47a68 68 0 0 0 0 96m104-96a68 68 0 0 1 0 96M63 23a102 102 0 0 0 0 144m154-144a102 102 0 0 1 0 144" />
+          <image href="/favicon.svg" x="108" y="63" width="64" height="64" />
+          <circle class="beacon-node signal-update" cx="63" cy="23" r="8" />
+          <circle class="beacon-node signal-ready" cx="88" cy="143" r="8" />
+          <circle class="beacon-node signal-danger" cx="217" cy="167" r="8" />
         </svg>
         <p class="eyebrow">A little color. A lot of context.</p>
         <ul class="signal-legend">
@@ -61,12 +62,7 @@ const features = [
       </p>
     </div>
     <ScrollReveal animation="fade" duration="standard" threshold={0.05}>
-      <figure class="product-preview">
-        <a href="/usage-preview.png" aria-label="View the full-size Dep Beacon editor screenshot">
-          <img src="/usage-preview.png" width="1600" height="900" loading="lazy" decoding="async" alt="Dep Beacon in VS Code showing version status, update links, workspace catalogs, and an OSV critical-risk signal in the sample workspace." />
-        </a>
-        <figcaption><span>Dep Beacon in VS Code · sample workspace</span><a href="/docs/vscode-extension">Explore the extension <Icon name="arrow-right" /></a></figcaption>
-      </figure>
+      <EditorShowcase />
     </ScrollReveal>
   </section>
 
