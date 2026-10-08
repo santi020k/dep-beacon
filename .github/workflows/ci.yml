@@ -6,7 +6,12 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      verify_credentials:
+        description: Verify existing delivery credentials with read-only provider calls
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -135,6 +140,7 @@ jobs:
     needs: [changes, validation, compatibility]
     if: >-
       always() &&
+      !inputs.verify_credentials &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       needs.changes.outputs.docs == 'true' &&
@@ -172,10 +178,82 @@ jobs:
             --commit-hash="$GITHUB_SHA" \
             --commit-dirty=true
 
+  credentials:
+    name: Read-only delivery credential verification
+    if: github.event_name == 'workflow_dispatch' && inputs.verify_credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+      - name: Set up pnpm workspace
+        uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
+        with:
+          node-version: 22.x
+          registry-url: https://registry.npmjs.org
+      - name: Verify npm identity and editor publisher access
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          test -n "$NODE_AUTH_TOKEN"
+          test -n "$VSCE_PAT"
+          test -n "$OVSX_PAT"
+          npm whoami >/dev/null 2>&1 || { echo 'npm identity verification failed'; exit 1; }
+          pnpm --filter vscode-dep-beacon exec vsce verify-pat santi020k >/dev/null 2>&1 || {
+            echo 'VS Code publisher access verification failed'; exit 1;
+          }
+          pnpm --filter vscode-dep-beacon exec ovsx verify-pat santi020k >/dev/null 2>&1 || {
+            echo 'Open VSX namespace publishing access verification failed'; exit 1;
+          }
+          echo 'npm identity, VS Code publisher access, and Open VSX publishing access verified'
+      - name: Verify documentation project and Zed fork access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PAGES_PROJECT_NAME: >-
+            ${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME || vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'dep-beacon-docs' }}
+          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
+          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
+        run: |
+          node --input-type=module <<'JS'
+          const required = name => {
+            const value = process.env[name];
+            if (!value) throw new Error(`Missing ${name}`);
+            return value;
+          };
+          const get = async (url, token) => {
+            const response = await fetch(url, {
+              headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+              signal: AbortSignal.timeout(30000),
+            });
+            if (!response.ok) throw new Error(`Provider access failed: HTTP ${response.status}`);
+            return response.json();
+          };
+          try {
+            const account = encodeURIComponent(required('CLOUDFLARE_ACCOUNT_ID'));
+            const project = encodeURIComponent(required('CLOUDFLARE_PAGES_PROJECT_NAME'));
+            const docs = await get(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`,
+              required('CLOUDFLARE_API_TOKEN'));
+            if (!docs.success || !docs.result?.name) throw new Error('Documentation project access failed');
+            console.log('Cloudflare account and documentation project read access verified');
+            const fork = required('ZED_EXTENSIONS_FORK');
+            if (!/^[\w.-]+\/[\w.-]+$/.test(fork)) throw new Error('Invalid Zed fork configuration');
+            const zed = await get(`https://api.github.com/repos/${fork}`, required('ZED_EXTENSIONS_TOKEN'));
+            if (!zed.permissions?.push) throw new Error('Zed fork write permission is unavailable');
+            console.log('Zed token and fork push permission verified without writing');
+            console.log('npm publishing scope and Marketplace role still require confirmation');
+            console.log('Cloudflare write scope and upstream PR access still require confirmation');
+          } catch {
+            console.error('Documentation or Zed credential verification failed; inspect provider access privately');
+            process.exitCode = 1;
+          }
+          JS
+
   gate:
     name: Required checks
     if: always()
-    needs: [changes, validation, compatibility, deploy-docs]
+    needs: [changes, validation, compatibility, deploy-docs, credentials]
     runs-on: ubuntu-latest
     steps:
       - name: Verify relevant jobs
@@ -184,8 +262,9 @@ jobs:
           VALIDATION: ${{ needs.validation.result }}
           COMPATIBILITY: ${{ needs.compatibility.result }}
           DEPLOY: ${{ needs.deploy-docs.result }}
+          CREDENTIALS: ${{ needs.credentials.result }}
         run: |
-          for result in "$CHANGES" "$VALIDATION" "$COMPATIBILITY" "$DEPLOY"; do
+          for result in "$CHANGES" "$VALIDATION" "$COMPATIBILITY" "$DEPLOY" "$CREDENTIALS"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               exit 1
             fi
