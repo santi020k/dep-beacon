@@ -17,9 +17,11 @@ words:
   - domexception
   - esbuild
   - expressjs
+  - fflate
   - GHSA
   - Ghsas
   - jsonc
+  - katex
   - keytar
   - knip
   - linecap
@@ -28,6 +30,8 @@ words:
   - lates
   - lstrip
   - npmjs
+  - noopener
+  - noreferrer
   - OpenVSX
   - osv
   - OVSX
@@ -43,8 +47,10 @@ words:
   - semver
   - Snyk
   - smol
+  - tlsv
   - undici
   - unrs
+  - unstub
   - vite
   - vitest
   - vulns
