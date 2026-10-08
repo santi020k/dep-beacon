@@ -17,7 +17,7 @@ status tokens where accessibility checks found insufficient contrast. The websit
 and theme project's sculpted direction supplies the shared 72rem alignment, raised
 identity tab, restrained surfaces, open numbered rows, and clear typography.
 The system font stack remains. A new blue/teal beacon monogram is shared by the
-favicon, wordmark, package icon, and editor toolbar. The navbar separates primary
+favicon, brand lettering, package icon, and editor toolbar. The navbar separates primary
 navigation from source/theme controls and routes installation to both editor guides.
 A Lumen tabbed showcase presents authentic VS Code and Zed sample-workspace captures
 over a decorative AI-generated backdrop. The editor UI is not AI-generated; asset
