@@ -2,7 +2,10 @@
 
 The logo is a code-authored SVG. Its source is
 `packages/vscode-dep-beacon/resources/icon.svg`; run `pnpm run assets` to regenerate
-its derived files and the optimized backdrop.
+its derived files and the optimized backdrop. The mark retains the original connected
+beacon: a warm signal at the top, a white analysis hub, and green/coral dependency
+nodes. Lighter connections and balanced spacing keep those four signals distinct.
+Toolbar variants use one color for both their nodes and connections.
 
 The editor showcase layers real screenshots over a decorative AI-generated plate.
 AI does not generate or retouch dependency names, versions, diagnostics, or editor UI.

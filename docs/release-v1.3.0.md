@@ -16,7 +16,7 @@ Dep Beacon keeps its blue, teal, and four status colors, with darker light-theme
 status tokens where accessibility checks found insufficient contrast. The website
 and theme project's sculpted direction supplies the shared 72rem alignment, raised
 identity tab, restrained surfaces, open numbered rows, and clear typography.
-The system font stack remains. A new blue/teal beacon monogram is shared by the
+The system font stack remains. The refined connected-node beacon retains its four signal colors and is shared by the
 favicon, brand lettering, package icon, and editor toolbar. The navbar separates primary
 navigation from source/theme controls and routes installation to both editor guides.
 A Lumen tabbed showcase presents authentic VS Code and Zed sample-workspace captures

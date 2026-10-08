@@ -31,7 +31,7 @@ const brandLogo = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180"
 
 /** @param {string} color */
 const toolbarIcon = color => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 4 24 24" width="16" height="16" role="img" aria-label="Dep Beacon">
-  <g fill="${color}">${symbolContent.replace(/ fill="#[\da-f]+"/giu, '')}  </g>
+  <g color="${color}">${symbolContent.replace(/(?<attribute>fill|stroke)="#[\da-f]+"/giu, '$<attribute>="currentColor"')}  </g>
 </svg>
 `
 
