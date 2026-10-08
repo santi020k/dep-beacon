@@ -35,6 +35,10 @@ catalog YAML, setting defaults, inline code, and OSV privacy explanations.
   TypeScript 7 alias supplies the `tsc` executable; these are different required roles.
 - lint-staged 16.4 preserves the repository's Node 22.19 development floor. Its 17.x
   line requires Node 22.22.1 and would violate that declared compatibility.
+- VS Code types stay on the latest compatible 1.85 patch line, matching the declared
+  editor minimum. Newer API types fail VSCE's packaging check against that minimum;
+  the supported editor range remains unchanged. See the
+  [VS Code compatibility contract](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#visual-studio-code-compatibility).
 - Open VSX's VSCE override uses version 4's existing `createVSIX` export, removing its
   older vulnerable packaging dependency tree. Local packaging verifies this boundary.
 - Shared OSV query/detail caches expire after 15 minutes. Failed query batches retry
@@ -49,6 +53,9 @@ catalog YAML, setting defaults, inline code, and OSV privacy explanations.
 The latest `eslint-plugin-jsx-a11y` package still declares ESLint 9 as its highest
 peer while the owned config requires ESLint 10. Accessibility lint remains enabled;
 this upstream metadata mismatch is reported rather than hidden by an override.
+The same tooling stack pulls deprecated `glob` 11.1.0 through its NestJS lint plugin;
+the audited lockfile has no known advisory for that package. Its deprecation notice
+remains visible, with no new exception suppressing it.
 Lumen also emits a roughly 506 KiB optional phone-input chunk. No documentation page
 uses phone input; the shared public runtime loads that controller only when needed.
 The Vite chunk-size advisory remains visible; no limit is raised to hide it.

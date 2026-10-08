@@ -11,6 +11,6 @@ node_modules/**
 coverage/**
 *.vsix
 tsconfig.json
-vitest.config.ts
+vitest.config.mts
 esbuild.config.js
 .gitignore
