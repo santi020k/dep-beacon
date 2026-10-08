@@ -190,24 +190,35 @@ jobs:
         with:
           node-version: 22.x
           registry-url: https://registry.npmjs.org
-      - name: Verify npm identity and editor publisher access
+      - name: Verify npm identity
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
           test -n "$NODE_AUTH_TOKEN"
-          test -n "$VSCE_PAT"
-          test -n "$OVSX_PAT"
           npm whoami >/dev/null 2>&1 || { echo 'npm identity verification failed'; exit 1; }
+          echo 'npm identity verified; publishing scope still requires confirmation'
+      - name: Verify VS Code publisher access
+        if: always()
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          test -n "$VSCE_PAT"
           pnpm --filter vscode-dep-beacon exec vsce verify-pat santi020k >/dev/null 2>&1 || {
             echo 'VS Code publisher access verification failed'; exit 1;
           }
+          echo 'VS Code publisher access verified; Marketplace role still requires confirmation'
+      - name: Verify Open VSX publishing access
+        if: always()
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          test -n "$OVSX_PAT"
           pnpm --filter vscode-dep-beacon exec ovsx verify-pat santi020k >/dev/null 2>&1 || {
             echo 'Open VSX namespace publishing access verification failed'; exit 1;
           }
-          echo 'npm identity, VS Code publisher access, and Open VSX publishing access verified'
+          echo 'Open VSX namespace publishing access verified'
       - name: Verify documentation project and Zed fork access
+        if: always()
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -230,22 +241,29 @@ jobs:
             if (!response.ok) throw new Error(`Provider access failed: HTTP ${response.status}`);
             return response.json();
           };
-          try {
+          const checks = await Promise.allSettled([
+            (async () => {
             const account = encodeURIComponent(required('CLOUDFLARE_ACCOUNT_ID'));
             const project = encodeURIComponent(required('CLOUDFLARE_PAGES_PROJECT_NAME'));
             const docs = await get(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`,
               required('CLOUDFLARE_API_TOKEN'));
             if (!docs.success || !docs.result?.name) throw new Error('Documentation project access failed');
             console.log('Cloudflare account and documentation project read access verified');
+            console.log('Cloudflare write scope still requires confirmation');
+            })(),
+            (async () => {
             const fork = required('ZED_EXTENSIONS_FORK');
             if (!/^[\w.-]+\/[\w.-]+$/.test(fork)) throw new Error('Invalid Zed fork configuration');
             const zed = await get(`https://api.github.com/repos/${fork}`, required('ZED_EXTENSIONS_TOKEN'));
             if (!zed.permissions?.push) throw new Error('Zed fork write permission is unavailable');
             console.log('Zed token and fork push permission verified without writing');
-            console.log('npm publishing scope and Marketplace role still require confirmation');
-            console.log('Cloudflare write scope and upstream PR access still require confirmation');
-          } catch {
-            console.error('Documentation or Zed credential verification failed; inspect provider access privately');
+            console.log('Upstream PR access still requires confirmation');
+            })(),
+          ]);
+          const labels = ['Cloudflare documentation project', 'Zed fork'];
+          for (const [index, check] of checks.entries()) {
+            if (check.status !== 'rejected') continue;
+            console.error(`${labels[index]} credential verification failed; inspect provider access privately`);
             process.exitCode = 1;
           }
           JS

@@ -4,6 +4,7 @@ words:
   - ACIP
   - axios
   - astrojs
+  - autobuild
   - clsx
   - codemod
   - CodeLens
@@ -46,6 +47,7 @@ words:
   - rstrip
   - rustup
   - santi
+  - SARIF
   - Segoe
   - semver
   - Snyk

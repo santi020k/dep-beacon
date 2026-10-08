@@ -44,4 +44,29 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
       - name: Perform CodeQL analysis
+        id: analysis
         uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+      - name: Preserve comparison with the historical language category
+        env:
+          SARIF_DIRECTORY: ${{ steps.analysis.outputs.sarif-output }}
+        run: |
+          node --input-type=module <<'JS'
+          import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const output = join(process.env.RUNNER_TEMP, 'codeql-language-category');
+          mkdirSync(output, { recursive: true });
+          for (const name of readdirSync(process.env.SARIF_DIRECTORY)) {
+            if (!name.endsWith('.sarif')) continue;
+            const sarif = JSON.parse(readFileSync(join(process.env.SARIF_DIRECTORY, name), 'utf8'));
+            // Preserve all results; only match the second category already present on main.
+            for (const run of sarif.runs) {
+              run.automationDetails = { ...run.automationDetails, id: '/language:javascript-typescript/' };
+            }
+            writeFileSync(join(output, name), JSON.stringify(sarif));
+          }
+          JS
+      - name: Upload analysis for the historical language category
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        with:
+          sarif_file: ${{ runner.temp }}/codeql-language-category
+          category: /language:javascript-typescript
