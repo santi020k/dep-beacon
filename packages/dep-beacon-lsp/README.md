@@ -1,4 +1,30 @@
-# Dep Beacon Language Server
+<p align="center">
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/README.md"><img src="https://raw.githubusercontent.com/santi020k/dep-beacon/main/packages/vscode-dep-beacon/resources/icon.png" alt="Dep Beacon" width="72"></a>
+</p>
+
+<p align="center"><a href="https://github.com/santi020k/dep-beacon/blob/main/README.md">Dep Beacon</a></p>
+
+<h1 align="center">Language server</h1>
+
+<p align="center">
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/README.md">Project overview</a> ·
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/packages/dep-beacon-lsp/package.json">Package manifest</a> ·
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/packages/dep-beacon-lsp/CHANGELOG.md">Changelog</a> ·
+  <a href="#resources">Resources</a>
+</p>
+
+<details>
+<summary>On this page</summary>
+
+- [Features](#features)
+- [Usage](#usage)
+- [Settings](#settings)
+- [Development](#development)
+- [Related extension](#related-extension)
+- [License](#license)
+- [Resources](#resources)
+
+</details>
 
 `@santi020k/dep-beacon-lsp` provides dependency intelligence over the Language Server Protocol. It powers the Dep Beacon extension for Zed and reuses `@santi020k/dep-beacon-core` for manifest analysis, npm metadata, pnpm workspace catalogs, and OSV vulnerability checks.
 
@@ -67,3 +93,7 @@ The Rust/WASM Zed adapter is maintained separately in [`extensions/dep-beacon-ls
 ## License
 
 MIT
+
+## Resources
+
+[Project overview](https://github.com/santi020k/dep-beacon/blob/main/README.md) · [License](https://github.com/santi020k/dep-beacon/blob/main/LICENSE)

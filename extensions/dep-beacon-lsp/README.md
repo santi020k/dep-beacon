@@ -1,4 +1,29 @@
-# Dep Beacon for Zed
+<p align="center">
+  <a href="../../README.md"><img src="../../packages/vscode-dep-beacon/resources/icon.png" alt="Dep Beacon" width="72"></a>
+</p>
+
+<p align="center"><a href="../../README.md">Dep Beacon</a></p>
+
+<h1 align="center">Zed extension</h1>
+
+<p align="center">
+  <a href="../../README.md">Project overview</a> ·
+  <a href="#resources">Resources</a>
+</p>
+
+<details>
+<summary>On this page</summary>
+
+- [Required version](#required-version)
+- [Development](#development)
+- [Install as a development extension](#install-as-a-development-extension)
+- [Zed UI](#zed-ui)
+- [Settings](#settings)
+- [Publishing](#publishing)
+- [License](#license)
+- [Resources](#resources)
+
+</details>
 
 This directory contains the thin Rust/WASM adapter that connects Zed to `@santi020k/dep-beacon-lsp`. The language server provides dependency status hints, an actionable diagnostics dashboard, npm links, update quick fixes, pnpm catalog awareness, and OSV vulnerability signals.
 
@@ -140,3 +165,7 @@ The same registry environment used by `santi020k-theme` can be reused:
 ## License
 
 MIT
+
+## Resources
+
+[Project overview](../../README.md) · [License](../../LICENSE)
