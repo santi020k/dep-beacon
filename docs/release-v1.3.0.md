@@ -150,7 +150,9 @@ The published package files match merge commit
 
 After the workflow correction passes checks and review, run the Release workflow
 from `main` with `commit_sha` set to that exact original source and
-`recover_published=true`. Recovery rebuilds the original source, verifies registry
+`recover_published=true`. The workflow rejects any other recovery source SHA,
+including later commits with unchanged npm files but different editor code.
+Recovery rebuilds the original source, verifies registry
 tarball integrity and all package file contents, and reconciles missing package
 tags and GitHub release records. Existing tags must match the verified source. Git CLI pushes keep those tags on the checked-out source. It does not
 republish the npm versions. The downstream steps create the GitHub releases,

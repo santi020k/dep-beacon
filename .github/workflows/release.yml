@@ -8,7 +8,7 @@ on:
         required: false
         type: string
       recover_published:
-        description: Recover missing tags, GitHub releases, and editors after verifying existing npm artifacts
+        description: Recover verified v1.3.0 delivery from its authorized source commit
         required: false
         default: false
         type: boolean
@@ -53,9 +53,10 @@ jobs:
         if: inputs.recover_published
         env:
           EXPECTED_SOURCE_SHA: ${{ inputs.commit_sha }}
+          AUTHORIZED_RECOVERY_SOURCE_SHA: 2105e4efacd90e81b242bb058378382c9d03bdbc
         run: |
-          test -n "$EXPECTED_SOURCE_SHA"
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          test "$EXPECTED_SOURCE_SHA" = "$AUTHORIZED_RECOVERY_SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$AUTHORIZED_RECOVERY_SOURCE_SHA"
           pnpm run build
           python3 - <<'PYTHON'
           import base64
