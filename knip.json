@@ -14,7 +14,9 @@
     },
     "apps/docs": {
       "entry": [
-        "src/pages/**/*.astro"
+        "src/pages/**/*.astro",
+        "og.config.mjs",
+        "og.audit.config.mjs"
       ],
       "ignoreDependencies": [
         "tailwindcss"

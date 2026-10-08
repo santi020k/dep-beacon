@@ -6,146 +6,7 @@ import sharp from 'sharp'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const publicDir = resolve(root, 'apps/docs/public')
-const ogDir = resolve(publicDir, 'og')
 const usagePreview = resolve(publicDir, 'usage-preview.png')
-const siteUrl = 'https://beacon.santi020k.com'
-const siteHost = new URL(siteUrl).host
-
-const escapeXml = (value) =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-
-const logoMark = (x, y, scale = 1) => `
-  <g transform="translate(${x} ${y}) scale(${scale})">
-    <rect width="32" height="32" rx="8" fill="#111827"/>
-    <path d="M16 6.2 9.2 21.6h13.6L16 6.2Z" fill="#1f2a44"/>
-    <path d="M16 6.2 9.2 21.6M16 6.2l6.8 15.4M9.2 21.6h13.6M16 14.4l-6.8 7.2M16 14.4l6.8 7.2" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-    <circle cx="16" cy="6.2" r="3.1" fill="#f8c65c"/>
-    <circle cx="16" cy="14.4" r="2.4" fill="#f8fafc"/>
-    <circle cx="9.2" cy="21.6" r="3" fill="#34d399"/>
-    <circle cx="22.8" cy="21.6" r="3" fill="#fb7185"/>
-  </g>
-`
-
-const ogCards = [
-  {
-    accent: '#7dd3fc',
-    eyebrow: 'VS Code extension',
-    file: 'home',
-    subtitle: 'Inline npm version, pnpm catalog, and OSV security signals.',
-    title: 'Dep Beacon',
-  },
-  {
-    accent: '#5bd67b',
-    eyebrow: 'User docs',
-    file: 'docs',
-    subtitle: 'Understand status colors, update actions, catalogs, and settings.',
-    title: 'Dep Beacon Docs',
-  },
-  {
-    accent: '#f2c14e',
-    eyebrow: 'Install',
-    file: 'install',
-    subtitle: 'Add dependency intelligence to VS Code from the marketplace.',
-    title: 'Install Dep Beacon',
-  },
-  {
-    accent: '#75a7ff',
-    eyebrow: 'Editor workflow',
-    file: 'extension',
-    subtitle: 'CodeLens update paths, diagnostics, sorting, and cache controls.',
-    title: 'VS Code Extension',
-  },
-  {
-    accent: '#3dd6b3',
-    eyebrow: 'pnpm workspaces',
-    file: 'pnpm-workspaces',
-    subtitle: 'Resolve default and named catalogs before checking versions.',
-    title: 'Catalog-aware Signals',
-  },
-  {
-    accent: '#f05d5e',
-    eyebrow: 'OSV security',
-    file: 'security',
-    subtitle: 'Spot low, medium, high, and critical advisory risk in manifests.',
-    title: 'Security Signals',
-  },
-  {
-    accent: '#f59e4c',
-    eyebrow: 'Settings',
-    file: 'configuration',
-    subtitle: 'Tune registry, prerelease, vulnerability, cache, and install behavior.',
-    title: 'Configuration',
-  },
-]
-
-const subtitleFontSize = (subtitle) => {
-  if (subtitle.length > 64) return 28
-
-  if (subtitle.length > 58) return 30
-
-  return 32
-}
-
-const socialCardSvg = ({ accent, eyebrow, subtitle, title }) => {
-  const titleSize = title.length > 20 ? 72 : 78
-  const subtitleSize = subtitleFontSize(subtitle)
-
-  return `\
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="${escapeXml(title)} social card">
-  <defs>
-    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#0b1115"/>
-      <stop offset="0.48" stop-color="#111820"/>
-      <stop offset="1" stop-color="#17130f"/>
-    </linearGradient>
-    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
-      <path d="M44 0H0v44" fill="none" stroke="#24343b" stroke-opacity="0.55"/>
-    </pattern>
-    <clipPath id="inner-panel">
-      <rect x="90" y="90" width="1020" height="450" rx="18"/>
-    </clipPath>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="630" fill="url(#grid)" opacity="0.48"/>
-  <path d="M64 476c162-72 310-74 444-6 142 72 300 70 474-8 62-28 112-45 154-51v155H64Z" fill="${accent}" opacity="0.13"/>
-  <rect x="64" y="64" width="1072" height="502" rx="26" fill="#101820" fill-opacity="0.82" stroke="#2b424a" stroke-width="2"/>
-  <rect x="90" y="90" width="1020" height="450" rx="18" fill="#0b1115" fill-opacity="0.58" stroke="#20343d"/>
-  <g clip-path="url(#inner-panel)">
-    <path d="M90 90h1020v6H90Z" fill="${accent}" opacity="0.62"/>
-    <path d="M708 90h402v450H780c70-56 88-125 54-207-30-73-72-141-126-243Z" fill="${accent}" opacity="0.08"/>
-    <g transform="translate(782 122)">
-      <rect width="286" height="124" rx="14" fill="#101820" fill-opacity="0.82" stroke="#29424c"/>
-      <rect x="18" y="20" width="96" height="10" rx="5" fill="#78908c" opacity="0.48"/>
-      <rect x="18" y="48" width="158" height="12" rx="6" fill="#75a7ff" opacity="0.38"/>
-      <rect x="190" y="47" width="72" height="14" rx="7" fill="${accent}" opacity="0.72"/>
-      <rect x="18" y="76" width="132" height="12" rx="6" fill="#f2c14e" opacity="0.42"/>
-      <rect x="164" y="75" width="98" height="14" rx="7" fill="#5bd67b" opacity="0.72"/>
-      <rect x="18" y="104" width="178" height="12" rx="6" fill="#fb7185" opacity="0.4"/>
-      <rect x="210" y="103" width="52" height="14" rx="7" fill="#f05d5e" opacity="0.72"/>
-    </g>
-    ${logoMark(104, 112, 3)}
-    <text x="238" y="154" fill="${accent}" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="850" letter-spacing="0">${escapeXml(eyebrow)}</text>
-    <rect x="238" y="174" width="92" height="4" rx="2" fill="${accent}" opacity="0.82"/>
-    <text x="104" y="318" fill="#f4fbf8" font-family="Inter, Arial, sans-serif" font-size="${titleSize}" font-weight="850" letter-spacing="0">${escapeXml(title)}</text>
-    <text x="108" y="382" fill="#b7c9c5" font-family="Inter, Arial, sans-serif" font-size="${subtitleSize}" font-weight="500" letter-spacing="0">${escapeXml(subtitle)}</text>
-    <path d="M104 426H1068" stroke="#20343d" stroke-width="1"/>
-    <g font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0">
-      <rect x="104" y="448" width="154" height="48" rx="8" fill="#102f26" stroke="#5bd67b"/>
-      <text x="128" y="480" fill="#5bd67b">up to date</text>
-      <rect x="278" y="448" width="188" height="48" rx="8" fill="#302913" stroke="#f2c14e"/>
-      <text x="302" y="480" fill="#f2c14e">update ready</text>
-      <rect x="486" y="448" width="182" height="48" rx="8" fill="#321b1c" stroke="#f05d5e"/>
-      <text x="510" y="480" fill="#f05d5e">security risk</text>
-    </g>
-    <text x="1068" y="480" text-anchor="end" fill="#8ba39f" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0">${escapeXml(siteHost)}</text>
-  </g>
-</svg>
-`
-}
 
 const heroPreviewSvg = `\
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Dep Beacon VS Code preview">
@@ -227,8 +88,6 @@ const render = async (input, output, options) => {
 
 const generatedSvgs = [
   [resolve(publicDir, 'hero-preview.svg'), heroPreviewSvg],
-  [resolve(publicDir, 'social-card.svg'), socialCardSvg(ogCards[0])],
-  ...ogCards.map((card) => [resolve(ogDir, `${card.file}.svg`), socialCardSvg(card)]),
 ]
 
 await Promise.all(generatedSvgs.map(([path, content]) => writeTextFile(path, content)))
@@ -248,16 +107,5 @@ await Promise.all([
     usagePreview,
     resolve(root, 'packages/vscode-dep-beacon/resources/usage-preview.png'),
     { height: 900, width: 1600 },
-  ),
-  render(
-    resolve(publicDir, 'social-card.svg'),
-    resolve(publicDir, 'social-card.png'),
-    { height: 630, width: 1200 },
-  ),
-  ...ogCards.map((card) =>
-    render(resolve(ogDir, `${card.file}.svg`), resolve(ogDir, `${card.file}.png`), {
-      height: 630,
-      width: 1200,
-    }),
   ),
 ])

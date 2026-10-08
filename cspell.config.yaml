@@ -39,6 +39,7 @@ words:
   - rollup
   - rstrip
   - rustup
+  - santi
   - semver
   - Snyk
   - undici

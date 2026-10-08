@@ -1,4 +1,10 @@
-# Dep Beacon
+<p align="center">
+  <img src="packages/vscode-dep-beacon/resources/icon.svg" alt="Dep Beacon" width="88">
+</p>
+
+<h1 align="center">Dep Beacon</h1>
+
+<p align="center">Dependency intelligence where you edit your manifests.</p>
 
 Dep Beacon is a dependency intelligence engine for npm projects with integrations for VS Code and Zed. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
 
@@ -9,12 +15,16 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 [Releases](https://github.com/santi020k/dep-beacon/releases) ·
 [Issues](https://github.com/santi020k/dep-beacon/issues)
 
-[![CI](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml)
-[![npm core](https://img.shields.io/npm/v/@santi020k/dep-beacon-core.svg?label=core)](https://www.npmjs.com/package/@santi020k/dep-beacon-core)
-[![VS Marketplace](https://badgen.net/vs-marketplace/v/santi020k.vscode-dep-beacon?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon)
-[![Open VSX](https://img.shields.io/open-vsx/v/santi020k/vscode-dep-beacon)](https://open-vsx.org/extension/santi020k/vscode-dep-beacon)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
+  <a href="https://www.npmjs.com/package/@santi020k/dep-beacon-core"><img src="https://img.shields.io/npm/v/@santi020k/dep-beacon-core.svg?label=core" alt="npm core"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon"><img src="https://badgen.net/vs-marketplace/v/santi020k.vscode-dep-beacon?label=VS%20Marketplace" alt="VS Marketplace"></a>
+  <a href="https://open-vsx.org/extension/santi020k/vscode-dep-beacon"><img src="https://img.shields.io/open-vsx/v/santi020k/vscode-dep-beacon" alt="Open VSX"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
+</p>
+
+**Explore:** [Packages](#packages) · [Quick Start](#quick-start) · [Use in Zed](#use-in-zed) · [Commits](#commits) · [Local Extension Debugging](#local-extension-debugging) · [Status Colors](#status-colors)
 
 ## Packages
 
@@ -27,6 +37,12 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 | [`apps/docs`](apps/docs) | Guides, configuration, and product documentation | [Documentation](https://beacon.santi020k.com) |
 
 ## Quick Start
+
+For VS Code, install **Dep Beacon** from the linked Marketplace or Open VSX listing,
+then open a project’s `package.json`. The extension adds dependency status and
+update actions to the manifest. Use the Zed instructions below for its language-server integration.
+
+To develop this repository locally:
 
 ```sh
 pnpm install
@@ -116,6 +132,13 @@ Copy `.env.example` to `.env` for local release or deploy commands. Use these na
 - Yellow: a newer version exists.
 - Orange: low or moderate vulnerabilities are present.
 - Red: the package/version is invalid, missing from npm, or has high or critical vulnerabilities.
+
+## Find your next step
+
+| Resource | Use it for |
+| --- | --- |
+| [`@santi020k/dep-beacon-core`](packages/dep-beacon-core/README.md) | Focused installation and usage reference. |
+| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp/README.md) | Focused installation and usage reference. |
 
 ## License
 
