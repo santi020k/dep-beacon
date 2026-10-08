@@ -19,7 +19,12 @@ words:
   - domexception
   - esbuild
   - expressjs
+  - extractfile
   - fflate
+  - fileobj
+  - getmembers
+  - hashlib
+  - isfile
   - GHSA
   - Ghsas
   - jsonc
@@ -54,6 +59,9 @@ words:
   - smol
   - tlsv
   - undici
+  - urllib
+  - urlopen
+  - urlparse
   - unrs
   - unstub
   - vite
