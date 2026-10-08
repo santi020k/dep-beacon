@@ -1,4 +1,37 @@
-# Dep Beacon for Zed
+<p align="center">
+  <a href="../../README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="../../docs/assets/readme/workspace-dark.svg">
+      <img src="../../docs/assets/readme/workspace-light.svg" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="220">
+    </picture>
+  </a>
+</p>
+
+<h1 align="center">Zed extension</h1>
+
+<p align="center">
+  <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-MIT-13967e?style=flat-square" alt="License: MIT"></a>
+  <a href="../../README.md"><img src="https://img.shields.io/badge/source-Package-276ccc?style=flat-square" alt="Source: Package"></a>
+</p>
+
+<p align="center">
+  <a href="../../README.md">Project overview</a> ·
+  <a href="#resources">Resources</a>
+</p>
+
+<details>
+<summary>On this page</summary>
+
+- [Required version](#required-version)
+- [Development](#development)
+- [Install as a development extension](#install-as-a-development-extension)
+- [Zed UI](#zed-ui)
+- [Settings](#settings)
+- [Publishing](#publishing)
+- [License](#license)
+- [Resources](#resources)
+
+</details>
 
 This directory contains the thin Rust/WASM adapter that connects Zed to `@santi020k/dep-beacon-lsp`. The language server provides dependency status hints, an actionable diagnostics dashboard, npm links, update quick fixes, pnpm catalog awareness, and OSV vulnerability signals.
 
@@ -32,17 +65,36 @@ Compile the adapter directly with:
 
 ```sh
 cargo check \
-  --manifest-path extensions/dep-beacon/Cargo.toml \
+  --manifest-path extensions/dep-beacon-lsp/Cargo.toml \
   --target wasm32-wasip1
 ```
 
 ## Install as a development extension
 
 1. Install Rust with `rustup` and add the `wasm32-wasip1` target.
-2. Build and publish the corresponding `@santi020k/dep-beacon-lsp` version.
-3. Run `zed: install dev extension` and select `extensions/dep-beacon`.
+2. Build the language server with the commands above.
+3. Run `zed: install dev extension` and select `extensions/dep-beacon-lsp`.
 
-The adapter always uses Zed's managed `@santi020k/dep-beacon-lsp` installation so a stale global binary cannot override the released server. Publish the language-server package before testing or releasing an adapter that depends on new server behavior.
+The adapter defaults to Zed's managed `@santi020k/dep-beacon-lsp` installation so a
+stale global binary cannot override the released server. To test an unpublished local
+build, configure an explicit command in Zed's project or user settings:
+
+```json
+{
+  "lsp": {
+    "dep-beacon": {
+      "binary": {
+        "path": "/absolute/path/to/node",
+        "arguments": ["/absolute/path/to/dep-beacon/packages/dep-beacon-lsp/dist/server.cjs", "--stdio"]
+      }
+    }
+  }
+}
+```
+
+Run `editor: restart language server` after changing the command. Remove the explicit
+binary configuration to return to the managed released server. Publish the language-server
+package before releasing an adapter that depends on new server behavior.
 
 ## Zed UI
 
@@ -127,7 +179,7 @@ This hides only update warnings. Security findings, invalid ranges, and missing 
 
 ## Publishing
 
-The npm language server is published as `@santi020k/dep-beacon-lsp`. The Zed registry points its Dep Beacon entry at `extensions/dep-beacon` in this repository.
+The npm language server is published as `@santi020k/dep-beacon-lsp`. The Zed registry points its `dep-beacon-lsp` entry at `extensions/dep-beacon-lsp` in this repository.
 
 For `0.0.3`, publish `@santi020k/dep-beacon-lsp@0.0.3` first, confirm that npm's `latest` tag resolves to it, and then update the Zed extension registry. Publishing the adapter first can leave users temporarily running the older language server without the documented workflow.
 
@@ -140,3 +192,7 @@ The same registry environment used by `santi020k-theme` can be reused:
 ## License
 
 MIT
+
+## Resources
+
+[Project overview](../../README.md) · [License](../../LICENSE)

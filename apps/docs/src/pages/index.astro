@@ -1,173 +1,110 @@
 ---
-import { Badge, ButtonLink, Card, Stat } from '@santi020k/lumen-astro'
+import { ButtonLink, Card, Icon, RevealGroup, ScrollReveal, Stat } from '@santi020k/lumen-astro'
 
+import EditorShowcase from '../components/EditorShowcase.astro'
 import Base from '../layouts/Base.astro'
 import { SITE } from '../site.config'
+
+const features = [
+  { title: 'Understand the version.', description: 'See whether your declared range accepts the latest stable release, then choose a patch, minor, major, or latest update.', href: '/docs/vscode-extension', label: 'Explore update actions' },
+  { title: 'Follow the catalog.', description: 'Resolve default and named pnpm catalogs before acting. Keep shared versions connected to their workspace source.', href: '/docs/pnpm-workspaces', label: 'Read the workspace guide' },
+  { title: 'Recognize the risk.', description: 'OSV advisories bring security context into the manifest, with severity and affected-version information beside the dependency.', href: '/docs/security', label: 'Understand security signals' },
+  { title: 'Keep your workflow.', description: 'Use the editor you already know. CodeLens, diagnostics, hovers, and update actions put maintenance within reach.', href: '/docs/configuration', label: 'Make it your own' }
+]
 ---
 
 <Base title={SITE.name} description={SITE.description} image="/og/home.png" imageAlt="Dep Beacon social preview">
-  <section class="hero">
+  <section class="hero site-shell" aria-labelledby="home-title">
     <div class="hero-inner">
-      <div class="hero-copy">
-        <p class="eyebrow">VS Code and Zed extensions for npm manifests</p>
-        <h1>Dep Beacon</h1>
-        <p class="hero-summary">
-          See dependency update paths, pnpm catalog context, and OSV security risk beside the versions you already edit.
-        </p>
+      <ScrollReveal class="hero-copy" animation="slide-up" duration="standard" threshold={0}>
+        <p class="eyebrow">Dependency intelligence / VS Code + Zed</p>
+        <h1 id="home-title">Know your<br /><span>next update.</span></h1>
+        <p class="hero-summary">Version choices, workspace context, and security signals. Right beside the dependencies you already edit.</p>
         <div class="hero-actions">
-          <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install from Marketplace</ButtonLink>
-          <ButtonLink class="button secondary" href="/docs/zed-extension" variant="secondary">Use in Zed</ButtonLink>
-          <ButtonLink class="button tertiary" href="/docs" variant="ghost">Read docs</ButtonLink>
+          <ButtonLink class="button primary" href={SITE.marketplaceUrl} variant="unstyled" newTab>
+            Install for VS Code <span class="button-arrow"><Icon name="arrow-up-right" /></span>
+          </ButtonLink>
+          <ButtonLink class="button text-action" href="/docs" variant="unstyled">Read the docs <Icon name="arrow-right" /></ButtonLink>
         </div>
-        <div class="hero-proof" aria-label="Supported dependency surfaces">
-          <span>package.json</span>
-          <span>pnpm-workspace.yaml</span>
-          <span>OSV.dev</span>
-          <span>npm registry</span>
-        </div>
+      </ScrollReveal>
+      <div class="hero-signals">
+        <svg class="beacon-graphic" viewBox="0 0 280 190" aria-hidden="true" focusable="false">
+          <path class="beacon-trace" d="M88 47a68 68 0 0 0 0 96m104-96a68 68 0 0 1 0 96M63 23a102 102 0 0 0 0 144m154-144a102 102 0 0 1 0 144" />
+          <image href="/favicon.svg" x="108" y="63" width="64" height="64" />
+          <circle class="beacon-node signal-update" cx="63" cy="23" r="8" />
+          <circle class="beacon-node signal-ready" cx="88" cy="143" r="8" />
+          <circle class="beacon-node signal-danger" cx="217" cy="167" r="8" />
+        </svg>
+        <p class="eyebrow">A little color. A lot of context.</p>
+        <ul class="signal-legend">
+          <li><span class="signal-dot signal-ready"></span><strong>Up to date</strong><span>Range accepts latest</span></li>
+          <li><span class="signal-dot signal-update"></span><strong>Update available</strong><span>A newer version exists</span></li>
+          <li><span class="signal-dot signal-caution"></span><strong>Review needed</strong><span>Low or moderate risk</span></li>
+          <li><span class="signal-dot signal-danger"></span><strong>Needs attention</strong><span>Invalid or high-risk</span></li>
+        </ul>
       </div>
     </div>
+    <div class="hero-meta"><span>Made for <code>package.json</code> + <code>pnpm-workspace.yaml</code></span><span>Free. Open source. Editor native.</span></div>
   </section>
 
-  <section class="signal-band" aria-label="Dep Beacon value summary">
-    <div class="signal-band-inner">
-      <Stat class="signal-stat">
-        <strong>4 update paths</strong>
-        <span>patch, minor, major, latest</span>
-      </Stat>
-      <Stat class="signal-stat">
-        <strong>Catalog aware</strong>
-        <span>default and named pnpm catalogs</span>
-      </Stat>
-      <Stat class="signal-stat">
-        <strong>Risk visible</strong>
-        <span>OSV severity mapped to editor signals</span>
-      </Stat>
-      <Stat class="signal-stat">
-        <strong>Editor native</strong>
-        <span>CodeLens, diagnostics, and update actions</span>
-      </Stat>
-    </div>
+  <section class="signal-band site-shell" aria-label="Dep Beacon capabilities">
+    <Stat as="article" class="signal-stat" variant="bare"><strong>Four update paths</strong><span>Patch, minor, major, latest</span></Stat>
+    <Stat as="article" class="signal-stat" variant="bare"><strong>Workspace aware</strong><span>Default and named pnpm catalogs</span></Stat>
+    <Stat as="article" class="signal-stat" variant="bare"><strong>Security in context</strong><span>OSV advisories inside your editor</span></Stat>
   </section>
 
-  <section class="section">
-    <div class="section-inner split-layout">
-      <div class="section-heading compact">
-        <p class="eyebrow">The moment it helps</p>
-        <h2>Turn a dependency line into a decision.</h2>
-        <p>
-          Dep Beacon keeps version status where the change happens. You can compare the next safe move, spot security
-          risk, and understand catalog-managed ranges without leaving your editor.
-        </p>
-      </div>
-
-      <figure class="editor-demo" aria-label="Example dependency signals in a package manifest">
-        <div class="editor-demo-bar">
-          <span></span>
-          <span></span>
-          <span></span>
-          <strong>package.json</strong>
-        </div>
-        <div class="editor-demo-body">
-          <code>
-            <span class="line-no">3</span>
-            <span class="key">"astro"</span>: <span class="version-value">"^6.4.0"</span>
-          </code>
-          <div class="lens-row">
-            <Badge class="lens warning" variant="warning">latest 7.0.0</Badge>
-            <Badge class="lens ok" variant="success">minor ^7.0.0</Badge>
-          </div>
-          <code>
-            <span class="line-no">4</span>
-            <span class="key">"react"</span>: <span class="version-value">"catalog:react19"</span>
-          </code>
-          <div class="lens-row">
-            <Badge class="lens catalog" variant="outline">catalog resolves ^19.0.0</Badge>
-          </div>
-          <code>
-            <span class="line-no">5</span>
-            <span class="key">"left-pad"</span>: <span class="version-value">"1.1.0"</span>
-          </code>
-          <div class="lens-row">
-            <Badge class="lens danger" variant="destructive">high vulnerability reported</Badge>
-          </div>
-        </div>
-      </figure>
+  <section class="section site-shell" aria-labelledby="preview-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">01 / In the editor</p><h2 id="preview-title">Clarity, right beside<br />the version.</h2></div>
+      <p>
+        Open a manifest and keep moving. Dep Beacon brings version status and actionable updates into the files
+        where dependency decisions happen.
+      </p>
     </div>
+    <ScrollReveal animation="fade" duration="standard" threshold={0.05}>
+      <EditorShowcase />
+    </ScrollReveal>
   </section>
 
-  <section class="section alt-section">
-    <div class="section-inner">
-      <div class="section-heading">
-        <h2>Useful signals, not another dashboard.</h2>
-        <p>
-          The extensions focus on maintainers who review manifests all day: clear status signals, practical update
-          targets, and actions that fit each editor.
-        </p>
-      </div>
-      <div class="feature-grid">
-        <Card as="article" class="feature-tile">
-          <span class="feature-icon green"></span>
-          <h3>Version status</h3>
-          <p>Know when a range already accepts the latest stable release and when a newer target is available.</p>
-        </Card>
-        <Card as="article" class="feature-tile">
-          <span class="feature-icon yellow"></span>
-          <h3>Semver choices</h3>
-          <p>Apply patch, minor, major, or latest updates while preserving common `^` and `~` range style.</p>
-        </Card>
-        <Card as="article" class="feature-tile">
-          <span class="feature-icon blue"></span>
-          <h3>pnpm catalogs</h3>
-          <p>Resolve `catalog:` and `catalog:name` entries before showing status, diagnostics, and update context.</p>
-        </Card>
-        <Card as="article" class="feature-tile">
-          <span class="feature-icon red"></span>
-          <h3>Security risk</h3>
-          <p>Use OSV results to separate routine update work from low, medium, high, and critical advisory risk.</p>
-        </Card>
-      </div>
+  <section class="section site-shell" aria-labelledby="features-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">02 / Less searching. More context.</p><h2 id="features-title">From a dependency line<br />to a decision.</h2></div>
+      <p>The useful details stay together: what you have, what comes next, and what deserves a closer look.</p>
     </div>
+    <RevealGroup animation="fade" duration="standard" stagger={35} threshold={0.05}>
+      {features.map((feature, index) => (
+        <Card as="article" variant="unstyled" class="feature-row">
+          <span class="feature-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+          <h3>{feature.title}</h3>
+          <div><p>{feature.description}</p><a href={feature.href}>{feature.label}<Icon name="arrow-right" /></a></div>
+        </Card>
+      ))}
+    </RevealGroup>
   </section>
 
-  <section class="section">
-    <div class="section-inner">
-      <div class="section-heading">
-        <h2>Designed for the files teams actually touch.</h2>
-        <p>
-          Dep Beacon reads package manifests and workspace policy files, then keeps dependency maintenance actions
-          close to the line that needs attention.
-        </p>
-      </div>
-      <div class="workflow-grid">
-        <Card as="article" class="workflow-item">
-          <strong>Open a manifest</strong>
-          <span>
-            `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` activates the extension automatically.
-          </span>
-        </Card>
-        <Card as="article" class="workflow-item">
-          <strong>Review the signal</strong>
-          <span>Green, yellow, orange, and red labels distinguish healthy ranges, updates, warnings, and errors.</span>
-        </Card>
-        <Card as="article" class="workflow-item">
-          <strong>Apply the next move</strong>
-          <span>Use CodeLens, diagnostics, update actions, and package links in VS Code or Zed.</span>
-        </Card>
-      </div>
+  <section class="section site-shell" aria-labelledby="editors-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">03 / Your editor. Your next step.</p><h2 id="editors-title">At home in<br />your workflow.</h2></div>
+      <p>One dependency engine, with the right experience for each editor. Start with the guide for your setup.</p>
     </div>
+    <RevealGroup class="editor-grid" animation="fade" duration="standard" stagger={35} threshold={0.05}>
+      <Card as="article" variant="unstyled" class="editor-choice">
+        <span class="eyebrow">The extension</span><h3>VS Code</h3>
+        <p>Inline status, CodeLens actions, and security diagnostics. Available through Marketplace and Open VSX.</p>
+        <ButtonLink class="button text-action" variant="unstyled" href="/docs/vscode-extension">Explore VS Code <Icon name="arrow-right" /></ButtonLink>
+      </Card>
+      <Card as="article" variant="unstyled" class="editor-choice">
+        <span class="eyebrow">The language server</span><h3>Zed</h3>
+        <p>Diagnostics, hovers, and update actions through a shared language server. Open a manifest to get started.</p>
+        <ButtonLink class="button text-action" variant="unstyled" href="/docs/zed-extension">Explore Zed <Icon name="arrow-right" /></ButtonLink>
+      </Card>
+    </RevealGroup>
   </section>
 
-  <section class="cta-section">
-    <div class="section-inner cta-inner">
-      <div>
-        <p class="eyebrow">Ready when the manifest opens</p>
-        <h2>Make dependency reviews easier to scan.</h2>
-      </div>
-      <div class="cta-actions">
-        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install for VS Code</ButtonLink>
-        <ButtonLink class="button secondary" href="/docs/zed-extension" variant="secondary">Use in Zed</ButtonLink>
-      </div>
-    </div>
+  <section class="cta-section site-shell" aria-labelledby="start-title">
+    <div><p class="eyebrow">Ready when the manifest opens</p><h2 id="start-title">Follow the next signal.</h2><p>A small addition to your editor. A clearer view of your dependencies.</p></div>
+    <ButtonLink class="button primary" variant="unstyled" href="/docs/installation">
+        Get started <span class="button-arrow"><Icon name="arrow-right" /></span>
+      </ButtonLink>
   </section>
 </Base>

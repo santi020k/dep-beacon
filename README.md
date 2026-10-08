@@ -1,32 +1,64 @@
-# Dep Beacon
+<p align="center">
+  <a href="README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/hero-dark.svg">
+      <img src="docs/assets/readme/hero-light.svg" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="360">
+    </picture>
+  </a>
+</p>
+
+<h1 align="center">Dep Beacon</h1>
+
+<p align="center">Dependency intelligence where you edit your manifests.</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@santi020k/dep-beacon-core"><img src="https://img.shields.io/npm/v/@santi020k/dep-beacon-core.svg?label=core&amp;style=flat-square&amp;color=276ccc" alt="npm core"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
+  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon"><img src="https://badgen.net/vs-marketplace/v/santi020k.vscode-dep-beacon?label=VS%20Marketplace" alt="VS Marketplace"></a>
+  <a href="https://open-vsx.org/extension/santi020k/vscode-dep-beacon"><img src="https://img.shields.io/open-vsx/v/santi020k/vscode-dep-beacon" alt="Open VSX"></a>
+</p>
 
 Dep Beacon is a dependency intelligence engine for npm projects with integrations for VS Code and Zed. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
 
-[![CI](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg)](https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml)
-[![npm](https://img.shields.io/npm/v/%40santi020k%2Fdep-beacon-core)](https://www.npmjs.com/package/@santi020k/dep-beacon-core)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[Documentation](https://beacon.santi020k.com) ·
+[VS Code](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) ·
+[Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) ·
+[npm packages](#packages) ·
+[Releases](https://github.com/santi020k/dep-beacon/releases) ·
+[Issues](https://github.com/santi020k/dep-beacon/issues)
 
-## Install
+**Explore:** [Packages](#packages) · [Quick Start](#quick-start) · [Use in Zed](#use-in-zed) · [Commits](#commits) · [Local Extension Debugging](#local-extension-debugging) · [Status Colors](#status-colors)
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon)
-- [Open VSX Registry](https://open-vsx.org/extension/santi020k/vscode-dep-beacon)
-- [Zed installation guide](https://beacon.santi020k.com/docs/zed-extension)
-- Core library: `pnpm add @santi020k/dep-beacon-core`
+## In your editor
 
-The editor extensions work without project configuration. Open a `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml` file to see dependency status and security findings.
+Real dependency signals from the public sample workspace. Select either preview to
+open the full capture; the [website](https://beacon.santi020k.com) includes both editors.
+
+| VS Code                                                                                            | Zed                                                                                        |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [![Dep Beacon in VS Code](apps/docs/public/usage-preview.png)](apps/docs/public/usage-preview.png) | [![Dep Beacon in Zed](apps/docs/public/zed-preview.jpg)](apps/docs/public/zed-preview.jpg) |
 
 ## Packages
 
-- `@santi020k/dep-beacon-core` analyzes package manifests, npm registry metadata, semver ranges, and OSV advisories.
-- `vscode-dep-beacon` adds CodeLens, inline status decorations, diagnostics, update commands, sorting, cache control, and install-on-save workflows to VS Code.
-- `@santi020k/dep-beacon-lsp` provides the language server that powers dependency diagnostics, hovers, npm links, and individual or bulk update actions in Zed.
-- `extensions/dep-beacon` contains the thin Rust/WASM adapter distributed through the Zed extension registry.
-- `@santi020k/dep-beacon-docs` is the Astro documentation site.
+| Package or surface                                       | Purpose                                                                                                     | Distribution                                                                                                                                                               |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@santi020k/dep-beacon-core`](packages/dep-beacon-core) | Manifest analysis, npm metadata, semver ranges, and OSV advisories                                          | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-core)                                                                                                            |
+| [`vscode-dep-beacon`](packages/vscode-dep-beacon)        | CodeLens, status decorations, diagnostics, update commands, sorting, caching, and install-on-save workflows | [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) · [Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) |
+| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp)   | Language server for dependency diagnostics, hovers, npm links, and update actions                           | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-lsp)                                                                                                             |
+| [`extensions/dep-beacon-lsp`](extensions/dep-beacon-lsp) | Thin Rust/WASM adapter for Zed                                                                              | Zed registry source                                                                                                                                                        |
+| [`apps/docs`](apps/docs)                                 | Guides, configuration, and product documentation                                                            | [Documentation](https://beacon.santi020k.com)                                                                                                                              |
 
 ## Quick Start
 
+For VS Code, install **Dep Beacon** from the linked Marketplace or Open VSX listing,
+then open a project’s `package.json`. The extension adds dependency status and
+update actions to the manifest. Use the Zed instructions below for its language-server integration.
+
 Local development requires Node.js 22.19 or newer and the pnpm version declared in `package.json`.
+
+To develop this repository locally:
 
 ```sh
 pnpm install
@@ -62,6 +94,21 @@ pnpm run validate
 
 ## Commits
 
+Install [Quality v1.3.0](https://github.com/santi020k/quality/releases/tag/v1.3.0)
+before configuring Git hooks. On macOS and Linux, its installer verifies the native binary checksum:
+
+```sh
+curl --proto '=https' --tlsv1.2 -fsSL \
+  https://raw.githubusercontent.com/santi020k/quality/main/install.sh \
+  | sh -s -- santi020k/quality v1.3.0
+pnpm run hooks:install
+quality hooks status
+```
+
+On Windows, install the native executable from the linked release, add it to `PATH`,
+then run the same hook commands. Repeat hook installation for each clone or worktree.
+`pnpm install` installs the JavaScript dependencies; it does not install Quality or Git hooks.
+
 Run `pnpm commit` after staging the intended changes. Commitprompt applies its
 included Conventional Commit rules, collects the message interactively,
 validates it, previews it, and asks before creating the commit.
@@ -87,9 +134,21 @@ If the Extension Development Host reports `The window terminated unexpectedly (r
 
 The sample workspace includes `package.json` and `pnpm-workspace.yaml` entries for regular dependencies, catalogs, overrides, and package extensions.
 
+## Documentation validation
+
+Run `pnpm exec playwright install chromium webkit` once, then `pnpm run test:docs`
+to build and check every route at 320, 375, 768, and 1440 pixels in both themes.
+The suite also checks mobile focus restoration, route changes, theme persistence,
+and keyboard-operated editor examples. `pnpm run validate` remains the full package gate.
+
+See [the 1.3 release notes](docs/release-v1.3.0.md) for design decisions, migration,
+validation, and the automated publication boundary.
+
 ## Environment
 
-Copy `.env.example` to `.env` for local release or deploy commands. Use these names for local envs and GitHub secrets or variables:
+Infisical's configured development environment is the source of truth for local secrets.
+Use `infisical run --env dev -- <command>` for commands that require credentials.
+`.env.example` documents supported names; keep actual values out of committed files:
 
 - `GH_TOKEN` locally for GitHub API access. Do not create a custom `GITHUB_TOKEN` secret; GitHub Actions provides its runtime token automatically.
 - `NPM_TOKEN`
@@ -103,7 +162,9 @@ Copy `.env.example` to `.env` for local release or deploy commands. Use these na
 - optional `CLOUDFLARE_PAGES_PROJECT_NAME`
 - optional `TURBO_TOKEN` and `TURBO_TEAM`
 
-Production GitHub workflows fetch publishing and deployment credentials from Infisical through OIDC. Keep `.env` files local and never commit credentials.
+Current publishing and deployment workflows consume GitHub Actions secrets and variables.
+The manual Infisical workflow checks OIDC connectivity; it does not migrate those workflows
+or synchronize credentials. Never commit credentials or local `.env` files.
 
 ## What It Tracks
 
@@ -118,3 +179,14 @@ Production GitHub workflows fetch publishing and deployment credentials from Inf
 - Yellow: a newer version exists.
 - Orange: low or moderate vulnerabilities are present.
 - Red: the package/version is invalid, missing from npm, or has high or critical vulnerabilities.
+
+## Find your next step
+
+| Resource                                                           | Use it for                                |
+| ------------------------------------------------------------------ | ----------------------------------------- |
+| [`@santi020k/dep-beacon-core`](packages/dep-beacon-core/README.md) | Focused installation and usage reference. |
+| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp/README.md)   | Focused installation and usage reference. |
+
+## License
+
+MIT. See [LICENSE](LICENSE).

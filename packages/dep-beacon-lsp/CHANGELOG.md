@@ -1,5 +1,19 @@
 # @santi020k/dep-beacon-lsp
 
+## 1.1.2
+
+### Reliability fixes
+
+- Preserve catalog npm aliases in dependency update actions.
+- Honor explicit Zed binary paths, arguments, and environment settings for local
+  development while retaining the managed npm server by default.
+
+### Patch Changes
+
+- Keep Zed responsive in dependency-heavy workspaces by debouncing manifest edits, sharing in-flight analyses, and caching registry and vulnerability lookups across requests.
+- Updated dependencies []:
+  - @santi020k/dep-beacon-core@1.3.0
+
 ## 1.1.1
 
 ### Patch Changes

@@ -1,9 +1,10 @@
 ---
-import { Callout, Link } from '@santi020k/lumen-astro'
+import { Callout, CodeTabs, Icon, Link } from '@santi020k/lumen-astro'
 
 import Docs from '../../layouts/Docs.astro'
 
-const settingsExample = `{
+const settingsExamples = [
+  { value: 'server', label: 'Language server', language: 'json', code: `{
   "lsp": {
     "dep-beacon": {
       "settings": {
@@ -14,123 +15,137 @@ const settingsExample = `{
       }
     }
   }
-}`
----
-
-<Docs title="Zed Extension" description="Zed features provided by Dep Beacon through the Language Server Protocol.">
-  <h1>Dep Beacon for Zed</h1>
-  <p>
-    Dep Beacon brings npm dependency intelligence to Zed through the Language Server Protocol. Open `package.json`,
-    `pnpm-workspace.yaml`, or `pnpm-workspace.yml` to see dependency signals in your editor.
-  </p>
-
-  <Callout class="docs-callout">
-    <strong>Required version:</strong>
-    <span>
-      Use Dep Beacon for Zed `0.0.3` or newer. Version `0.0.3` is the first release with the zero-configuration
-      diagnostics workflow and bulk update actions described below.
-    </span>
-  </Callout>
-
-  <h2>Install</h2>
-  <ol>
-    <li>Open the command palette in Zed.</li>
-    <li>Run `zed: extensions`.</li>
-    <li>Search for `Dep Beacon` and select Install.</li>
-    <li>Open a supported manifest.</li>
-  </ol>
-  <p>
-    If the manifest was already open during installation or an extension update, focus it and run
-    `editor: restart language server` once. Closing and reopening the manifest works too.
-  </p>
-
-  <h2>Features</h2>
-  <ul>
-    <li>No settings are required after installation.</li>
-    <li>Zed's diagnostics multi-buffer acts as an actionable dependency and security dashboard.</li>
-    <li>Updates and security issues are visible through default Zed warnings and errors.</li>
-    <li>Quick fixes apply patch, minor, major, and latest update targets.</li>
-    <li>Bulk actions update all compatible dependencies or move the manifest to latest.</li>
-    <li>Document links open dependency names on npm.</li>
-    <li>Default and named pnpm catalogs resolve before dependency analysis.</li>
-    <li>Optional OSV.dev checks add vulnerability severity to dependency diagnostics.</li>
-  </ul>
-
-  <h2>Dependency dashboard</h2>
-  <p>
-    Open a supported manifest and Dep Beacon starts automatically. Click the error and warning indicator in Zed's
-    status bar or run `diagnostics: deploy` (`cmd-shift-m` on macOS or `ctrl-shift-m` on Linux and Windows) to see
-    actionable dependencies from your open manifests in one editable multi-buffer.
-  </p>
-
-  <h2>Update dependencies</h2>
-  <p>
-    Place the cursor on an actionable dependency and open code actions with `cmd-.` or `ctrl-.`.
-  </p>
-  <ul>
-    <li>Patch, minor, major, and latest actions update only the selected dependency.</li>
-    <li>
-      `Update all compatible dependencies` applies the highest available patch or minor targets without crossing a
-      major version.
-    </li>
-    <li>`Update all dependencies to latest` may include breaking major-version updates.</li>
-    <li>Bulk actions appear only when the selected dependency has an applicable manifest edit.</li>
-  </ul>
-  <p>
-    For a `catalog:` or named `catalog:&lt;name&gt;` dependency in `package.json`, the action edits its owning entry in
-    `pnpm-workspace.yaml`.
-  </p>
-
-  <h2>Understand npm tags</h2>
-  <p>
-    npm can publish a version under another tag such as `next` while its `latest` tag still points to an older version.
-    If the existing semver range already accepts that newer version, Dep Beacon explains the range and tag difference
-    without offering a no-op edit or downgrade.
-  </p>
-
-  <h2>Optional inline status</h2>
-  <p>
-    No visual settings are required for the dashboard. If you also want compact signals such as `↑ 18.3.1 → 19.1.0`,
-    `⚠ high risk`, and `✓ 19.1.0` beside every dependency, enable Zed's inlay hints.
-  </p>
-  <pre><code>{`{
+}` },
+  { value: 'inline', label: 'Inline hints', language: 'json', code: `{
   "inlay_hints": {
     "enabled": true,
     "show_other_hints": true
   }
-}`}
-       </code>
-  </pre>
-  <h2>Settings</h2>
-  <p>
-    Settings are optional. To override the defaults, configure the language server under `lsp.dep-beacon.settings` in
-    your Zed settings file.
-  </p>
-  <pre><code>{settingsExample}</code></pre>
-  <ul>
-    <li>`checkVulnerabilities` defaults to `true`.</li>
-    <li>`includePrerelease` defaults to `false`.</li>
-    <li>`registryUrl` defaults to the public npm registry.</li>
-    <li>
-      `showUpdateDiagnostics` defaults to `true`. Set it to `false` to hide dependency update warnings while keeping
-      security and manifest errors visible.
-    </li>
-  </ul>
-  <p>
-    Disabling update diagnostics does not disable dependency analysis. Hover details, code actions, and individual or
-    bulk dependency upgrades remain available.
-  </p>
+}` }
+]
+---
 
-  <Callout class="docs-callout">
-    <strong>Editor differences:</strong>
-    <span>
-      Zed does not currently expose custom extension panels or APIs equivalent to VS Code inline decorations. Dep
-      Beacon therefore uses Zed's native diagnostics multi-buffer, hover, and code-action surfaces.
-    </span>
-  </Callout>
+<Docs title="Zed Extension" description="Zed features provided by Dep Beacon through the Language Server Protocol.">
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>03</span> / Editor guide</p>
+    <h1>Your dependencies.<br />The Zed way.</h1>
+    <p class="docs-intro">
+      Native diagnostics, hovers, and code actions bring dependency intelligence into Zed. Open a manifest and
+        start with the signals already in your editor.
+    </p>
+    <dl class="docs-facts">
+      <div><dt>Integration</dt><dd>Language Server Protocol</dd></div>
+      <div><dt>Setup</dt><dd>No settings required</dd></div>
+    </dl>
+  </header>
 
-  <h2>Source</h2>
-  <p>
-    The <Link href="https://github.com/santi020k/dep-beacon/tree/main/extensions/dep-beacon" target="_blank" rel="noopener noreferrer">Zed adapter</Link> and <Link href="https://github.com/santi020k/dep-beacon/tree/main/packages/dep-beacon-lsp" target="_blank" rel="noopener noreferrer">language server</Link> are available in the Dep Beacon repository.
-  </p>
+  <figure class="docs-media">
+    <a href="/zed-preview.jpg" aria-label="View the full-size Zed screenshot">
+      <img src="/zed-preview.jpg" width="3024" height="1898" loading="eager" decoding="async" alt="Dep Beacon in Zed showing real pnpm catalog versions, available updates, a missing package, and an OSV high-risk warning for axios in the sample workspace." />
+    </a>
+    <figcaption>Captured in Zed with the public sample workspace. Inline hints and native diagnostics keep version
+      and security context beside each catalog entry.</figcaption>
+  </figure>
+
+  <section aria-labelledby="install">
+    <h2 id="install">Open a manifest and get started</h2>
+    <ol class="docs-steps" role="list">
+      <li><strong>Find Dep Beacon.</strong><p>Open the command palette, run <code>zed: extensions</code>, and
+        search for <code>Dep Beacon</code>.</p></li>
+      <li><strong>Install the extension.</strong><p>Use version <code>0.0.3</code> or newer for the diagnostics and
+        bulk-update workflow in this guide.</p></li>
+      <li><strong>Open your workspace.</strong><p>Start with <code>package.json</code>,
+        <code>pnpm-workspace.yaml</code>, or <code>pnpm-workspace.yml</code>.</p></li>
+    </ol>
+    <Callout class="docs-note">
+      <strong>Updating while a manifest is open?</strong>
+      <p>Focus it and run <code>editor: restart language server</code> once. Closing and reopening the manifest
+        also works.</p>
+    </Callout>
+  </section>
+
+  <section aria-labelledby="dashboard">
+    <h2 id="dashboard">See what needs attention</h2>
+    <p>
+      Click Zed’s error and warning indicator, or run <code>diagnostics: deploy</code>, to see actionable dependencies
+      from open manifests in one editable multi-buffer. Updates appear as warnings; security findings use warnings
+      or errors according to severity.
+    </p>
+    <dl class="docs-reference">
+      <div><dt>Dependency dashboard</dt><dd><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>M</kbd> on macOS; <kbd>Ctrl</kbd>
+        <kbd>Shift</kbd> <kbd>M</kbd> on Linux and Windows.</dd></div>
+      <div><dt>Code actions</dt><dd><kbd>⌘</kbd> <kbd>.</kbd> on macOS; <kbd>Ctrl</kbd> <kbd>.</kbd> on Linux and
+        Windows.</dd></div>
+    </dl>
+    <p>
+      Hover a dependency for resolved ranges, npm tags, update targets, and vulnerability details. Dependency-name links
+      open npm. Default and named pnpm catalogs resolve before analysis.
+    </p>
+  </section>
+
+  <section aria-labelledby="updates">
+    <h2 id="updates">Update one dependency, or the manifest</h2>
+    <p>Place the cursor on an actionable dependency, then open code actions.</p>
+    <dl class="docs-reference">
+      <div><dt>Patch, minor, major, latest</dt><dd>Apply the selected target to one dependency.</dd></div>
+      <div><dt>Update all compatible dependencies</dt><dd>Apply available compatible targets without crossing a
+        major version.</dd></div>
+      <div><dt>Update all dependencies to latest</dt><dd>Move to latest targets, which can include breaking
+        major-version updates.</dd></div>
+    </dl>
+    <p>
+      Bulk actions appear when the selected dependency has an applicable manifest edit. For a <code>catalog:</code>
+      or <code>catalog:&lt;name&gt;</code> reference, the update edits its owning entry in
+        <code>pnpm-workspace.yaml</code>.
+    </p>
+  </section>
+
+  <section aria-labelledby="npm-tags">
+    <h2 id="npm-tags">Understand the tag as well as the range</h2>
+    <p>
+      npm can publish a version under a tag such as <code>next</code> while <code>latest</code> still points to an older
+      version. If the existing range already accepts that newer version, Dep Beacon explains the difference without
+      offering a no-op edit or downgrade.
+    </p>
+  </section>
+
+  <section aria-labelledby="optional-settings">
+    <h2 id="optional-settings">Keep the defaults, or tune the signals</h2>
+    <p>
+      Configure the language server under <code>lsp.dep-beacon.settings</code> in your Zed settings file.
+      Enable inlay hints separately if you want compact version and risk labels beside each dependency.
+    </p>
+    <CodeTabs wrap={false} ariaLabel="Optional Zed settings" items={settingsExamples} />
+    <dl class="docs-reference">
+      <div><dt><code>checkVulnerabilities</code></dt><dd>Defaults to <code>true</code>. Adds OSV.dev vulnerability
+        details to dependency analysis.</dd></div>
+      <div><dt><code>includePrerelease</code></dt><dd>Defaults to <code>false</code>. Opt in to consider prerelease
+        versions.</dd></div>
+      <div><dt><code>registryUrl</code></dt><dd>Defaults to the public npm registry.</dd></div>
+      <div><dt><code>showUpdateDiagnostics</code></dt><dd>Defaults to <code>true</code>. Set it to
+        <code>false</code> to hide update warnings while keeping security findings and manifest errors
+        visible.</dd></div>
+    </dl>
+    <p>Disabling update diagnostics keeps analysis, hovers, code actions, and individual or bulk upgrades available.</p>
+    <Callout class="docs-note">
+      <strong>Built around Zed’s native surfaces.</strong>
+      <p>Dep Beacon uses the diagnostics multi-buffer, hover, and code-action menu. It does not add a custom panel
+        or VS Code-style inline decorations.</p>
+    </Callout>
+  </section>
+
+  <section aria-labelledby="source">
+    <h2 id="source">Follow the source</h2>
+    <p>
+      Explore the <Link href="https://github.com/santi020k/dep-beacon/tree/main/extensions/dep-beacon-lsp" newTab>Zed
+        adapter</Link>
+      and <Link href="https://github.com/santi020k/dep-beacon/tree/main/packages/dep-beacon-lsp" newTab>language
+        server</Link>
+      in the Dep Beacon repository.
+    </p>
+  </section>
+
+  <nav class="docs-next" aria-label="Related guide">
+    <Link href="/docs/pnpm-workspaces">Connect a pnpm workspace <Icon name="arrow-right" /></Link>
+  </nav>
 </Docs>

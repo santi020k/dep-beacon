@@ -1,13 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-label="Dep Beacon">
-  <g transform="translate(32 24) scale(4.125)">
-    <rect width="32" height="32" rx="8" fill="#111827"/>
-    <path d="M16 6.2 9.2 21.6h13.6L16 6.2Z" fill="#1f2a44"/>
-    <path d="M16 6.2 9.2 21.6M16 6.2l6.8 15.4M9.2 21.6h13.6M16 14.4l-6.8 7.2M16 14.4l6.8 7.2" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-    <circle cx="16" cy="6.2" r="3.1" fill="#f8c65c"/>
-    <circle cx="16" cy="14.4" r="2.4" fill="#f8fafc"/>
-    <circle cx="9.2" cy="21.6" r="3" fill="#34d399"/>
-    <circle cx="22.8" cy="21.6" r="3" fill="#fb7185"/>
+  <style>
+    @media (prefers-color-scheme: light) {
+      .brand-name { fill: #14232b; }
+      .tagline { fill: #394b54; }
+    }
+  </style>
+  <g transform="translate(24 24) scale(4.125)">
+  <rect width="32" height="32" rx="8" fill="#0b1115"/>
+  <g data-beacon-symbol="true">
+    <path d="M16 7.5 8 23.5h16L16 7.5Z" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25" opacity=".65"/>
+    <path d="M16 7.5v8m0 0-8 8m8-8 8 8" fill="none" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+    <circle cx="16" cy="7.5" r="2.75" fill="#f8c65c"/>
+    <circle cx="16" cy="15.5" r="2.25" fill="#f4fbf8"/>
+    <circle cx="8" cy="23.5" r="2.75" fill="#34d399"/>
+    <circle cx="24" cy="23.5" r="2.75" fill="#fb7185"/>
   </g>
-  <text x="196" y="82" fill="#f4fbf8" font-family="Inter, system-ui, sans-serif" font-size="54" font-weight="800">Dep Beacon</text>
-  <text x="198" y="123" fill="#a8b3cf" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="500">Dependency signals for npm manifests</text>
+  </g>
+  <text class="brand-name" x="188" y="86" fill="#f4fbf8" font-family="Inter, system-ui, sans-serif" font-size="54" font-weight="600" letter-spacing="-2.5">Dep Beacon</text>
+  <text class="tagline" x="190" y="126" fill="#b7c9c5" font-family="Inter, system-ui, sans-serif" font-size="20">Dependency signals, right where you work.</text>
 </svg>

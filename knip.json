@@ -1,5 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreBinaries": [
+    "quality"
+  ],
   "workspaces": {
     ".": {
       "entry": [
@@ -11,13 +14,12 @@
     },
     "apps/docs": {
       "entry": [
-        "src/pages/**/*.astro"
-      ],
-      "ignoreDependencies": [
-        "tailwindcss"
+        "src/pages/**/*.astro",
+        "og.config.mjs",
+        "og.audit.config.mjs"
       ],
       "project": [
-        "src/**/*.{astro,ts}"
+        "src/**/*.{astro,ts,css}"
       ]
     },
     "packages/dep-beacon-core": {

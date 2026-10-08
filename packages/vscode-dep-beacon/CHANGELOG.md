@@ -1,5 +1,19 @@
 # Dep Beacon
 
+## 1.3.0
+
+### Minor Changes
+
+- Refresh the dependency toolchain and documentation for the 1.3 release. The documentation
+  adopts Lumen 4, keeps Dep Beacon's blue and teal identity, and adds accessible navigation,
+  code examples, and optional page motion. Remove unused build dependencies and generated
+  preview assets while preserving the public dependency-analysis APIs.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @santi020k/dep-beacon-core@1.3.0
+
 ## 1.2.1
 
 ### Patch Changes

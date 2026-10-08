@@ -1,20 +1,28 @@
 ---
-import { Link } from '@santi020k/lumen-astro'
+import { Icon, Link } from '@santi020k/lumen-astro'
 
 import { SITE } from '../site.config'
+
+import LogoMark from './LogoMark.astro'
 ---
 
-<footer class="site-footer" transition:name="site-footer" transition:persist>
-  <p>
-    Made by <Link href={SITE.personalUrl} target="_blank" rel="noopener noreferrer">santi020k</Link>
-    with <Link href={SITE.lumenUrl} target="_blank" rel="noopener noreferrer">Lumen</Link>.
-  </p>
-  <div>
-    <Link href="/docs">Docs</Link>
-    <Link href="/docs/zed-extension">Zed</Link>
-    <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace</Link>
-    <Link href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</Link>
-    <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</Link>
-    <Link href="https://github.com/sponsors/santi020k" target="_blank" rel="noopener noreferrer">Sponsor</Link>
+<footer class="site-footer site-shell">
+  <div class="footer-main">
+    <div class="footer-identity">
+      <Link class="footer-brand" href="/"><LogoMark class="brand-mark" />Dep Beacon</Link>
+      <p>Dependency intelligence.<br />Right where you work.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <Link href="/docs">Documentation</Link>
+      <Link href="/docs/zed-extension">Use in Zed</Link>
+      <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Marketplace <Icon name="arrow-up-right" /></Link>
+      <Link href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX <Icon name="arrow-up-right" /></Link>
+      <Link href={SITE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub <Icon name="arrow-up-right" /></Link>
+      <Link href="https://github.com/sponsors/santi020k" target="_blank" rel="noopener noreferrer">Sponsor <Icon name="arrow-up-right" /></Link>
+    </nav>
+  </div>
+  <div class="footer-colophon">
+    <p>Made by <Link href={SITE.personalUrl} target="_blank" rel="noopener noreferrer">santi020k</Link> with <Link href={SITE.lumenUrl} target="_blank" rel="noopener noreferrer">Lumen</Link>.</p>
+    <span>Free and open source. MIT licensed.</span>
   </div>
 </footer>

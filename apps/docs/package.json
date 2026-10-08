@@ -5,22 +5,25 @@
   "description": "Documentation website for Dep Beacon.",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "pnpm run generate:og && astro dev",
+    "build": "pnpm run generate:og && astro build && pnpm run audit:og",
     "preview": "astro preview",
     "check": "astro check",
     "typecheck": "astro check",
     "lint": "eslint . --no-warn-ignored --max-warnings=0",
     "lint:fix": "eslint . --fix --no-warn-ignored --max-warnings=0",
-    "clean": "rm -rf dist .astro"
+    "clean": "rm -rf dist .astro",
+    "generate:og": "santi-og generate",
+    "check:og": "santi-og check",
+    "audit:og": "santi-og audit --config og.audit.config.mjs"
   },
   "dependencies": {
-    "@astrojs/mdx": "catalog:",
     "@astrojs/sitemap": "catalog:",
     "@santi020k/lumen-astro": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "astro": "catalog:",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "@santi020k/og": "catalog:"
   },
   "devDependencies": {
     "@astrojs/check": "catalog:",
@@ -29,7 +32,7 @@
     "typescript": "catalog:"
   },
   "engines": {
-    "node": "^20.19.0 || >=22.13.0"
+    "node": ">=22.19.0"
   },
   "packageManager": "pnpm@11.1.2"
 }

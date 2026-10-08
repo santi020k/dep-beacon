@@ -1,4 +1,39 @@
-# Dep Beacon
+<p align="center">
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/santi020k/dep-beacon/main/docs/assets/readme/workspace-dark.png">
+      <img src="https://raw.githubusercontent.com/santi020k/dep-beacon/main/docs/assets/readme/workspace-light.png" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="220">
+    </picture>
+  </a>
+</p>
+
+<h1 align="center">VS Code extension</h1>
+
+<p align="center">
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-13967e?style=flat-square" alt="License: MIT"></a>
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/packages/vscode-dep-beacon/package.json"><img src="https://img.shields.io/badge/editor-VS_Code-276ccc?style=flat-square" alt="Editor: VS Code"></a>
+</p>
+
+<p align="center">
+  <a href="../../README.md">Project overview</a> ·
+  <a href="package.json">Package manifest</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="#resources">Resources</a>
+</p>
+
+<details>
+<summary>On this page</summary>
+
+- [What You Get](#what-you-get)
+- [Supported Files](#supported-files)
+- [Status Colors](#status-colors)
+- [Update Actions](#update-actions)
+- [Commands](#commands)
+- [Settings](#settings)
+- [Privacy](#privacy)
+- [Resources](#resources)
+
+</details>
 
 Dep Beacon adds dependency version and security signals to npm manifests in VS Code.
 
@@ -68,3 +103,7 @@ Manual refreshes also write activation, scheduling, cache, parse, analysis, and 
 ## Privacy
 
 When vulnerability checks are enabled, Dep Beacon sends package names and resolved versions to OSV.dev. Turn off `depBeacon.checkVulnerabilities` if you are offline or do not want dependency names checked against an external vulnerability service.
+
+## Resources
+
+[Project overview](../../README.md) · [License](../../LICENSE)

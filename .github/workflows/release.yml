@@ -28,6 +28,8 @@ jobs:
     environment:
       name: release
       url: https://www.npmjs.com/package/@santi020k/dep-beacon-core
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
@@ -35,19 +37,12 @@ jobs:
           fetch-depth: 0
           ref: ${{ inputs.commit_sha || github.sha }}
       - name: Set up pnpm workspace
-        uses: santi020k/quality/actions/setup-pnpm@eec1701b98bcc0b76d36af288ee78a0369cd84cc # v1
+        uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
         with:
           node-version: 22.x
           registry-url: https://registry.npmjs.org
-          install: false
-      - name: Prepare publishing authentication
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          test -n "$NPM_TOKEN"
-          printf 'NODE_AUTH_TOKEN=%s\n' "$NPM_TOKEN" >> "$GITHUB_ENV"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Verify publishing authentication
+        run: test -n "$NODE_AUTH_TOKEN"
       - name: Create release pull request or publish
         id: changesets
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0

@@ -6,7 +6,12 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      verify_credentials:
+        description: Verify existing delivery credentials with read-only provider calls
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -57,7 +62,7 @@ jobs:
             echo "packages=false" >> "$GITHUB_OUTPUT"
           fi
           release_pattern='^(\.changeset/|packages/[^/]+/(package\.json|CHANGELOG\.md)$|'
-          release_pattern+='extensions/dep-beacon/(Cargo\.toml|Cargo\.lock|extension\.toml)$|'
+          release_pattern+='extensions/dep-beacon-lsp/(Cargo\.toml|Cargo\.lock|extension\.toml)$|'
           release_pattern+='\.github/workflows/release\.yml$)'
           if grep -Eq "$release_pattern" /tmp/changed-files; then
             echo "release=true" >> "$GITHUB_OUTPUT"
@@ -78,7 +83,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up pnpm workspace
-        uses: santi020k/quality/actions/setup-pnpm@eec1701b98bcc0b76d36af288ee78a0369cd84cc # v1
+        uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
         with:
           node-version: 22.x
       - name: Audit dependencies
@@ -92,14 +97,24 @@ jobs:
         if: >-
           github.event_name == 'pull_request' &&
           !contains(github.event.pull_request.labels.*.name, 'skip-changelog') &&
-          !startsWith(github.head_ref, 'changeset-release/')
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          !startsWith(github.head_ref, 'release/v')
         run: |
           pnpm changeset status --since=origin/main --output=/tmp/changeset-status.json
           jq -e '.releases | length > 0' /tmp/changeset-status.json >/dev/null
       - name: Run repository validation
         run: pnpm run validate
+      - name: Verify prepared release versions
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/v')
+        env:
+          RELEASE_BRANCH: ${{ github.head_ref }}
+        run: pnpm run check:release
+      - name: Install documentation browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Verify documentation interactions
+        run: pnpm run test:docs
       - name: Check the Zed adapter
-        run: cargo check --locked --manifest-path extensions/dep-beacon/Cargo.toml
+        run: cargo check --locked --manifest-path extensions/dep-beacon-lsp/Cargo.toml
 
   compatibility:
     name: Package compatibility (24.x)
@@ -110,7 +125,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
       - name: Set up pnpm workspace
-        uses: santi020k/quality/actions/setup-pnpm@eec1701b98bcc0b76d36af288ee78a0369cd84cc # v1
+        uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
         with:
           node-version: 24.x
       - name: Build, typecheck, and test published packages
@@ -125,6 +140,7 @@ jobs:
     needs: [changes, validation, compatibility]
     if: >-
       always() &&
+      !inputs.verify_credentials &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       needs.changes.outputs.docs == 'true' &&
@@ -140,7 +156,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
       - name: Set up pnpm workspace
-        uses: santi020k/quality/actions/setup-pnpm@eec1701b98bcc0b76d36af288ee78a0369cd84cc # v1
+        uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
         with:
           node-version: 22.x
       - name: Build and deploy documentation
@@ -162,10 +178,117 @@ jobs:
             --commit-hash="$GITHUB_SHA" \
             --commit-dirty=true
 
+  credentials:
+    name: Read-only delivery credential verification
+    if: github.event_name == 'workflow_dispatch' && inputs.verify_credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+      - name: Set up pnpm workspace
+        uses: santi020k/quality/actions/setup-pnpm@ffa37774f75b2b8e761fe3d71e7046cdb6694a69 # v1
+        with:
+          node-version: 22.x
+          registry-url: https://registry.npmjs.org
+      - name: Verify npm identity
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          test -n "$NODE_AUTH_TOKEN"
+          node --input-type=module <<'JS'
+          try {
+            const response = await fetch('https://registry.npmjs.org/-/whoami', {
+              headers: { Authorization: `Bearer ${process.env.NODE_AUTH_TOKEN}` },
+              signal: AbortSignal.timeout(30000),
+            });
+            if (!response.ok) {
+              console.error(`npm identity verification failed: HTTP ${response.status}`);
+              process.exitCode = 1;
+            } else {
+              const identity = await response.json();
+              if (typeof identity.username !== 'string') throw new Error('Unexpected identity response');
+              console.log('npm identity verified; publishing scope still requires confirmation');
+            }
+          } catch {
+            console.error('npm identity verification unavailable: network or provider response failure');
+            process.exitCode = 1;
+          }
+          JS
+      - name: Verify VS Code publisher access
+        if: always()
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          test -n "$VSCE_PAT"
+          pnpm --filter vscode-dep-beacon exec vsce verify-pat santi020k >/dev/null 2>&1 || {
+            echo 'VS Code publisher access verification failed'; exit 1;
+          }
+          echo 'VS Code publisher access verified; Marketplace role still requires confirmation'
+      - name: Verify Open VSX publishing access
+        if: always()
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          test -n "$OVSX_PAT"
+          pnpm --filter vscode-dep-beacon exec ovsx verify-pat santi020k >/dev/null 2>&1 || {
+            echo 'Open VSX namespace publishing access verification failed'; exit 1;
+          }
+          echo 'Open VSX namespace publishing access verified'
+      - name: Verify documentation project and Zed fork access
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PAGES_PROJECT_NAME: >-
+            ${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME || vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'dep-beacon-docs' }}
+          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
+          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
+        run: |
+          node --input-type=module <<'JS'
+          const required = name => {
+            const value = process.env[name];
+            if (!value) throw new Error(`Missing ${name}`);
+            return value;
+          };
+          const get = async (url, token) => {
+            const response = await fetch(url, {
+              headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+              signal: AbortSignal.timeout(30000),
+            });
+            if (!response.ok) throw new Error(`Provider access failed: HTTP ${response.status}`);
+            return response.json();
+          };
+          const checks = await Promise.allSettled([
+            (async () => {
+            const account = encodeURIComponent(required('CLOUDFLARE_ACCOUNT_ID'));
+            const project = encodeURIComponent(required('CLOUDFLARE_PAGES_PROJECT_NAME'));
+            const docs = await get(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`,
+              required('CLOUDFLARE_API_TOKEN'));
+            if (!docs.success || !docs.result?.name) throw new Error('Documentation project access failed');
+            console.log('Cloudflare account and documentation project read access verified');
+            console.log('Cloudflare write scope still requires confirmation');
+            })(),
+            (async () => {
+            const fork = required('ZED_EXTENSIONS_FORK');
+            if (!/^[\w.-]+\/[\w.-]+$/.test(fork)) throw new Error('Invalid Zed fork configuration');
+            const zed = await get(`https://api.github.com/repos/${fork}`, required('ZED_EXTENSIONS_TOKEN'));
+            if (!zed.permissions?.push) throw new Error('Zed fork write permission is unavailable');
+            console.log('Zed token and fork push permission verified without writing');
+            console.log('Upstream PR access still requires confirmation');
+            })(),
+          ]);
+          const labels = ['Cloudflare documentation project', 'Zed fork'];
+          for (const [index, check] of checks.entries()) {
+            if (check.status !== 'rejected') continue;
+            console.error(`${labels[index]} credential verification failed; inspect provider access privately`);
+            process.exitCode = 1;
+          }
+          JS
+
   gate:
     name: Required checks
     if: always()
-    needs: [changes, validation, compatibility, deploy-docs]
+    needs: [changes, validation, compatibility, deploy-docs, credentials]
     runs-on: ubuntu-latest
     steps:
       - name: Verify relevant jobs
@@ -174,8 +297,9 @@ jobs:
           VALIDATION: ${{ needs.validation.result }}
           COMPATIBILITY: ${{ needs.compatibility.result }}
           DEPLOY: ${{ needs.deploy-docs.result }}
+          CREDENTIALS: ${{ needs.credentials.result }}
         run: |
-          for result in "$CHANGES" "$VALIDATION" "$COMPATIBILITY" "$DEPLOY"; do
+          for result in "$CHANGES" "$VALIDATION" "$COMPATIBILITY" "$DEPLOY" "$CREDENTIALS"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               exit 1
             fi

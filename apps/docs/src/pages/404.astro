@@ -1,16 +1,19 @@
 ---
-import { ButtonLink } from '@santi020k/lumen-astro'
+import { ButtonLink, Icon } from '@santi020k/lumen-astro'
 
 import Base from '../layouts/Base.astro'
 ---
 
 <Base title="Not Found" description="Dep Beacon page not found." noindex>
-  <section class="section">
-    <div class="section-inner">
-      <p class="eyebrow">404</p>
-      <h1>That page is out of range.</h1>
-      <p>Head back to the docs and follow the latest signal.</p>
-      <p><ButtonLink class="button primary" href="/docs">Open docs</ButtonLink></p>
+  <section class="not-found site-shell">
+    <p class="eyebrow">404 / Signal not found</p>
+    <h1>That page is<br /><span>out of range.</span></h1>
+    <p>The link may have moved. The documentation will help you find your next step.</p>
+    <div class="hero-actions">
+      <ButtonLink class="button primary" variant="unstyled" href="/docs">
+        Open the docs <span class="button-arrow"><Icon name="arrow-right" /></span>
+      </ButtonLink>
+      <ButtonLink class="button text-action" variant="unstyled" href="/">Back home <Icon name="arrow-right" /></ButtonLink>
     </div>
   </section>
 </Base>

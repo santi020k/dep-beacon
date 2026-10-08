@@ -1,30 +1,84 @@
 ---
+import { Badge, Callout, CodeTabs, Icon, Link } from '@santi020k/lumen-astro'
+
 import Docs from '../../layouts/Docs.astro'
 
-const disableOsvExample = `{
+const disableOsvExamples = [
+  { value: 'vscode', label: 'VS Code', language: 'json', code: `{
   "depBeacon.checkVulnerabilities": false
-}`
+}` },
+  { value: 'zed', label: 'Zed', language: 'json', code: `{
+  "lsp": {
+    "dep-beacon": {
+      "settings": {
+        "checkVulnerabilities": false
+      }
+    }
+  }
+}` }
+]
 ---
 
-<Docs title="Security Signals" description="How Dep Beacon uses OSV.dev vulnerability data.">
-  <h1>Security Signals</h1>
-  <p>
-    Dep Beacon can query OSV.dev for the package and version currently selected by a range. The result is summarized
-    without replacing a full audit workflow.
-  </p>
+<Docs title="Security Signals" description="How Dep Beacon uses OSV.dev vulnerability data and how to control security queries.">
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>05</span> / Security signals</p>
+    <h1>See the risk.<br />Understand the context.</h1>
+    <p class="docs-intro">
+      An available update and a reported vulnerability are different signals. Dep Beacon keeps that distinction
+        close to the dependency.
+    </p>
+    <dl class="docs-facts">
+      <div><dt>Advisory source</dt><dd>OSV.dev</dd></div>
+      <div><dt>Queries</dt><dd>Enabled by default</dd></div>
+    </dl>
+  </header>
 
-  <h2>Severity mapping</h2>
-  <ul>
-    <li>Low and medium advisories show as orange warning signals.</li>
-    <li>High and critical advisories show as red error signals.</li>
-    <li>Unknown severity stays visible as known risk.</li>
-  </ul>
+  <section aria-labelledby="severity">
+    <h2 id="severity">Read severity, not just color</h2>
+    <p>
+      Dep Beacon queries OSV for the package and version selected by the declared range, then summarizes advisory
+      details in your editor. Inspect the dependency hover for context.
+    </p>
+    <dl class="docs-status-list">
+      <div>
+        <dt><Badge class="docs-risk-warning" variant="warning">Low / medium</Badge></dt>
+        <dd>Orange warning signals identify lower-severity advisories that still need review.</dd>
+      </div>
+      <div>
+        <dt><Badge variant="destructive">High / critical</Badge></dt>
+        <dd>Red error signals give higher-severity findings greater prominence.</dd>
+      </div>
+      <div>
+        <dt><Badge variant="outline">Unknown severity</Badge></dt>
+        <dd>Advisory details remain visible as known risk, even when a severity is unavailable.</dd>
+      </div>
+    </dl>
+    <Callout class="docs-note">
+      <strong>Keep your full audit workflow.</strong>
+      <p>These signals describe the version selected from the manifest range. They do not replace an audit of your
+        installed dependency tree or a review of the advisory.</p>
+    </Callout>
+  </section>
 
-  <h2>Privacy and control</h2>
-  <p>
-    Disable OSV checks with `depBeacon.checkVulnerabilities` when working offline or inside registries that should not
-    send dependency names to external services.
-  </p>
+  <section aria-labelledby="privacy">
+    <h2 id="privacy">Control what goes to OSV</h2>
+    <p>
+      OSV checks send package names and selected versions to OSV.dev. Set <code>checkVulnerabilities</code> to
+      <code>false</code> when your workspace should not send that information to this external service.
+    </p>
+    <CodeTabs
+      ariaLabel="Disable OSV queries by editor"
+      items={disableOsvExamples}
+      storageKey="dep-beacon-docs-editor"
+      wrap={false}
+    />
+    <p>
+      This disables OSV queries. Dependency metadata requests still go to your configured npm registry;
+      it does not make Dep Beacon an offline tool.
+    </p>
+  </section>
 
-  <pre><code>{disableOsvExample}</code></pre>
+  <nav class="docs-next" aria-label="Related guide">
+    <Link href="/docs/configuration">Configure your workspace <Icon name="arrow-right" /></Link>
+  </nav>
 </Docs>

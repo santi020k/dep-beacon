@@ -7,20 +7,14 @@ const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/'
 ---
 
 <aside class="docs-sidebar">
-  <nav aria-label="Documentation navigation">
-    {DOCS_NAV.map(item => {
-      const href = item.href.replace(/\/$/u, '')
-      const active = currentPath === href
-
-      return (
-        <Link
-          aria-current={active ? 'page' : undefined}
-          class={active ? 'active' : undefined}
-          href={item.href}
-        >
-          {item.label}
-        </Link>
-      )
-    })}
+  <p class="eyebrow">Field guide</p>
+  <nav aria-label="Documentation chapters">
+    {DOCS_NAV.map((item, index) => (
+      <Link aria-current={currentPath === item.href ? 'page' : undefined} href={item.href}>
+        <span class="nav-number" aria-hidden="true">{String(index).padStart(2, '0')}</span>
+        <span>{item.label}</span>
+      </Link>
+    ))}
   </nav>
+  <p class="sidebar-note">Dependency intelligence.<br />Right where you work.</p>
 </aside>

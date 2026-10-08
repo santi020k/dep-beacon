@@ -1,35 +1,123 @@
 ---
+import { Callout, CodeTabs, Icon, Link, Table } from '@santi020k/lumen-astro'
+
 import Docs from '../../layouts/Docs.astro'
 
-const settingsExample = `{
+const settingsExamples = [
+  { value: 'vscode', label: 'VS Code', language: 'json', code: `{
   "depBeacon.enable": true,
   "depBeacon.includePrerelease": false,
   "depBeacon.checkVulnerabilities": true,
   "depBeacon.registryUrl": "https://registry.npmjs.org",
+  "depBeacon.cacheTtlMinutes": 15,
   "depBeacon.showInlineStatus": true,
   "depBeacon.runInstallOnSave": false,
   "depBeacon.packageManager": "auto"
-}`
+}` },
+  { value: 'zed', label: 'Zed', language: 'json', code: `{
+  "lsp": {
+    "dep-beacon": {
+      "settings": {
+        "checkVulnerabilities": true,
+        "includePrerelease": false,
+        "registryUrl": "https://registry.npmjs.org",
+        "showUpdateDiagnostics": true
+      }
+    }
+  }
+}` }
+]
+
+const settings = [
+  { name: 'enable', value: 'true', description: 'Enable CodeLens, diagnostics, and inline dependency status.' },
+  { name: 'includePrerelease', value: 'false', description: 'Include prerelease versions when calculating update targets.' },
+  { name: 'checkVulnerabilities', value: 'true', description: 'Query OSV.dev for vulnerability summaries.' },
+  { name: 'showInlineStatus', value: 'true', description: 'Display colored labels beside version ranges.' },
+  { name: 'cacheTtlMinutes', value: '15', description: 'Reuse document analysis for 1–1440 minutes.' },
+  { name: 'runInstallOnSave', value: 'false', description: 'Run a package install after saving a supported manifest.' },
+  { name: 'packageManager', value: 'auto', description: 'Detect the manager automatically, or select npm, pnpm, or yarn.' }
+]
 ---
 
-<Docs title="Configuration" description="Dep Beacon VS Code settings.">
-  <h1>Configuration</h1>
-  <p>
-    Configure Dep Beacon from VS Code settings or workspace `.vscode/settings.json`.
-  </p>
+<Docs title="Configuration" description="Configure Dep Beacon in VS Code and Zed, including registry, security, and display settings.">
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>06</span> / Your workflow</p>
+    <h1>Make it yours.</h1>
+    <p class="docs-intro">
+      The defaults get you started. Adjust your registry, security queries, and editor signals when your workspace
+        needs something different.
+    </p>
+  </header>
 
-  <h2>Common settings</h2>
-  <pre><code>{settingsExample}</code></pre>
+  <section aria-labelledby="editor-settings">
+    <h2 id="editor-settings">Start with your editor</h2>
+    <p>
+      In VS Code, use Settings or <code>.vscode/settings.json</code>. In Zed, place language-server settings under
+      <code>lsp.dep-beacon.settings</code>. These examples show the defaults; add only the overrides you need.
+    </p>
+    <CodeTabs wrap={false} ariaLabel="Configuration by editor" items={settingsExamples} storageKey="dep-beacon-docs-editor" />
+  </section>
 
-  <h2>Registry</h2>
-  <p>
-    `depBeacon.registryUrl` can point at a private npm-compatible registry. Package links still open npmjs.com by
-    default because that is the public package reference.
-  </p>
+  <section aria-labelledby="vscode-settings">
+    <h2 id="vscode-settings">VS Code settings at a glance</h2>
+    <p>Each setting below uses the <code>depBeacon.</code> prefix.</p>
+    <Table class="docs-settings-table" layout="records">
+      <table role="table">
+        <caption>VS Code settings and their default values</caption>
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">Setting</th>
+            <th role="columnheader" scope="col">Default</th>
+            <th role="columnheader" scope="col">What it controls</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {settings.map(setting => (
+            <tr role="row">
+              <td role="cell">
+                <span class="docs-table-label" aria-hidden="true">Setting</span><code>{setting.name}</code>
+              </td>
+              <td role="cell">
+                <span class="docs-table-label" aria-hidden="true">Default</span><code>{setting.value}</code>
+              </td>
+              <td class="docs-table-description" role="cell">
+                <span class="docs-table-label" aria-hidden="true">What it controls</span>{setting.description}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Table>
+  </section>
 
-  <h2>Cache</h2>
-  <p>
-    `depBeacon.cacheTtlMinutes` controls document analysis reuse. Use `Dep Beacon: Clear Registry Cache` when you
-    publish a package and want fresh metadata immediately.
-  </p>
+  <section aria-labelledby="registry-cache">
+    <h2 id="registry-cache">Registry and cache</h2>
+    <dl class="docs-reference">
+      <div>
+        <dt><code>registryUrl</code></dt>
+        <dd>Defaults to <code>https://registry.npmjs.org</code>. It can point to another npm-compatible registry.
+          Package links still open npmjs.com.</dd>
+      </div>
+      <div>
+        <dt>Fresh metadata</dt>
+        <dd>In VS Code, run <code>Dep Beacon: Clear Registry Cache</code> when you publish a package and want to
+          refresh cached results immediately.</dd>
+      </div>
+      <div>
+        <dt>Zed diagnostics</dt>
+        <dd>Set <code>showUpdateDiagnostics</code> to <code>false</code> to hide update warnings. Security
+          findings, manifest errors, hovers, and update actions remain available.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <Callout class="docs-note">
+    <strong>Security queries are a separate choice.</strong>
+    <p>Changing your npm registry does not disable OSV queries. Review <Link href="/docs/security">security and
+      privacy settings</Link> before using private package names.</p>
+  </Callout>
+
+  <nav class="docs-next" aria-label="Related guide">
+    <Link href="/docs">Back to all guides <Icon name="arrow-right" /></Link>
+  </nav>
 </Docs>

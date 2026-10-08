@@ -1,11 +1,25 @@
 {
-  "$schema": "https://unpkg.com/@changesets/config@3.0.5/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "santi020k/dep-beacon" }],
+  "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "santi020k/dep-beacon"
+    }
+  ],
   "commit": false,
-  "fixed": [["@santi020k/dep-beacon-core", "vscode-dep-beacon"]],
+  "fixed": [
+    [
+      "@santi020k/dep-beacon-core",
+      "vscode-dep-beacon"
+    ]
+  ],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
 }

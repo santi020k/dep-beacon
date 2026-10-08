@@ -1,0 +1,50 @@
+name: ESLint config maintenance
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/eslint-config-maintenance.yml
+      - '**/eslint.config.*'
+      - '**/package.json'
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify ESLint config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Check compatibility
+        run: pnpm exec basic-eslint compatibility
+      - name: Check config declaration portability when supported
+        run: |
+          cli=node_modules/@santi020k/eslint-config-basic/dist/cli.js
+          if node "$cli" config-types --help | grep -q 'Usage: basic-eslint config-types'; then
+            node "$cli" config-types
+          else
+            echo 'Skipping config declaration portability until Basic 3.4.0 is installed.'
+          fi
+      - name: Capture Doctor report
+        run: pnpm exec basic-eslint doctor --json > .eslint-config-doctor.json
+      - name: Check committed snapshot when present
+        run: |
+          if [ -f .eslint-config-snapshot.json ]; then
+            pnpm exec basic-eslint snapshot --check
+          fi
+      - name: Upload Doctor report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: eslint-config-doctor
+          path: .eslint-config-doctor.json
+          if-no-files-found: warn

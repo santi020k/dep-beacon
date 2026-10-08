@@ -1,40 +1,86 @@
 ---
+import { Callout, CodeTabs, Icon, Link } from '@santi020k/lumen-astro'
+
 import Docs from '../../layouts/Docs.astro'
+
+const defaultCatalog = [
+  { value: 'workspace', label: 'pnpm-workspace.yaml', language: 'yaml', code: `catalog:
+  react: ^19.0.0
+  react-dom: ^19.0.0` },
+  { value: 'package', label: 'package.json', language: 'json', code: `{
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  }
+}` }
+]
+
+const namedCatalog = [
+  { value: 'workspace', label: 'pnpm-workspace.yaml', language: 'yaml', code: `catalogs:
+  react19:
+    react: ^19.0.0
+    react-dom: ^19.0.0` },
+  { value: 'package', label: 'package.json', language: 'json', code: `{
+  "dependencies": {
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19"
+  }
+}` }
+]
 ---
 
 <Docs title="pnpm Workspaces" description="How Dep Beacon resolves pnpm workspace catalogs.">
-  <h1>pnpm Workspaces</h1>
-  <p>
-    Dep Beacon scans workspace `pnpm-workspace.yaml` files and creates a catalog snapshot before analyzing package
-    manifests.
-  </p>
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>04</span> / Shared dependency policy</p>
+    <h1>One catalog.<br />A connected workspace.</h1>
+    <p class="docs-intro">
+      Keep version policy in one place. Dep Beacon resolves your pnpm catalogs before it analyzes each package manifest.
+    </p>
+    <dl class="docs-facts">
+      <div><dt>Catalogs</dt><dd>Default + named</dd></div>
+      <div><dt>Also supported</dt><dd>Overrides + package extensions</dd></div>
+    </dl>
+  </header>
 
-  <h2>Default catalog</h2>
-  <pre><code>catalog:
-    astro: ^7.0.0
-    typescript: ^6.0.3
-  </code>
-  </pre>
+  <section aria-labelledby="default-catalog">
+    <h2 id="default-catalog">Start with a default catalog</h2>
+    <p>
+      Define your ranges in <code>pnpm-workspace.yaml</code>, then reference them with <code>catalog:</code>
+      in each <code>package.json</code>. Dep Beacon analyzes the resolved range, not the catalog reference itself.
+    </p>
+    <CodeTabs wrap={false} ariaLabel="Default catalog files" items={defaultCatalog} />
+  </section>
 
-  <p>
-    A `package.json` dependency like `"astro": "catalog:"` is analyzed using the catalog range.
-  </p>
+  <section aria-labelledby="named-catalogs">
+    <h2 id="named-catalogs">Name a shared set of versions</h2>
+    <p>
+      Named catalogs let packages choose a specific version policy. Here, <code>catalog:react19</code>
+      resolves the matching entry under <code>catalogs.react19</code>.
+    </p>
+    <CodeTabs wrap={false} ariaLabel="Named catalog files" items={namedCatalog} />
+  </section>
 
-  <h2>Named catalogs</h2>
-  <pre><code>catalogs:
-    react19:
-    react: ^19.0.0
-    react-dom: ^19.0.0
-       </code>
-  </pre>
+  <Callout class="docs-note">
+    <strong>Update the source of truth.</strong>
+    <p>
+      An update action on a catalog-backed dependency edits its owning entry in <code>pnpm-workspace.yaml</code>.
+      The package keeps its <code>catalog:</code> reference.
+    </p>
+  </Callout>
 
-  <p>
-    A dependency using `"react": "catalog:react19"` resolves against the named catalog.
-  </p>
+  <section aria-labelledby="workspace-policy">
+    <h2 id="workspace-policy">Bring the rest of your policy along</h2>
+    <dl class="docs-reference">
+      <div><dt><code>overrides</code></dt><dd>Central dependency overrides receive the same version and security
+        signals as package manifests.</dd></div>
+      <div><dt><code>packageExtensions</code></dt><dd>Additional dependency mappings participate in workspace
+        analysis too.</dd></div>
+      <div><dt><code>.yaml</code> or <code>.yml</code></dt><dd>Both supported workspace filenames work in VS Code
+        and Zed.</dd></div>
+    </dl>
+  </section>
 
-  <h2>Workspace dependency maps</h2>
-  <p>
-    Dep Beacon also analyzes workspace `overrides` and `packageExtensions` so central dependency policy gets the same
-    status signals as package manifests.
-  </p>
+  <nav class="docs-next" aria-label="Related guide">
+    <Link href="/docs/security">Understand security signals <Icon name="arrow-right" /></Link>
+  </nav>
 </Docs>
