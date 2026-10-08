@@ -1,4 +1,5 @@
-import { fetchWithTimeout } from './fetch.js'
+import { fetchJsonWithTimeout } from './fetch.js'
+import { RequestLimiter } from './request-limiter.js'
 import type { FetchLike, NpmPackageMetadata, RegistryLookupResult } from './types.js'
 
 interface PackumentShape {
@@ -13,52 +14,7 @@ interface CacheEntry {
 }
 
 const MAX_CONCURRENT_REGISTRY_LOOKUPS = 8
-
-class RegistryLookupLimiter {
-  #active = 0
-  readonly #limit: number
-  readonly #queue: (() => void)[] = []
-
-  constructor(limit: number) {
-    this.#limit = limit
-  }
-
-  async run<T>(lookup: () => Promise<T>): Promise<T> {
-    await this.#acquire()
-
-    try {
-      return await lookup()
-    } finally {
-      this.#release()
-    }
-  }
-
-  async #acquire(): Promise<void> {
-    if (this.#active < this.#limit) {
-      this.#active += 1
-
-      return
-    }
-
-    await new Promise<void>(resolve => {
-      this.#queue.push(resolve)
-    })
-  }
-
-  #release(): void {
-    const next = this.#queue.shift()
-
-    if (next) {
-      next()
-
-      return
-    }
-
-    this.#active -= 1
-  }
-}
-
-const registryLookupLimiter = new RegistryLookupLimiter(MAX_CONCURRENT_REGISTRY_LOOKUPS)
+const registryLookupLimiter = new RequestLimiter(MAX_CONCURRENT_REGISTRY_LOOKUPS)
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const toDistTags = (value: unknown): Record<string, string> => {
@@ -153,7 +109,7 @@ export class NpmRegistryClient {
       const encodedName = encodeURIComponent(packageName)
 
       try {
-        const response = await fetchWithTimeout(this.#fetch, `${this.#registryUrl}/${encodedName}`, {
+        const response = await fetchJsonWithTimeout(this.#fetch, `${this.#registryUrl}/${encodedName}`, {
           headers: {
             accept: 'application/vnd.npm.install-v1+json, application/json'
           }
@@ -181,7 +137,7 @@ export class NpmRegistryClient {
           }
         }
 
-        const metadata = toMetadata(packageName, await response.json())
+        const metadata = toMetadata(packageName, response.body)
 
         if (!metadata) {
           return {

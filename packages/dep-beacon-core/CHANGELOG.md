@@ -2,6 +2,13 @@
 
 ## 1.3.0
 
+### Reliability fixes
+
+- Resolve catalog npm aliases and preserve aliases in editor update actions.
+- Parse override comparators and nested parent overrides without false package errors.
+- Keep request timeouts active through JSON body downloads and limit concurrent OSV
+  requests across clients. Retry malformed OSV batch responses on the next lookup.
+
 ### Minor Changes
 
 - Refresh the dependency toolchain and documentation for the 1.3 release. The documentation

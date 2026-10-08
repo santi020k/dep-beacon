@@ -36,7 +36,7 @@
 
 `@santi020k/dep-beacon-lsp` provides dependency intelligence over the Language Server Protocol. It powers the Dep Beacon extension for Zed and reuses `@santi020k/dep-beacon-core` for manifest analysis, npm metadata, pnpm workspace catalogs, and OSV vulnerability checks.
 
-Dep Beacon for Zed `0.0.3` requires language server `0.0.3` or newer. The Zed adapter installs it automatically unless a `dep-beacon-lsp` executable already exists on `PATH`.
+Dep Beacon for Zed `0.0.3` requires language server `0.0.3` or newer. The Zed adapter installs it automatically unless an explicit `lsp.dep-beacon.binary` command is configured.
 
 ## Features
 
@@ -57,7 +57,9 @@ The package exposes the `dep-beacon-lsp` executable. LSP clients should launch i
 dep-beacon-lsp --stdio
 ```
 
-Zed users do not need to install this package manually. The Zed adapter installs it through Zed's managed npm APIs when no `dep-beacon-lsp` executable is available on `PATH`.
+Zed users do not need to install this package manually. The Zed adapter installs it through Zed's managed npm APIs by default.
+For a local development build, configure an explicit `lsp.dep-beacon.binary` command
+as described in the [adapter development guide](../../extensions/dep-beacon-lsp/README.md).
 
 In Zed, the server publishes default-visible diagnostics for dependency updates, invalid ranges, missing packages, and OSV findings. It also provides:
 

@@ -38,31 +38,30 @@ export const normalizeDependencySpec = (
   dependency: DependencyEntry,
   catalogSnapshot?: CatalogSnapshot
 ): NormalizedDependencySpec => {
-  if (dependency.spec.startsWith('catalog:')) {
-    const catalogSpec = resolveCatalogSpec(catalogSnapshot, dependency.packageName, dependency.spec)
+  const isCatalog = dependency.spec.startsWith('catalog:')
 
-    return {
-      displaySpec: catalogSpec ? `${dependency.spec} (${catalogSpec})` : dependency.spec,
-      packageName: dependency.packageName,
-      protocol: catalogSpec ? 'catalog' : 'unsupported',
-      spec: catalogSpec ?? dependency.spec
-    }
-  }
+  const catalogSpec = isCatalog ?
+    resolveCatalogSpec(catalogSnapshot, dependency.packageName, dependency.spec) :
+    undefined
 
-  if (isUnsupportedProtocol(dependency.spec)) {
+  const spec = catalogSpec ?? dependency.spec
+  const displaySpec = catalogSpec ? `${dependency.spec} (${catalogSpec})` : dependency.spec
+
+  if (isUnsupportedProtocol(spec)) {
     return {
-      displaySpec: dependency.spec,
+      displaySpec,
       packageName: dependency.packageName,
       protocol: 'unsupported',
-      spec: dependency.spec
+      spec
     }
   }
 
-  const alias = stripNpmAlias(dependency.packageName, dependency.spec)
+  const alias = stripNpmAlias(dependency.packageName, spec)
 
   return {
-    displaySpec: dependency.spec,
+    displaySpec,
     packageName: alias.packageName,
+    protocol: isCatalog ? 'catalog' : undefined,
     spec: alias.spec
   }
 }
@@ -149,7 +148,13 @@ export const getVersionPrefix = (spec: string): string => {
   return ''
 }
 
-export const createTargetSpec = (currentSpec: string, targetVersion: string): string => `${getVersionPrefix(currentSpec)}${targetVersion}`
+export const createTargetSpec = (currentSpec: string, targetVersion: string): string => {
+  const normalized = currentSpec.trim()
+  const alias = stripNpmAlias('', normalized)
+  const target = `${getVersionPrefix(alias.spec)}${targetVersion}`
+
+  return normalized.startsWith('npm:') ? `npm:${alias.packageName}@${target}` : target
+}
 
 export const computeUpdateTargets = (
   spec: string,

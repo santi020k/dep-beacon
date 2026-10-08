@@ -109,8 +109,8 @@ describe('version helpers', () => {
       spec: '^2.0.0'
     })
     expect(normalizeDependencySpec(aliasWithoutVersion)).toMatchObject({
-      packageName: 'alias',
-      spec: 'real-package'
+      packageName: 'real-package',
+      spec: 'latest'
     })
     expect(normalizeDependencySpec({
       ...dependency,
@@ -306,4 +306,23 @@ describe('dependency analysis edge cases', () => {
 
     expect(urls).toEqual(['https://registry.example.test/demo'])
   })
+})
+
+test('resolves catalog aliases and preserves their package name when updating', async () => {
+  const dependency = firstDependency('{"dependencies":{"typescript":"catalog:"}}')
+  const catalogSnapshot = createEmptyCatalogSnapshot()
+
+  catalogSnapshot.default.set('typescript', 'npm:@typescript/typescript6@^1.0.0')
+
+  const analysis = await analyzeDependency(dependency, { catalogSnapshot, registryClient: registryClient() })
+
+  expect(analysis.status).toBe('outdated')
+  expect(analysis.packageUrl).toBe('https://www.npmjs.com/package/@typescript/typescript6')
+  expect(analysis.displaySpec).toBe('catalog: (npm:@typescript/typescript6@^1.0.0)')
+  expect(createTargetSpec('npm:@typescript/typescript6@^1.0.0', '2.0.0')).toBe('npm:@typescript/typescript6@^2.0.0')
+  expect(createTargetSpec('npm:real-package', '2.0.0')).toBe('npm:real-package@2.0.0')
+
+  catalogSnapshot.default.set('typescript', 'workspace:*')
+
+  expect((await analyzeDependency(dependency, { catalogSnapshot })).status).toBe('protocol')
 })

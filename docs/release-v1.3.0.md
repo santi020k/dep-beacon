@@ -85,6 +85,42 @@ Temporary before/after screenshots and the 28-case documentation accessibility s
 live outside Git in `/tmp/dep-beacon-redesign`. All seven chapters passed the rendered
 desktop/mobile, light/dark axe sweep without violations, page errors, or overflow.
 
+## Large workspace reliability
+
+The shared engine now resolves npm aliases inside default and named catalogs before
+querying registry metadata, and update actions preserve the alias package and range
+prefix in both editors. Override selectors distinguish parent separators from semver
+comparators such as `>=`; nested npm `.` overrides query the actual parent package.
+Npm aliases without a version resolve their target package using the npm latest tag.
+
+Registry and OSV timeouts cover JSON response downloads as well as headers. OSV
+requests share an eight-request limit across clients, and malformed or truncated
+batch results are retried instead of being cached as successful empty findings.
+
+Zed honors an explicit `lsp.dep-beacon.binary` command for local development or
+custom installations. Without an explicit path it keeps the managed npm server;
+it does not silently prefer a possibly stale executable from `PATH`.
+
+### Workspace verification
+
+The rebuilt VS Code extension and Zed development adapter were exercised on the
+actual `eslint-config-basic` workspace. Both displayed dependency annotations;
+VS Code analyzed its 151-entry workspace manifest, and Zed started the locally
+built server through the explicit binary setting. The temporary workspace setting
+was removed after verification. No consumer dependency manifests were changed.
+
+A read-only shared-engine scan covered 88 manifests and 818 dependency entries in
+`eslint-config-basic`, with no parse errors or invalid specifications. It retained
+two unpublished version-floor findings and one registry timeout. A second scan of
+Lumen covered 19 manifests and 329 entries, with no parse, specification, missing
+package, or request errors. Registry results are snapshots, not permanent guarantees.
+
+Regression tests cover catalog aliases, alias-preserving editor actions, override
+comparators, stalled JSON bodies, malformed OSV batches, and the shared request limit.
+`pnpm run validate`, Zed extension validation, Rust tests, the WASM build, and Rust lint
+with warnings denied passed for the candidate. Final release integration and checks
+on the merged commit remain required before publication.
+
 ## Publication and recovery
 
 The integrated Zed registry fix changes the adapter ID and source directory to

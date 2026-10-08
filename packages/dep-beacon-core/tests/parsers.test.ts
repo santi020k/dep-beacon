@@ -53,7 +53,7 @@ describe('package.json parser edge cases', () => {
     ])).toEqual([
       ['fsevents', 'optionalDependencies', '^2.3.0', 'npm', ['optionalDependencies', 'fsevents']],
       ['react', 'peerDependencies', '^19.0.0', 'npm', ['peerDependencies', 'react']],
-      ['react@^18', 'overrides', '18.3.1', 'npm', ['overrides', 'react@^18', '.']],
+      ['react', 'overrides', '18.3.1', 'npm', ['overrides', 'react@^18', '.']],
       ['scheduler', 'overrides', '0.23.2', 'npm', ['overrides', 'react@^18', 'scheduler@^0.23.0']],
       ['debug', 'packageExtensions', '^4.4.0', 'pnpm', ['pnpm', 'packageExtensions', 'left-pad@*', 'optionalDependencies', 'debug']],
       ['ms', 'packageExtensions', '^2.1.0', 'pnpm', ['pnpm', 'packageExtensions', 'left-pad@*', 'peerDependencies', 'ms']]
@@ -135,4 +135,18 @@ packageExtensions:
     expect(manifest.catalogs.default.size).toBe(0)
     expect(manifest.catalogs.named.size).toBe(0)
   })
+})
+
+test.each([
+  ['esbuild@>=0.27.3 <0.28.1', 'esbuild'],
+  ['parent@>=1>child@>=2 <3', 'child'],
+  ['@scope/parent@>=1>@scope/child@>=2', '@scope/child'],
+  ['demo@>1.0.0', 'demo'],
+  ['parent>123-child@^1', '123-child']
+])('parses override selectors without treating comparators as package names: %s', (key, name) => {
+  const json = parsePackageJsonManifest(JSON.stringify({ pnpm: { overrides: { [key]: '2.0.0' } } }))
+  const yaml = parsePnpmWorkspaceManifest(`overrides:\n  "${key}": 2.0.0\n`)
+
+  expect(json.dependencies[0]?.packageName).toBe(name)
+  expect(yaml.dependencies[0]?.packageName).toBe(name)
 })

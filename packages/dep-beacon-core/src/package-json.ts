@@ -159,7 +159,7 @@ const collectOverrides = (
 
     if (isStringNode(valueNode)) {
       const spec = stringNodeValue(valueNode)
-      const packageName = key === '.' ? path.at(-1) ?? key : getOverridePackageName(key)
+      const packageName = getOverridePackageName(key === '.' ? path.at(-1) ?? key : key)
 
       entries.push(createEntry({
         lineStarts,
