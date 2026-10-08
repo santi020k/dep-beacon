@@ -1,10 +1,18 @@
 <p align="center">
-  <a href="../../README.md"><img src="resources/icon.png" alt="Dep Beacon" width="72"></a>
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/santi020k/dep-beacon/main/docs/assets/readme/workspace-dark.png">
+      <img src="https://raw.githubusercontent.com/santi020k/dep-beacon/main/docs/assets/readme/workspace-light.png" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="220">
+    </picture>
+  </a>
 </p>
 
-<p align="center"><a href="../../README.md">Dep Beacon</a></p>
-
 <h1 align="center">VS Code extension</h1>
+
+<p align="center">
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-13967e?style=flat-square" alt="License: MIT"></a>
+  <a href="https://github.com/santi020k/dep-beacon/blob/main/packages/vscode-dep-beacon/package.json"><img src="https://img.shields.io/badge/editor-VS_Code-276ccc?style=flat-square" alt="Editor: VS Code"></a>
+</p>
 
 <p align="center">
   <a href="../../README.md">Project overview</a> ·

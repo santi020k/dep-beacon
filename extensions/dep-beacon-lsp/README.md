@@ -1,10 +1,18 @@
 <p align="center">
-  <a href="../../README.md"><img src="../../packages/vscode-dep-beacon/resources/icon.png" alt="Dep Beacon" width="72"></a>
+  <a href="../../README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="../../docs/assets/readme/workspace-dark.svg">
+      <img src="../../docs/assets/readme/workspace-light.svg" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="220">
+    </picture>
+  </a>
 </p>
 
-<p align="center"><a href="../../README.md">Dep Beacon</a></p>
-
 <h1 align="center">Zed extension</h1>
+
+<p align="center">
+  <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-MIT-13967e?style=flat-square" alt="License: MIT"></a>
+  <a href="../../README.md"><img src="https://img.shields.io/badge/source-Package-276ccc?style=flat-square" alt="Source: Package"></a>
+</p>
 
 <p align="center">
   <a href="../../README.md">Project overview</a> ·

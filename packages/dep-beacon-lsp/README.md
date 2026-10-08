@@ -1,10 +1,18 @@
 <p align="center">
-  <a href="https://github.com/santi020k/dep-beacon/blob/main/README.md"><img src="https://raw.githubusercontent.com/santi020k/dep-beacon/main/packages/vscode-dep-beacon/resources/icon.png" alt="Dep Beacon" width="72"></a>
+  <a href="../../README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="../../docs/assets/readme/workspace-dark.svg">
+      <img src="../../docs/assets/readme/workspace-light.svg" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="220">
+    </picture>
+  </a>
 </p>
 
-<p align="center"><a href="https://github.com/santi020k/dep-beacon/blob/main/README.md">Dep Beacon</a></p>
-
 <h1 align="center">Language server</h1>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@santi020k/dep-beacon-lsp"><img src="https://img.shields.io/npm/v/@santi020k/dep-beacon-lsp?style=flat-square&amp;color=276ccc" alt="Published npm version"></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-MIT-13967e?style=flat-square" alt="License: MIT"></a>
+</p>
 
 <p align="center">
   <a href="https://github.com/santi020k/dep-beacon/blob/main/README.md">Project overview</a> ·

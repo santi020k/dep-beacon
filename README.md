@@ -1,10 +1,24 @@
 <p align="center">
-  <img src="packages/vscode-dep-beacon/resources/icon.svg" alt="Dep Beacon" width="88">
+  <a href="README.md">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/hero-dark.svg">
+      <img src="docs/assets/readme/hero-light.svg" alt="Dep Beacon — Every dependency. A clearer signal." width="1200" height="360">
+    </picture>
+  </a>
 </p>
 
 <h1 align="center">Dep Beacon</h1>
 
 <p align="center">Dependency intelligence where you edit your manifests.</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@santi020k/dep-beacon-core"><img src="https://img.shields.io/npm/v/@santi020k/dep-beacon-core.svg?label=core&amp;style=flat-square&amp;color=276ccc" alt="npm core"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
+  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon"><img src="https://badgen.net/vs-marketplace/v/santi020k.vscode-dep-beacon?label=VS%20Marketplace" alt="VS Marketplace"></a>
+  <a href="https://open-vsx.org/extension/santi020k/vscode-dep-beacon"><img src="https://img.shields.io/open-vsx/v/santi020k/vscode-dep-beacon" alt="Open VSX"></a>
+</p>
 
 Dep Beacon is a dependency intelligence engine for npm projects with integrations for VS Code and Zed. It brings version status, safe update targets, pnpm workspace catalog awareness, and OSV vulnerability warnings directly into manifests.
 
@@ -15,15 +29,6 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 [Releases](https://github.com/santi020k/dep-beacon/releases) ·
 [Issues](https://github.com/santi020k/dep-beacon/issues)
 
-<p align="center">
-  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml"><img src="https://github.com/santi020k/dep-beacon/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
-  <a href="https://www.npmjs.com/package/@santi020k/dep-beacon-core"><img src="https://img.shields.io/npm/v/@santi020k/dep-beacon-core.svg?label=core" alt="npm core"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon"><img src="https://badgen.net/vs-marketplace/v/santi020k.vscode-dep-beacon?label=VS%20Marketplace" alt="VS Marketplace"></a>
-  <a href="https://open-vsx.org/extension/santi020k/vscode-dep-beacon"><img src="https://img.shields.io/open-vsx/v/santi020k/vscode-dep-beacon" alt="Open VSX"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
-</p>
-
 **Explore:** [Packages](#packages) · [Quick Start](#quick-start) · [Use in Zed](#use-in-zed) · [Commits](#commits) · [Local Extension Debugging](#local-extension-debugging) · [Status Colors](#status-colors)
 
 ## In your editor
@@ -31,19 +36,19 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 Real dependency signals from the public sample workspace. Select either preview to
 open the full capture; the [website](https://beacon.santi020k.com) includes both editors.
 
-| VS Code | Zed |
-| --- | --- |
+| VS Code                                                                                            | Zed                                                                                        |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | [![Dep Beacon in VS Code](apps/docs/public/usage-preview.png)](apps/docs/public/usage-preview.png) | [![Dep Beacon in Zed](apps/docs/public/zed-preview.jpg)](apps/docs/public/zed-preview.jpg) |
 
 ## Packages
 
-| Package or surface | Purpose | Distribution |
-| --- | --- | --- |
-| [`@santi020k/dep-beacon-core`](packages/dep-beacon-core) | Manifest analysis, npm metadata, semver ranges, and OSV advisories | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-core) |
-| [`vscode-dep-beacon`](packages/vscode-dep-beacon) | CodeLens, status decorations, diagnostics, update commands, sorting, caching, and install-on-save workflows | [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) · [Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) |
-| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp) | Language server for dependency diagnostics, hovers, npm links, and update actions | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-lsp) |
-| [`extensions/dep-beacon-lsp`](extensions/dep-beacon-lsp) | Thin Rust/WASM adapter for Zed | Zed registry source |
-| [`apps/docs`](apps/docs) | Guides, configuration, and product documentation | [Documentation](https://beacon.santi020k.com) |
+| Package or surface                                       | Purpose                                                                                                     | Distribution                                                                                                                                                               |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@santi020k/dep-beacon-core`](packages/dep-beacon-core) | Manifest analysis, npm metadata, semver ranges, and OSV advisories                                          | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-core)                                                                                                            |
+| [`vscode-dep-beacon`](packages/vscode-dep-beacon)        | CodeLens, status decorations, diagnostics, update commands, sorting, caching, and install-on-save workflows | [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) · [Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) |
+| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp)   | Language server for dependency diagnostics, hovers, npm links, and update actions                           | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-lsp)                                                                                                             |
+| [`extensions/dep-beacon-lsp`](extensions/dep-beacon-lsp) | Thin Rust/WASM adapter for Zed                                                                              | Zed registry source                                                                                                                                                        |
+| [`apps/docs`](apps/docs)                                 | Guides, configuration, and product documentation                                                            | [Documentation](https://beacon.santi020k.com)                                                                                                                              |
 
 ## Quick Start
 
@@ -177,10 +182,10 @@ or synchronize credentials. Never commit credentials or local `.env` files.
 
 ## Find your next step
 
-| Resource | Use it for |
-| --- | --- |
+| Resource                                                           | Use it for                                |
+| ------------------------------------------------------------------ | ----------------------------------------- |
 | [`@santi020k/dep-beacon-core`](packages/dep-beacon-core/README.md) | Focused installation and usage reference. |
-| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp/README.md) | Focused installation and usage reference. |
+| [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp/README.md)   | Focused installation and usage reference. |
 
 ## License
 
