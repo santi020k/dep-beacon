@@ -312,6 +312,10 @@ const awaitCurrentAnalysis = async (
   return isCurrentDocumentVersion(uri, version, generation) ? result : undefined
 }
 
+const isSameOpenDocumentVersion = (document: TextDocument, version: number): boolean => (
+  documents.get(document.uri) === document && document.version === version
+)
+
 const getDocumentAnalysis = async (document: TextDocument): Promise<DocumentAnalysis | undefined> => {
   const generation = analysisGeneration
   const version = document.version
@@ -333,8 +337,10 @@ const getDocumentAnalysis = async (document: TextDocument): Promise<DocumentAnal
   if (scheduled) {
     await scheduled.finished
 
-    if (!isCurrentDocumentVersion(uri, version, generation)) return undefined
+    if (!isSameOpenDocumentVersion(document, version)) return undefined
 
+    // Workspace refreshes may advance the shared generation while this document
+    // remains unchanged. Retry against that generation instead of losing results.
     return getDocumentAnalysis(document)
   }
 
@@ -702,6 +708,17 @@ const refreshAffectedDocuments = async (document: TextDocument): Promise<void> =
 }
 
 const scheduleDocumentRefresh = (document: TextDocument): void => {
+  const path = manifestPath(document)
+  const workspaceChanged = path !== undefined && basename(path).startsWith('pnpm-workspace.')
+
+  if (workspaceChanged) {
+    // Catalog locations belong to package analyses too. Invalidate them before
+    // the debounce window so an action cannot reuse an outdated workspace range.
+    analysisGeneration += 1
+
+    results.clear()
+  }
+
   revisions.set(document.uri, (revisions.get(document.uri) ?? 0) + 1)
 
   clearRefresh(document.uri)
@@ -727,7 +744,9 @@ const scheduleDocumentRefresh = (document: TextDocument): void => {
       return
     }
 
-    refreshAffectedDocuments(currentDocument).finally(finish).catch((error: unknown) => {
+    const refresh = workspaceChanged ? refreshAllDocuments() : refreshDocument(currentDocument)
+
+    refresh.finally(finish).catch((error: unknown) => {
       connection.console.error(error instanceof Error ? error.stack ?? error.message : String(error))
     })
   }, DOCUMENT_CHANGE_DEBOUNCE_MS)

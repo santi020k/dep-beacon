@@ -56,7 +56,10 @@ interface ServerHarness {
   synchronize: () => Promise<boolean>
 }
 
-const withServer = async (run: (harness: ServerHarness) => Promise<void>): Promise<void> => {
+const withServer = async (
+  run: (harness: ServerHarness) => Promise<void>,
+  rootUri: string | null = null
+): Promise<void> => {
   const languageServer = await vi.importActual<typeof protocol>('vscode-languageserver/node')
   const incoming = new PassThrough()
   const outgoing = new PassThrough()
@@ -83,7 +86,7 @@ const withServer = async (run: (harness: ServerHarness) => Promise<void>): Promi
 
     client.listen()
 
-    await client.sendRequest(protocol.InitializeRequest.type, { capabilities: {}, processId: null, rootUri: null })
+    await client.sendRequest(protocol.InitializeRequest.type, { capabilities: {}, processId: null, rootUri })
 
     await run({ client, published, synchronize })
   } finally {
@@ -193,9 +196,30 @@ describe('document analysis revisions', () => {
     })
   })
 
-  test('answers current-version editor requests with the shared analysis after debounce completes', async () => {
+  test.each([
+    { fileName: 'package.json', initial: initialText, languageId: 'json', line: 3, updated: movedText },
+    {
+      fileName: 'pnpm-workspace.yaml',
+      initial: 'catalog:\n  example-package: ^1.0.0\n',
+      languageId: 'yaml',
+      line: 4,
+      updated: 'packages:\n  - packages/*\n\ncatalog:\n  example-package: ^1.0.0\n'
+    },
+    {
+      fileName: 'pnpm-workspace.yml',
+      initial: 'catalog:\n  example-package: ^1.0.0\n',
+      languageId: 'yaml',
+      line: 4,
+      updated: 'packages:\n  - packages/*\n\ncatalog:\n  example-package: ^1.0.0\n'
+    }
+  ])('answers queued editor requests after $fileName refresh', async ({ fileName, initial, languageId, line, updated }) => {
+    const documentUri = `file:///dep-beacon-test/${fileName}`
+    const requestedDocument = { uri: documentUri }
+
     await withServer(async ({ client, synchronize }) => {
-      await openDocument(client)
+      await client.sendNotification(protocol.DidOpenTextDocumentNotification.type, {
+        textDocument: { languageId, text: initial, uri: documentUri, version: 1 }
+      })
 
       await synchronize()
 
@@ -205,13 +229,18 @@ describe('document analysis revisions', () => {
 
       const initialCalls = vi.mocked(core.analyzeDependencies).mock.calls.length
 
-      await moveDependency(client)
+      await client.sendNotification(protocol.DidChangeTextDocumentNotification.type, {
+        contentChanges: [{ text: updated }],
+        textDocument: { uri: documentUri, version: 2 }
+      })
 
       await synchronize()
 
-      const lenses = client.sendRequest(protocol.CodeLensRequest.type, { textDocument })
-      const links = client.sendRequest(protocol.DocumentLinkRequest.type, { textDocument })
-      const hints = client.sendRequest(protocol.InlayHintRequest.type, { range: requestedRange, textDocument })
+      const lenses = client.sendRequest(protocol.CodeLensRequest.type, { textDocument: requestedDocument })
+      const links = client.sendRequest(protocol.DocumentLinkRequest.type, { textDocument: requestedDocument })
+      const hints = client.sendRequest(protocol.InlayHintRequest.type, {
+        range: requestedRange, textDocument: requestedDocument
+      })
 
       await synchronize()
 
@@ -223,11 +252,70 @@ describe('document analysis revisions', () => {
 
       expect(core.analyzeDependencies).toHaveBeenCalledTimes(initialCalls + 1)
       expect(resolvedLenses).toHaveLength(1)
-      expect(resolvedLenses?.[0]?.range.start.line).toBe(3)
+      expect(resolvedLenses?.[0]?.range.start.line).toBe(line)
       expect(resolvedLinks).toHaveLength(1)
-      expect(resolvedLinks?.[0]?.range.start.line).toBe(3)
+      expect(resolvedLinks?.[0]?.range.start.line).toBe(line)
       expect(resolvedHints).toHaveLength(1)
-      expect(resolvedHints?.[0]?.position.line).toBe(3)
+      expect(resolvedHints?.[0]?.position.line).toBe(line)
     })
   })
+  test.each(['pnpm-workspace.yaml', 'pnpm-workspace.yml'])(
+    'refreshes cached catalog action ranges immediately when %s changes',
+    async fileName => {
+      const workspaceUri = `file:///dep-beacon-test/${fileName}`
+
+      await withServer(async ({ client, synchronize }) => {
+        await client.sendNotification(protocol.DidOpenTextDocumentNotification.type, {
+          textDocument: {
+            languageId: 'yaml', text: 'catalog:\n  example-package: ^1.0.0\n', uri: workspaceUri, version: 1
+          }
+        })
+
+        await synchronize()
+
+        await vi.advanceTimersByTimeAsync(300)
+
+        await client.sendNotification(protocol.DidOpenTextDocumentNotification.type, {
+          textDocument: {
+            languageId: 'json', text: '{"dependencies":{"example-package":"catalog:"}}', uri, version: 1
+          }
+        })
+
+        await synchronize()
+
+        await vi.advanceTimersByTimeAsync(300)
+
+        await synchronize()
+
+        const before = await client.sendRequest(protocol.CodeActionRequest.type, {
+          context: { diagnostics: [] }, range: requestedRange, textDocument
+        })
+        const originalEdits = (before ?? []).flatMap(action => (
+          'edit' in action ? action.edit?.changes?.[workspaceUri] ?? [] : []
+        ))
+
+        expect(originalEdits.length).toBeGreaterThan(0)
+        expect(originalEdits.every(edit => edit.range.start.line === 1)).toBe(true)
+
+        await client.sendNotification(protocol.DidChangeTextDocumentNotification.type, {
+          contentChanges: [{ text: 'packages:\n  - packages/*\n\ncatalog:\n  example-package: ^1.0.0\n' }],
+          textDocument: { uri: workspaceUri, version: 2 }
+        })
+
+        await synchronize()
+
+        // The package document has not changed, and the workspace debounce timer
+        // has not fired. Its actions must still target the new catalog location.
+        const after = await client.sendRequest(protocol.CodeActionRequest.type, {
+          context: { diagnostics: [] }, range: requestedRange, textDocument
+        })
+        const currentEdits = (after ?? []).flatMap(action => (
+          'edit' in action ? action.edit?.changes?.[workspaceUri] ?? [] : []
+        ))
+
+        expect(currentEdits.length).toBeGreaterThan(0)
+        expect(currentEdits.every(edit => edit.range.start.line === 4)).toBe(true)
+      }, 'file:///dep-beacon-test')
+    }
+  )
 })
