@@ -55,6 +55,11 @@ desktop/mobile, light/dark axe sweep without violations, page errors, or overflo
 
 ## Publication and recovery
 
+The integrated Zed registry fix changes the adapter ID and source directory to
+`dep-beacon-lsp`. For a local development installation, reinstall the extension from
+`extensions/dep-beacon-lsp` and remove the old development entry. The display name
+remains Dep Beacon; the npm package and `lsp.dep-beacon` settings key are unchanged.
+
 This task prepares local integration. Publishing packages, updating editor registries,
 deploying documentation, pushing branches, and opening or merging the release PR are
 separate external actions. After authorization, open `release/v1.3.0` into `main`.

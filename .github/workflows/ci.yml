@@ -57,7 +57,7 @@ jobs:
             echo "packages=false" >> "$GITHUB_OUTPUT"
           fi
           release_pattern='^(\.changeset/|packages/[^/]+/(package\.json|CHANGELOG\.md)$|'
-          release_pattern+='extensions/dep-beacon/(Cargo\.toml|Cargo\.lock|extension\.toml)$|'
+          release_pattern+='extensions/dep-beacon-lsp/(Cargo\.toml|Cargo\.lock|extension\.toml)$|'
           release_pattern+='\.github/workflows/release\.yml$)'
           if grep -Eq "$release_pattern" /tmp/changed-files; then
             echo "release=true" >> "$GITHUB_OUTPUT"
@@ -109,7 +109,7 @@ jobs:
       - name: Verify documentation interactions
         run: pnpm run test:docs
       - name: Check the Zed adapter
-        run: cargo check --locked --manifest-path extensions/dep-beacon/Cargo.toml
+        run: cargo check --locked --manifest-path extensions/dep-beacon-lsp/Cargo.toml
 
   compatibility:
     name: Package compatibility (24.x)

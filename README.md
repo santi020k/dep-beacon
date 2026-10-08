@@ -33,7 +33,7 @@ Dep Beacon is a dependency intelligence engine for npm projects with integration
 | [`@santi020k/dep-beacon-core`](packages/dep-beacon-core) | Manifest analysis, npm metadata, semver ranges, and OSV advisories | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-core) |
 | [`vscode-dep-beacon`](packages/vscode-dep-beacon) | CodeLens, status decorations, diagnostics, update commands, sorting, caching, and install-on-save workflows | [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=santi020k.vscode-dep-beacon) · [Open VSX](https://open-vsx.org/extension/santi020k/vscode-dep-beacon) |
 | [`@santi020k/dep-beacon-lsp`](packages/dep-beacon-lsp) | Language server for dependency diagnostics, hovers, npm links, and update actions | [npm](https://www.npmjs.com/package/@santi020k/dep-beacon-lsp) |
-| [`extensions/dep-beacon`](extensions/dep-beacon) | Thin Rust/WASM adapter for Zed | Zed registry source |
+| [`extensions/dep-beacon-lsp`](extensions/dep-beacon-lsp) | Thin Rust/WASM adapter for Zed | Zed registry source |
 | [`apps/docs`](apps/docs) | Guides, configuration, and product documentation | [Documentation](https://beacon.santi020k.com) |
 
 ## Quick Start
