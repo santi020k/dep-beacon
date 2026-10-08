@@ -17,6 +17,7 @@ words:
   - dep
   - depbeacon
   - domexception
+  - elif
   - esbuild
   - expressjs
   - extractfile

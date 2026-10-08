@@ -104,11 +104,64 @@ jobs:
                       raise ValueError(f'{name}@{version} does not match the release source')
               print(f'Verified exact published artifact: {name}@{version}')
           PYTHON
+      - name: Reconcile verified release records
+        if: inputs.recover_published
+        id: recovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SOURCE_SHA: ${{ inputs.commit_sha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for directory in packages/dep-beacon-core packages/dep-beacon-lsp; do
+            name="$(node -p "require('./$directory/package.json').name")"
+            version="$(node -p "require('./$directory/package.json').version")"
+            tag="${name}@${version}"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            elif ! git rev-parse --verify "$tag^{commit}" >/dev/null 2>&1; then
+              git tag -a "$tag" -m "$tag" "$EXPECTED_SOURCE_SHA"
+            fi
+            if [[ "$(git rev-parse "$tag^{commit}")" != "$EXPECTED_SOURCE_SHA" ]]; then
+              echo "Existing release tag does not match the verified source: $tag"
+              exit 1
+            fi
+            git push origin "refs/tags/$tag"
+            if gh release view "$tag" --json isDraft > /tmp/existing-release.json 2>/dev/null; then
+              if jq -e '.isDraft' /tmp/existing-release.json >/dev/null; then
+                gh release edit "$tag" --draft=false
+              fi
+            else
+              python3 - "$directory/CHANGELOG.md" "$version" <<'PYTHON'
+          import sys
+          from pathlib import Path
+
+          changelog = Path(sys.argv[1]).read_text()
+          heading = '## ' + sys.argv[2] + '\n'
+          if heading not in changelog:
+              raise ValueError('Release changelog entry is missing')
+          notes = changelog.split(heading, 1)[1].split('\n## ', 1)[0].strip()
+          Path('/tmp/release-notes.md').write_text(notes + '\n')
+          PYTHON
+              gh release create "$tag" --verify-tag --title "$tag" --notes-file /tmp/release-notes.md
+            fi
+          done
+          packages="$(node --input-type=commonjs <<'JS'
+          const packages = ['dep-beacon-core', 'dep-beacon-lsp'].map(slug => {
+            const pkg = require('./packages/' + slug + '/package.json');
+            return {name: pkg.name, version: pkg.version};
+          });
+          process.stdout.write(JSON.stringify(packages));
+          JS
+          )"
+          echo "published-packages=$packages" >> "$GITHUB_OUTPUT"
+          echo "published=true" >> "$GITHUB_OUTPUT"
       - name: Create release pull request or publish
+        if: '!inputs.recover_published'
         id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          publish-script: ${{ inputs.recover_published && 'pnpm exec changeset git-tag' || 'pnpm run release' }}
+          publish-script: pnpm run release
           version-script: pnpm run version-packages
           commit-message: "chore(release): version packages"
           pr-title: "chore(release): version packages"
@@ -124,9 +177,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run ci.yml --ref changeset-release/main
       - name: Create umbrella version tag
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.recovery.outputs.published == 'true' || steps.changesets.outputs.published == 'true'
         env:
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs['published-packages'] }}
+          PUBLISHED_PACKAGES: >-
+            ${{ steps.recovery.outputs['published-packages'] ||
+                steps.changesets.outputs['published-packages'] }}
         run: |
           VERSION="$(node -p "require('./packages/dep-beacon-core/package.json').version")"
           if ! jq -e \
@@ -137,7 +192,9 @@ jobs:
             exit 0
           fi
           if git ls-remote --exit-code --tags origin "refs/tags/v${VERSION}" >/dev/null 2>&1; then
-            echo "Tag v${VERSION} already exists; skipping."
+            git fetch origin "refs/tags/v${VERSION}:refs/tags/v${VERSION}"
+            test "$(git rev-parse "v${VERSION}^{commit}")" = "$(git rev-parse HEAD)"
+            echo "Tag v${VERSION} already matches the verified source; skipping."
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -145,7 +202,7 @@ jobs:
           git tag -a "v${VERSION}" -m "Release v${VERSION}"
           git push origin "v${VERSION}"
       - name: Publish VS Code extension
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.recovery.outputs.published == 'true' || steps.changesets.outputs.published == 'true'
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
@@ -154,7 +211,7 @@ jobs:
           test -n "$OVSX_PAT"
           pnpm --filter vscode-dep-beacon publish:ext
       - name: Publish Zed extension
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.recovery.outputs.published == 'true' || steps.changesets.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_SHA: ${{ inputs.commit_sha || github.sha }}

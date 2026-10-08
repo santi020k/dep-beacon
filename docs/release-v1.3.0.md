@@ -151,13 +151,13 @@ The published package files match merge commit
 After the workflow correction passes checks and review, run the Release workflow
 from `main` with `commit_sha` set to that exact original source and
 `recover_published=true`. Recovery rebuilds the original source, verifies registry
-tarball integrity and all package file contents, and creates only missing package
-tags. Git CLI pushes keep those tags on the checked-out source. It does not
+tarball integrity and all package file contents, and reconciles missing package
+tags and GitHub release records. Existing tags must match the verified source. Git CLI pushes keep those tags on the checked-out source. It does not
 republish the npm versions. The downstream steps create the GitHub releases,
 publish the matching VS Code/Open VSX artifact, and open the Zed registry PR.
 
-Inspect existing tags and release records before recovery. If recovery partially
-completes, inspect the individual surfaces and recover only the missing delivery
-steps. Existing tags emit no new Changesets events, so rerunning recovery alone
-may skip missing GitHub releases or editors. Preserve published artifacts and tags;
+If recovery partially completes, rerun it with the same verified source SHA.
+Existing matching tags and published GitHub releases are reused; missing records
+are created, and editor publication resumes with duplicate-version handling.
+Inspect the individual delivery surfaces after every recovery. Preserve published artifacts and tags;
 do not move tags to the later workflow-fix commit or overwrite npm versions.
