@@ -9,6 +9,8 @@ import {
   type DependencyEntry,
   type ManifestParseError,
   type ManifestParseResult,
+  NpmRegistryClient,
+  OsvClient,
   parseManifest
 } from '@santi020k/dep-beacon-core'
 
@@ -76,6 +78,24 @@ interface BulkWorkspaceEdit {
   edit: WorkspaceEdit
 }
 
+interface CachedDocumentAnalysis {
+  generation: number
+  result: DocumentAnalysis
+  version: number
+}
+
+interface PendingDocumentAnalysis {
+  generation: number
+  promise: Promise<DocumentAnalysis | undefined>
+  version: number
+}
+
+interface ScheduledRefresh {
+  finished: Promise<void>
+  resolve: () => void
+  timer: ReturnType<typeof setTimeout>
+}
+
 const DEFAULT_SETTINGS: DepBeaconSettings = {
   checkVulnerabilities: true,
   includePrerelease: false,
@@ -84,12 +104,19 @@ const DEFAULT_SETTINGS: DepBeaconSettings = {
 }
 
 const TRANSIENT_FAILURE_RETRY_MS = 30_000
+const DOCUMENT_CHANGE_DEBOUNCE_MS = 300
+const SHARED_CACHE_TTL_MS = 15 * 60_000
 const connection = createConnection(ProposedFeatures.all)
 const documents = new TextDocuments(TextDocument)
-const results = new Map<string, DocumentAnalysis>()
+const results = new Map<string, CachedDocumentAnalysis>()
+const analysisRequests = new Map<string, PendingDocumentAnalysis>()
 const revisions = new Map<string, number>()
+const refreshTimers = new Map<string, ScheduledRefresh>()
 const retryTimers = new Map<string, ReturnType<typeof setTimeout>>()
 let settings = DEFAULT_SETTINGS
+let analysisGeneration = 0
+let registryClient = new NpmRegistryClient({ cacheTtlMs: SHARED_CACHE_TTL_MS, registryUrl: settings.registryUrl })
+const osvClient = new OsvClient()
 let workspaceRoots: string[] = []
 
 const toRange = (range: { endPosition: Position, startPosition: Position }): Range => ({
@@ -261,11 +288,78 @@ const analyzeDocument = async (document: TextDocument): Promise<DocumentAnalysis
   const analyses = await analyzeDependencies(manifest.dependencies, {
     catalogSnapshot: catalogs,
     includePrerelease: settings.includePrerelease,
+    osvClient,
+    registryClient,
     registryUrl: settings.registryUrl,
     vulnerabilities: settings.checkVulnerabilities
   })
 
   return { analyses, catalogLocations, manifest }
+}
+
+const isCurrentDocumentVersion = (uri: string, version: number, generation: number): boolean => (
+  analysisGeneration === generation && documents.get(uri)?.version === version
+)
+
+const awaitCurrentAnalysis = async (
+  promise: Promise<DocumentAnalysis | undefined>,
+  uri: string,
+  version: number,
+  generation: number
+): Promise<DocumentAnalysis | undefined> => {
+  const result = await promise
+
+  return isCurrentDocumentVersion(uri, version, generation) ? result : undefined
+}
+
+const getDocumentAnalysis = async (document: TextDocument): Promise<DocumentAnalysis | undefined> => {
+  const generation = analysisGeneration
+  const version = document.version
+  const uri = document.uri
+  const cached = results.get(document.uri)
+
+  if (cached?.generation === generation && cached.version === version) return cached.result
+
+  const pending = analysisRequests.get(document.uri)
+
+  if (pending?.generation === generation && pending.version === version) {
+    return awaitCurrentAnalysis(pending.promise, uri, version, generation)
+  }
+
+  // Share the scheduled refresh so clients do not lose hints or links when they
+  // request them only once after an edit.
+  const scheduled = refreshTimers.get(uri)
+
+  if (scheduled) {
+    await scheduled.finished
+
+    if (!isCurrentDocumentVersion(uri, version, generation)) return undefined
+
+    return getDocumentAnalysis(document)
+  }
+
+  const promise = analyzeDocument(document)
+  const request = { generation, promise, version }
+
+  analysisRequests.set(document.uri, request)
+
+  try {
+    return await awaitCurrentAnalysis(promise, uri, version, generation)
+  } finally {
+    if (analysisRequests.get(document.uri) === request) analysisRequests.delete(document.uri)
+  }
+}
+
+const clearRefresh = (uri: string): void => {
+  const scheduled = refreshTimers.get(uri)
+
+  if (!scheduled) return
+
+  clearTimeout(scheduled.timer)
+
+  refreshTimers.delete(uri)
+
+  scheduled.resolve()
 }
 
 const clearRetry = (uri: string): void => {
@@ -314,19 +408,27 @@ const documentDiagnostics = (result: DocumentAnalysis): Diagnostic[] => [
   })
 ]
 
+const isCurrentAnalysis = (uri: string, version: number, generation: number, revision: number): boolean => (
+  revisions.get(uri) === revision &&
+  analysisGeneration === generation &&
+  documents.get(uri)?.version === version
+)
+
 const publishDocumentAnalysis = async (
   document: TextDocument,
   result: DocumentAnalysis,
+  version: number,
+  generation: number,
   revision: number
 ): Promise<boolean> => {
-  results.set(document.uri, result)
+  if (!isCurrentAnalysis(document.uri, version, generation, revision)) return false
+
+  results.set(document.uri, { generation, result, version })
 
   await connection.sendDiagnostics({
     diagnostics: documentDiagnostics(result),
     uri: document.uri
   })
-
-  if (revisions.get(document.uri) !== revision) return false
 
   return result.analyses.some(({ status }) => status === 'unavailable')
 }
@@ -335,8 +437,12 @@ const refreshDocument = async (document: TextDocument): Promise<void> => {
   clearRetry(document.uri)
 
   const revision = (revisions.get(document.uri) ?? 0) + 1
+  const generation = analysisGeneration
+  const version = document.version
 
   revisions.set(document.uri, revision)
+
+  results.delete(document.uri)
 
   if (!manifestPath(document)) {
     results.delete(document.uri)
@@ -347,17 +453,17 @@ const refreshDocument = async (document: TextDocument): Promise<void> => {
   }
 
   try {
-    const result = await analyzeDocument(document)
+    const result = await getDocumentAnalysis(document)
 
-    if (revisions.get(document.uri) !== revision || !result) return
+    if (!isCurrentAnalysis(document.uri, version, generation, revision) || !result) return
 
-    const shouldRetry = await publishDocumentAnalysis(document, result, revision)
+    const shouldRetry = await publishDocumentAnalysis(document, result, version, generation, revision)
 
     updateTransientFailureRetry(document, shouldRetry, refreshDocument)
   } catch (error) {
     connection.console.error(error instanceof Error ? error.stack ?? error.message : String(error))
 
-    if (revisions.get(document.uri) !== revision) return
+    if (!isCurrentAnalysis(document.uri, version, generation, revision)) return
 
     results.delete(document.uri)
 
@@ -377,18 +483,28 @@ const refreshAllDocuments = async (): Promise<void> => {
   await Promise.all(documents.all().map(async document => refreshDocument(document)))
 }
 
+const updateRegistryClient = (registryUrl: string): void => {
+  if (registryUrl === settings.registryUrl) return
+
+  registryClient = new NpmRegistryClient({ cacheTtlMs: SHARED_CACHE_TTL_MS, registryUrl })
+}
+
 const updateSettings = (value: unknown): void => {
   if (!value || typeof value !== 'object') return
 
   const root = value as Record<string, unknown>
   const configured = (root.depBeacon ?? root['dep-beacon'] ?? root) as Partial<DepBeaconSettings>
 
-  settings = {
+  const nextSettings = {
     checkVulnerabilities: configured.checkVulnerabilities ?? DEFAULT_SETTINGS.checkVulnerabilities,
     includePrerelease: configured.includePrerelease ?? DEFAULT_SETTINGS.includePrerelease,
     registryUrl: configured.registryUrl?.trim() || DEFAULT_SETTINGS.registryUrl,
     showUpdateDiagnostics: configured.showUpdateDiagnostics ?? DEFAULT_SETTINGS.showUpdateDiagnostics
   }
+
+  updateRegistryClient(nextSettings.registryUrl)
+
+  settings = nextSettings
 }
 
 connection.onInitialize((params): InitializeResult => {
@@ -416,6 +532,8 @@ connection.onInitialize((params): InitializeResult => {
 connection.onDidChangeConfiguration(({ settings: configuredSettings }) => {
   updateSettings(configuredSettings)
 
+  analysisGeneration += 1
+
   results.clear()
 
   // LSP notification handlers cannot await background refresh work.
@@ -427,7 +545,7 @@ connection.onCodeLens(async ({ textDocument }): Promise<CodeLens[]> => {
 
   if (!document) return []
 
-  const result = results.get(document.uri) ?? await analyzeDocument(document)
+  const result = await getDocumentAnalysis(document)
 
   return result?.analyses.map(analysis => ({
     range: Range.create(analysis.dependency.nameRange.startPosition, analysis.dependency.nameRange.startPosition),
@@ -443,7 +561,7 @@ connection.onHover(async ({ position, textDocument }): Promise<Hover | undefined
 
   if (!document) return undefined
 
-  const result = results.get(document.uri) ?? await analyzeDocument(document)
+  const result = await getDocumentAnalysis(document)
 
   const analysis = result?.analyses.find(candidate => (
     containsPosition(toRange(candidate.dependency.nameRange), position) ||
@@ -466,7 +584,7 @@ connection.languages.inlayHint.on(async ({ range, textDocument }): Promise<Inlay
 
   if (!document) return []
 
-  const result = results.get(document.uri) ?? await analyzeDocument(document)
+  const result = await getDocumentAnalysis(document)
 
   return result?.analyses.flatMap(analysis => {
     const position = analysis.dependency.specRange.endPosition
@@ -490,7 +608,7 @@ connection.onDocumentLinks(async ({ textDocument }): Promise<DocumentLink[]> => 
 
   if (!document) return []
 
-  const result = results.get(document.uri) ?? await analyzeDocument(document)
+  const result = await getDocumentAnalysis(document)
 
   return result?.analyses.map(analysis => ({
     range: toRange(analysis.dependency.nameRange),
@@ -504,7 +622,7 @@ connection.onCodeAction(async ({ range, textDocument }) => {
 
   if (!document) return []
 
-  const result = results.get(document.uri) ?? await analyzeDocument(document)
+  const result = await getDocumentAnalysis(document)
 
   if (!result) return []
 
@@ -571,6 +689,8 @@ const refreshAffectedDocuments = async (document: TextDocument): Promise<void> =
   const path = manifestPath(document)
 
   if (path && basename(path).startsWith('pnpm-workspace.')) {
+    analysisGeneration += 1
+
     results.clear()
 
     await refreshAllDocuments()
@@ -581,14 +701,58 @@ const refreshAffectedDocuments = async (document: TextDocument): Promise<void> =
   await refreshDocument(document)
 }
 
+const scheduleDocumentRefresh = (document: TextDocument): void => {
+  revisions.set(document.uri, (revisions.get(document.uri) ?? 0) + 1)
+
+  clearRefresh(document.uri)
+
+  clearRetry(document.uri)
+
+  results.delete(document.uri)
+
+  let finish: (() => void) | undefined
+
+  const finished = new Promise<void>(resolve => {
+    finish = resolve
+  })
+
+  const timer = setTimeout(() => {
+    refreshTimers.delete(document.uri)
+
+    const currentDocument = documents.get(document.uri)
+
+    if (!currentDocument) {
+      finish?.()
+
+      return
+    }
+
+    refreshAffectedDocuments(currentDocument).finally(finish).catch((error: unknown) => {
+      connection.console.error(error instanceof Error ? error.stack ?? error.message : String(error))
+    })
+  }, DOCUMENT_CHANGE_DEBOUNCE_MS)
+
+  refreshTimers.set(document.uri, { finished, resolve: () => finish?.(), timer })
+}
+
 documents.onDidOpen(async ({ document }) => refreshAffectedDocuments(document))
 
-documents.onDidChangeContent(async ({ document }) => refreshAffectedDocuments(document))
+documents.onDidChangeContent(({ document }) => {
+  scheduleDocumentRefresh(document)
+})
 
-documents.onDidSave(async ({ document }) => refreshAffectedDocuments(document))
+documents.onDidSave(async ({ document }) => {
+  clearRefresh(document.uri)
+
+  await refreshAffectedDocuments(document)
+})
 
 documents.onDidClose(async ({ document }) => {
+  clearRefresh(document.uri)
+
   clearRetry(document.uri)
+
+  analysisRequests.delete(document.uri)
 
   results.delete(document.uri)
 

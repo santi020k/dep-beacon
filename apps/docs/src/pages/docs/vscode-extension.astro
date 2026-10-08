@@ -1,13 +1,31 @@
 ---
+import { Badge, Icon, Link } from '@santi020k/lumen-astro'
+
 import Docs from '../../layouts/Docs.astro'
+
+const commands = [
+  { name: 'Refresh Dependency Signals', description: 'Re-analyze visible manifests.' },
+  { name: 'Clear Registry Cache', description: 'Clear cached npm metadata and refresh dependency information.' },
+  { name: 'Toggle Prerelease Versions', description: 'Include or exclude prerelease versions in update targets.' },
+  { name: 'Sort Current Manifest', description: 'Alphabetize package sections in package.json.' },
+  { name: 'Run Package Install', description: 'Start the selected package manager’s dependency install from VS Code.' },
+  { name: 'Show Debug Output', description: 'Inspect activation, refresh, cache, parse, analysis, and diagnostic details in the output channel.' }
+]
 ---
 
 <Docs title="VS Code Extension" description="VS Code features provided by Dep Beacon.">
-  <h1>VS Code Extension</h1>
-  <p>
-    Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`. Dep Beacon adds CodeLens and quick-fix actions,
-    dependency hovers, and inline status text to supported entries.
-  </p>
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>02</span> / Editor guide</p>
+    <h1>Stay on the line.<br />Work in VS Code.</h1>
+    <p class="docs-intro">
+      Version signals, CodeLens actions, and dependency details live beside the manifest entries you are already
+        editing.
+    </p>
+    <dl class="docs-facts">
+      <div><dt>Actions</dt><dd>CodeLens + quick fixes</dd></div>
+      <div><dt>Context</dt><dd>Hovers + inline labels</dd></div>
+    </dl>
+  </header>
 
   <figure class="docs-media">
     <img
@@ -18,46 +36,63 @@ import Docs from '../../layouts/Docs.astro'
       width="1600"
       height="900"
     />
-    <figcaption>
-      Dependency status stays beside the manifest entries you are already editing, including pnpm catalogs, overrides,
-      missing versions, and update targets.
-    </figcaption>
+    <figcaption>One workspace, connected signals. Package manifests and pnpm catalogs share the same dependency
+      intelligence.</figcaption>
   </figure>
 
-  <h2>CodeLens actions</h2>
-  <ul>
-    <li>`patch` updates to the highest patch in the current minor.</li>
-    <li>`minor` updates to the nearest higher minor in the current major.</li>
-    <li>`major` updates to the nearest higher major.</li>
-    <li>`latest` updates to npm's latest dist-tag or the newest stable version.</li>
-  </ul>
+  <section aria-labelledby="update-targets">
+    <h2 id="update-targets">Choose your next update</h2>
+    <p>
+      Open <code>package.json</code>, <code>pnpm-workspace.yaml</code>, or <code>pnpm-workspace.yml</code>.
+      CodeLens presents applicable targets directly above supported entries.
+    </p>
+    <dl class="docs-reference docs-targets">
+      <div><dt><code>patch</code></dt><dd>The highest available patch in the current minor version.</dd></div>
+      <div><dt><code>minor</code></dt><dd>The nearest higher minor in the current major version.</dd></div>
+      <div><dt><code>major</code></dt><dd>The nearest higher major version.</dd></div>
+      <div><dt><code>latest</code></dt><dd>The npm latest dist-tag, or the newest stable version when that tag is
+        unavailable.</dd></div>
+    </dl>
+  </section>
 
-  <h2>Hovers and quick fixes</h2>
-  <p>
-    Hover a dependency name or range to see resolved and latest versions, available update targets, npm links, and
-    vulnerability details. Open VS Code's quick-fix menu to update one dependency or update all compatible or latest
-    dependencies in the current manifest.
-    Catalog-backed actions edit the matching pnpm catalog entry.
-  </p>
+  <section aria-labelledby="hover-details">
+    <h2 id="hover-details">Inspect first, then apply</h2>
+    <p>
+      Hover a dependency name or range to inspect its resolved and latest versions, available update targets, npm links,
+      and vulnerability details. The quick-fix menu can update one dependency, all compatible dependencies,
+      or all dependencies to latest in the current manifest.
+    </p>
+    <p>
+      Catalog-backed actions edit the matching pnpm catalog entry. Major and latest updates can cross a breaking version
+      boundary; review the package’s release notes and test the consuming code.
+    </p>
+  </section>
 
-  <h2>Commands</h2>
-  <ul>
-    <li>`Dep Beacon: Refresh Dependency Signals` re-analyzes visible manifests.</li>
-    <li>`Dep Beacon: Clear Registry Cache` clears cached npm metadata.</li>
-    <li>`Dep Beacon: Toggle Prerelease Versions` includes or excludes prerelease versions.</li>
-    <li>`Dep Beacon: Sort Current Manifest` alphabetizes package sections in `package.json`.</li>
-    <li>`Dep Beacon: Run Package Install` starts the selected package manager's dependency install from VS Code.</li>
-    <li>
-      `Dep Beacon: Show Debug Output` opens the extension output channel with activation, refresh, cache, parse,
-      analysis, and diagnostic details.
-    </li>
-  </ul>
+  <section aria-labelledby="commands">
+    <h2 id="commands">Keep useful commands close</h2>
+    <p>Open the command palette and search for <code>Dep Beacon:</code>.</p>
+    <dl class="docs-reference">
+      {commands.map(command => (
+        <div><dt>{command.name}</dt><dd>{command.description}</dd></div>
+      ))}
+    </dl>
+  </section>
 
-  <h2>Status colors</h2>
-  <ul>
-    <li>Green means the declared range already accepts the latest stable version.</li>
-    <li>Yellow means a newer target exists.</li>
-    <li>Orange means OSV reports low or medium risk.</li>
-    <li>Red means the package or version is invalid, missing, high risk, or critical risk.</li>
-  </ul>
+  <section aria-labelledby="status-colors">
+    <h2 id="status-colors">A small signal, a clear meaning</h2>
+    <dl class="docs-status-list">
+      <div><dt><Badge variant="success">Green · current</Badge></dt><dd>The declared range already accepts the
+        latest stable version.</dd></div>
+      <div><dt><Badge variant="warning">Yellow · update</Badge></dt><dd>A newer target is available.</dd></div>
+      <div><dt><Badge class="docs-risk-warning" variant="warning">Orange · advisory</Badge></dt><dd>OSV reports low
+        or medium vulnerability risk.</dd></div>
+      <div><dt><Badge variant="destructive">Red · attention</Badge></dt><dd>A package or version is invalid,
+        missing, or has high or critical vulnerability risk.</dd></div>
+    </dl>
+  </section>
+
+  <nav class="docs-next" aria-label="Related guides">
+    <Link href="/docs/configuration">Adjust your settings <Icon name="arrow-right" /></Link>
+    <Link href="/docs/pnpm-workspaces">Connect a pnpm workspace <Icon name="arrow-right" /></Link>
+  </nav>
 </Docs>

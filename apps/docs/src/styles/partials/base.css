@@ -5,20 +5,19 @@
 html {
   background: var(--bg);
   color: var(--dep-ink);
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  letter-spacing: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   scroll-behavior: smooth;
+  scroll-padding-top: 7rem;
 }
 
 body {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--teal) 10%, transparent), transparent 28rem),
-    linear-gradient(90deg, color-mix(in srgb, var(--teal) 5%, transparent), color-mix(in srgb, var(--warm) 5%, transparent) 48%, transparent),
-    var(--bg);
+  background: var(--bg);
   margin: 0;
   min-width: 320px;
+}
+
+body:has(#site-navigation[open]) {
+  overflow: hidden;
 }
 
 a {
@@ -28,24 +27,42 @@ a {
 
 :focus-visible {
   outline: 2px solid var(--brand-bright);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 code {
-  border: 1px solid color-mix(in srgb, var(--dep-line) 75%, transparent);
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--dep-surface) 84%, black);
+  background: var(--bg-soft);
+  border: 1px solid var(--dep-rule);
+  border-radius: 0.35rem;
   color: var(--brand-bright);
-  font-size: 0.92em;
+  font-family: var(--dep-font-mono);
+  font-size: 0.9em;
   padding: 0.12rem 0.32rem;
+  overflow-wrap: anywhere;
 }
 
 main {
   min-height: 70vh;
 }
 
+.skip-link {
+  background: var(--dep-ink);
+  border-radius: 0.75rem;
+  color: var(--bg);
+  font-size: 0.875rem;
+  left: 1rem;
+  padding: 0.9rem 1.2rem;
+  position: fixed;
+  top: -5rem;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
 ::selection {
-  background: color-mix(in srgb, var(--brand-bright) 38%, transparent);
+  background: color-mix(in srgb, var(--brand-bright) 30%, transparent);
   color: var(--dep-ink);
 }
 
@@ -59,14 +76,8 @@ main {
     transition-duration: 1ms !important;
   }
 
-  ::view-transition-old(root),
-  ::view-transition-new(root),
-  ::view-transition-old(page-content),
-  ::view-transition-new(page-content),
-  ::view-transition-old(site-header),
-  ::view-transition-new(site-header),
-  ::view-transition-old(site-footer),
-  ::view-transition-new(site-footer) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
     animation: none !important;
   }
 }

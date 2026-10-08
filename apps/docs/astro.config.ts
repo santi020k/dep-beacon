@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
@@ -31,7 +30,7 @@ const rootEnvValue = (name: string): string | undefined => {
 const docsUrl = process.env.DEP_BEACON_DOCS_URL ?? rootEnvValue('DEP_BEACON_DOCS_URL')
 
 export default defineConfig({
-  integrations: [mdx(), sitemap()],
+  integrations: [sitemap()],
   site: normalizeSiteUrl(docsUrl),
   vite: {
     envDir,

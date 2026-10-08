@@ -163,11 +163,13 @@ describe('OSV client', () => {
 
   test('builds batch queries, fetches vulnerability details, and caches repeated ids', async () => {
     let batchInit: RequestInit | undefined
+    let batchRequests = 0
     const detailRequests: string[] = []
     const client = new OsvClient({
       baseUrl: `https://osv.example.test${'/'.repeat(100_000)}`,
       fetch: (url, init) => {
         if (url.endsWith('/v1/querybatch')) {
+          batchRequests += 1
           batchInit = init
 
           return Promise.resolve(new Response(JSON.stringify({
@@ -238,6 +240,97 @@ describe('OSV client', () => {
     })
     expect(summaries.get('other@2.0.0')?.severity).toBe('critical')
     expect(getOsvQueryKey({ name: '@scope/pkg', version: '1.2.3' })).toBe('@scope/pkg@1.2.3')
+
+    await expect(client.queryMany([
+      { name: 'demo', version: '1.0.0' },
+      { name: 'other', version: '2.0.0' },
+      { name: 'demo', version: '1.0.0' }
+    ])).resolves.toEqual(summaries)
+    expect(batchRequests).toBe(1)
+  })
+
+  test('shares concurrent vulnerability query batches and caches empty results', async () => {
+    let batchRequests = 0
+    let resolveBatch: ((response: Response) => void) | undefined
+    const client = new OsvClient({
+      fetch: () => {
+        batchRequests += 1
+
+        return new Promise<Response>(resolve => {
+          resolveBatch = resolve
+        })
+      }
+    })
+    const query = [{ name: 'demo', version: '1.0.0' }]
+    const first = client.queryMany(query)
+    const second = client.queryMany(query)
+
+    resolveBatch?.(new Response(JSON.stringify({ results: [{}] }), { status: 200 }))
+
+    await expect(Promise.all([first, second])).resolves.toEqual([new Map(), new Map()])
+    await expect(client.queryMany(query)).resolves.toEqual(new Map())
+    expect(batchRequests).toBe(1)
+  })
+
+  test('refreshes clean results and advisory details when the cache expires', async () => {
+    let now = 0
+    let batchRequests = 0
+    let detailRequests = 0
+    const client = new OsvClient({
+      cacheTtlMs: 1_000,
+      fetch: url => {
+        if (url.endsWith('/v1/querybatch')) {
+          batchRequests += 1
+
+          return Promise.resolve(new Response(JSON.stringify({
+            results: now === 0 ? [{}] : [{ vulns: [{ id: 'OSV-1' }] }]
+          })))
+        }
+
+        detailRequests += 1
+
+        return Promise.resolve(new Response(JSON.stringify({
+          database_specific: { severity: now < 2_000 ? 'LOW' : 'HIGH' },
+          id: 'OSV-1'
+        })))
+      },
+      now: () => now
+    })
+    const query = [{ name: 'demo', version: '1.0.0' }]
+
+    await expect(client.queryMany(query)).resolves.toEqual(new Map())
+
+    now = 999
+
+    await expect(client.queryMany(query)).resolves.toEqual(new Map())
+    expect(batchRequests).toBe(1)
+
+    now = 1_000
+
+    expect((await client.queryMany(query)).get('demo@1.0.0')?.severity).toBe('low')
+
+    now = 2_000
+
+    expect((await client.queryMany(query)).get('demo@1.0.0')?.severity).toBe('high')
+    expect(batchRequests).toBe(3)
+    expect(detailRequests).toBe(2)
+  })
+
+  test('retries a failed batch instead of caching it as a clean result', async () => {
+    let calls = 0
+    const client = new OsvClient({
+      fetch: () => {
+        calls += 1
+
+        return Promise.resolve(new Response(JSON.stringify({ results: [{}] }), { status: calls === 1 ? 503 : 200 }))
+      }
+    })
+    const query = [{ name: 'demo', version: '1.0.0' }]
+
+    await expect(client.queryMany(query)).resolves.toEqual(new Map())
+    await expect(client.queryMany(query)).resolves.toEqual(new Map())
+    await expect(client.queryMany(query)).resolves.toEqual(new Map())
+    expect(calls).toBe(2)
   })
 
   test('keeps ids when detail requests fail or return malformed data', async () => {

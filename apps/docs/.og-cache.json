@@ -1,0 +1,117 @@
+{
+  "cacheKey": "preset-v6",
+  "entries": {
+    "home.png": {
+      "baseDirectory": "public/og",
+      "digest": "e0d71f3723d8100471b2335cebbd59b16c7eb026ce333a2e10a2097f64d3691a",
+      "fingerprint": "a6c3750437c2c7789e8bdeac0b7adad47be2eea729ee782683472d1478ace9e6",
+      "output": "home.png"
+    },
+    "public:social-card.png": {
+      "baseDirectory": "public",
+      "digest": "e0d71f3723d8100471b2335cebbd59b16c7eb026ce333a2e10a2097f64d3691a",
+      "fingerprint": "a6c3750437c2c7789e8bdeac0b7adad47be2eea729ee782683472d1478ace9e6",
+      "directory": "public",
+      "output": "social-card.png"
+    },
+    "home.svg": {
+      "baseDirectory": "public/og",
+      "digest": "9f09f19fc25e4aee8eb9b0f5d1c05ccca7a1c931231655491f30e25db21f880d",
+      "fingerprint": "d960c47838f3a0156a6445a734fab404162d96fda36291ea7991b63e1eaaee92",
+      "output": "home.svg"
+    },
+    "public:social-card.svg": {
+      "baseDirectory": "public",
+      "digest": "9f09f19fc25e4aee8eb9b0f5d1c05ccca7a1c931231655491f30e25db21f880d",
+      "fingerprint": "d960c47838f3a0156a6445a734fab404162d96fda36291ea7991b63e1eaaee92",
+      "directory": "public",
+      "output": "social-card.svg"
+    },
+    "docs.png": {
+      "baseDirectory": "public/og",
+      "digest": "7a7a48f2753428545e2bc193d2ceeba44cf92528ef67fb7eeb57c105fa21b6a3",
+      "fingerprint": "e20be471db4209a0606a449451d4e2a07f1e16ab101625ae6c8ff4eb21176277",
+      "output": "docs.png"
+    },
+    "docs.svg": {
+      "baseDirectory": "public/og",
+      "digest": "c75fe019b8d257b84ba73573fd1f37c50c19e8ba90ae4c30cae99fcf00ec0c8a",
+      "fingerprint": "d32744606a4a7466b27408bbf262900b59fd18e370adc75f9db6a4398a201a61",
+      "output": "docs.svg"
+    },
+    "install.png": {
+      "baseDirectory": "public/og",
+      "digest": "8edb7b05f5b2b845c9823d1da5a1f31c7810f0ca20e1a04a79d9d7987ad10c24",
+      "fingerprint": "fe19a4c08960e7ed76b09b1f72a232b0cc63003fead5d99fa4a879db6b3f5f2c",
+      "output": "install.png"
+    },
+    "install.svg": {
+      "baseDirectory": "public/og",
+      "digest": "cfb6721d2205b74bbd2d302a05c5cfec5be2ed1304c7d5594303e8226b648467",
+      "fingerprint": "f1c978d9fd80d5dd79a3a82bfb76ac0d4c01fe7178791c2f8808adfd4f1cece4",
+      "output": "install.svg"
+    },
+    "extension.png": {
+      "baseDirectory": "public/og",
+      "digest": "24e8cfbc03c9302c4e21c58698218fa10f027f8168b70f292ddde30dfe4ab5c5",
+      "fingerprint": "5c8d25708af8ee62a5944683d631b681a21a9a5feedc8ec00bc2d7145aec6220",
+      "output": "extension.png"
+    },
+    "extension.svg": {
+      "baseDirectory": "public/og",
+      "digest": "959f101f8b2220cce2ebdcce414c1c93bc26cd42bf17725a5f3db6c7b02bdb37",
+      "fingerprint": "4eeb31cb15af08c8b2420cc0ed3b0a044a19b1bfcf8578bf4057a9c8b71718b2",
+      "output": "extension.svg"
+    },
+    "zed-extension.png": {
+      "baseDirectory": "public/og",
+      "digest": "e6e95e36392aa0d352323f931be6795cff51a8474dcc4c601fb8f6111a94f9a6",
+      "fingerprint": "b44bc785ac62c73948e5af2d93c8374f51e1fc24e4f9af7f1997bc0228661ab4",
+      "output": "zed-extension.png"
+    },
+    "zed-extension.svg": {
+      "baseDirectory": "public/og",
+      "digest": "b53c820499ef94a3d7b4f6cb4a874861ed02d7041472d5408722153f695ba45d",
+      "fingerprint": "f3f1e7eb7eefea15060ade28eede0980ea10e20515b5b453ca7262cf8e453d23",
+      "output": "zed-extension.svg"
+    },
+    "pnpm-workspaces.png": {
+      "baseDirectory": "public/og",
+      "digest": "bd79ee2f67cfe1b6a66fc9b289fa6d4978845899b3c1d1daa0ea362b19c2352f",
+      "fingerprint": "1f9108f1b42667c414ac225a16307858b877ae92067946258575f0ed46ef4252",
+      "output": "pnpm-workspaces.png"
+    },
+    "pnpm-workspaces.svg": {
+      "baseDirectory": "public/og",
+      "digest": "d95bb22b110e5f747973f63aa1ab3c51e584f1f54860d5d7bc483783c2f2cea5",
+      "fingerprint": "1af02ca05d6eada16ce1e4bbe489ae8cdaaf32c4611cd8c26bdb29609d17c89f",
+      "output": "pnpm-workspaces.svg"
+    },
+    "security.png": {
+      "baseDirectory": "public/og",
+      "digest": "7476e8a27daf56e36add07cfe4a9244146d2dc23aacafd108204aabfc69d63ce",
+      "fingerprint": "cc9ad4c36a1d46e29b98b8baa239c50779c30fceef7de8266a76a652c3bd0305",
+      "output": "security.png"
+    },
+    "security.svg": {
+      "baseDirectory": "public/og",
+      "digest": "95b3a3d24b29250f57bd935372a2997d4562607731398a960bad82aa0cc42202",
+      "fingerprint": "60133e80a22e119f101cdc2b4553904110801d7065959c3bd593280f2acf7df7",
+      "output": "security.svg"
+    },
+    "configuration.png": {
+      "baseDirectory": "public/og",
+      "digest": "5c844cf435ad22c980d1a21eff0301d5c1fe7e6c487b482358a6da143b75eeaf",
+      "fingerprint": "71a46e266bdb83eb92702c8af8d22fd2266faefa6d22848347574a543ad8b870",
+      "output": "configuration.png"
+    },
+    "configuration.svg": {
+      "baseDirectory": "public/og",
+      "digest": "b0abd3bfc7c193b91a291891d31b3b2173905ca1556f8ea22f12874a30d9052d",
+      "fingerprint": "01605b9f44b4ed9ce9878e1c04728546e4672f2f3f69a800623d23c81d53e790",
+      "output": "configuration.svg"
+    }
+  },
+  "generatorVersion": "1.2.0",
+  "version": 3
+}

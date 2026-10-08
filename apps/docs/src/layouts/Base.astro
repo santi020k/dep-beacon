@@ -3,8 +3,9 @@ import { ClientRouter } from 'astro:transitions'
 
 import '../styles/global.css'
 
-import { UIPrimitives } from '@santi020k/lumen-astro'
+import UIPrimitives from '@santi020k/lumen-astro/runtime'
 
+import manifest from '../../public/og/manifest.json'
 import Footer from '../components/Footer.astro'
 import Nav from '../components/Nav.astro'
 import { SITE } from '../site.config'
@@ -29,7 +30,16 @@ const {
 
 const pageTitle = title === 'Dep Beacon' ? title : `${title} | Dep Beacon`
 const canonicalUrl = new URL(Astro.url.pathname, SITE.url).toString()
-const imageUrl = new URL(image, SITE.url).toString()
+const pathname = Astro.url.pathname.replace(/\/$/u, '') || '/'
+const route = Object.values(manifest.routes).find(route => route.pathname === pathname)
+const generatedImage = route?.images.find(image => image.primary)
+let imagePath = image
+
+if (generatedImage?.url && (!Astro.props.image || generatedImage.url.split('?')[0] === image)) {
+  imagePath = generatedImage.url
+}
+
+const imageUrl = new URL(imagePath, SITE.url).toString()
 const keywordContent = typeof keywords === 'string' ? keywords : keywords.join(', ')
 
 const structuredData = [
@@ -109,25 +119,44 @@ const structuredData = [
     <meta property="og:description" content={description} />
     <meta property="og:image" content={imageUrl} />
     <meta property="og:image:secure_url" content={imageUrl} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:image:alt" content={imageAlt} />
-    <ClientRouter />
+    <ClientRouter fallback="swap" />
     {!noindex && <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <UIPrimitives />
     <Nav />
-    <main transition:name="page-content">
+    <main id="main-content" tabindex="-1" transition:name="page-content">
       <slot />
     </main>
     <Footer />
     <script>
+      import type { TransitionBeforeSwapEvent } from 'astro:transitions/client'
+
+      document.addEventListener('astro:before-swap', (event: TransitionBeforeSwapEvent) => {
+        const theme = document.documentElement.dataset.theme
+
+        if (theme === 'dark' || theme === 'light') {
+          event.newDocument.documentElement.dataset.theme = theme
+
+          event.newDocument.documentElement.classList.toggle('dark', theme === 'dark')
+
+          event.newDocument.querySelector('meta[name="theme-color"]')?.setAttribute(
+            'content', theme === 'dark' ? '#0b1115' : '#f5f8fa'
+          )
+        }
+      })
+
       document.addEventListener('ui:theme-change', () => {
         const themeColor = document.querySelector('meta[name="theme-color"]')
         const isDark = document.documentElement.dataset.theme === 'dark'

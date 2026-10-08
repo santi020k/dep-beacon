@@ -7,6 +7,8 @@ target
 .pnpm-store
 .eslintcache
 .cspellcache
+playwright-report
+test-results
 *.vsix
 .vscode/*.log
 .DS_Store

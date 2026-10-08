@@ -1,60 +1,73 @@
 ---
-import { Callout, Link } from '@santi020k/lumen-astro'
+import { ButtonLink, Callout, Icon, Link } from '@santi020k/lumen-astro'
 
 import Docs from '../../layouts/Docs.astro'
 import { SITE } from '../../site.config'
 ---
 
 <Docs title="Install" description="Install Dep Beacon for VS Code or Zed.">
-  <h1>Install Dep Beacon</h1>
-  <p>
-    Add Dep Beacon to VS Code or Zed, then open a supported npm manifest.
-  </p>
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>01</span> / Getting started</p>
+    <h1>Install once.<br />Open your manifest.</h1>
+    <p class="docs-intro">Add Dep Beacon to VS Code or Zed. Dependency signals appear where you already work.</p>
+    <dl class="docs-facts">
+      <div><dt>Setup</dt><dd>No configuration required</dd></div>
+      <div><dt>Supported files</dt><dd>JSON, JSONC + YAML manifests</dd></div>
+    </dl>
+  </header>
 
-  <Callout class="docs-callout">
-    <strong>Install links:</strong>
-    <span>
-      <Link href={SITE.marketplaceUrl} target="_blank" rel="noopener noreferrer">Visual Studio Marketplace</Link> or
-      <Link href={SITE.openVsxUrl} target="_blank" rel="noopener noreferrer">Open VSX</Link>.
-    </span>
-  </Callout>
+  <section aria-labelledby="install-vscode">
+    <h2 id="install-vscode">In VS Code</h2>
+    <ol class="docs-steps" role="list">
+      <li><strong>Find the extension.</strong><p>Open the Extensions view and search for <code>Dep
+        Beacon</code>.</p></li>
+      <li><strong>Select Install.</strong><p>Choose the extension published by <code>santi020k</code>.</p></li>
+      <li><strong>Open a manifest.</strong><p>Use <code>package.json</code>, <code>pnpm-workspace.yaml</code>, or
+        <code>pnpm-workspace.yml</code>.</p></li>
+    </ol>
+    <div class="docs-actions">
+      <ButtonLink class="docs-primary-action" href={SITE.marketplaceUrl} newTab variant="unstyled">
+        Get it from Marketplace <span><Icon name="arrow-up-right" /></span>
+      </ButtonLink>
+      <ButtonLink class="docs-text-action" href={SITE.openVsxUrl} newTab variant="unstyled">
+        Open VSX <Icon name="arrow-up-right" />
+      </ButtonLink>
+    </div>
+  </section>
 
-  <h2>From VS Code</h2>
-  <ol>
-    <li>Open the Extensions view.</li>
-    <li>Search for `Dep Beacon`.</li>
-    <li>Select Install.</li>
-    <li>Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.</li>
-  </ol>
+  <section aria-labelledby="install-zed">
+    <h2 id="install-zed">In Zed</h2>
+    <ol class="docs-steps" role="list">
+      <li><strong>Open extensions.</strong><p>Open the command palette and run <code>zed: extensions</code>.</p></li>
+      <li><strong>Install Dep Beacon.</strong><p>Search for <code>Dep Beacon</code> and select Install. Use version
+        <code>0.0.3</code> or newer for the workflow described here.</p></li>
+      <li><strong>Open a manifest.</strong><p>The same package and pnpm workspace files are supported. No settings
+        are required.</p></li>
+    </ol>
+    <Callout class="docs-note">
+      <strong>Already have the file open?</strong>
+      <p>Focus the manifest and run <code>editor: restart language server</code> once after installation or an
+        extension update. Reopening the manifest works too.</p>
+    </Callout>
+  </section>
 
-  <h2>From Zed</h2>
-  <p>
-    The zero-configuration workflow requires Dep Beacon `0.0.3` or newer.
-  </p>
-  <ol>
-    <li>Open the command palette.</li>
-    <li>Run `zed: extensions`.</li>
-    <li>Search for `Dep Beacon` and select Install.</li>
-    <li>Open `package.json`, `pnpm-workspace.yaml`, or `pnpm-workspace.yml`.</li>
-  </ol>
-  <p>
-    If that manifest was already open during installation or an update, run `editor: restart language server` once.
-  </p>
-  <p>
-    See the <Link href="/docs/zed-extension">Zed extension guide</Link> for supported actions, settings, and editor-specific limitations.
-  </p>
+  <section aria-labelledby="first-signals">
+    <h2 id="first-signals">Your first signals</h2>
+    <p>
+      Dep Beacon activates automatically for supported manifests. Both editors show dependency diagnostics and update
+      actions. VS Code also provides inline decorations; Zed uses its native diagnostics multi-buffer and
+        code-action menu.
+    </p>
+    <p>
+      In VS Code, <code>depBeacon.showInlineStatus</code> controls inline labels,
+      <code>depBeacon.checkVulnerabilities</code> controls OSV queries, and <code>depBeacon.packageManager</code>
+      overrides automatic package-manager detection. See <Link href="/docs/configuration">configuration</Link> for
+        the defaults.
+    </p>
+  </section>
 
-  <h2>What happens next</h2>
-  <p>
-    Dep Beacon activates automatically for JSON, JSONC, and YAML dependency files. Both editors show dependency
-    diagnostics and update actions. VS Code also provides inline decorations; Zed uses its diagnostics multi-buffer
-    and code-action menu without requiring settings.
-  </p>
-
-  <h2>Useful first VS Code settings</h2>
-  <ul>
-    <li>Use `depBeacon.showInlineStatus` to show or hide the inline labels.</li>
-    <li>Use `depBeacon.checkVulnerabilities` to enable or disable OSV vulnerability checks.</li>
-    <li>Use `depBeacon.packageManager` if automatic package-manager detection picks the wrong command.</li>
-  </ul>
+  <nav class="docs-next" aria-label="Choose your editor guide">
+    <Link href="/docs/vscode-extension">Explore VS Code <Icon name="arrow-right" /></Link>
+    <Link href="/docs/zed-extension">Explore Zed <Icon name="arrow-right" /></Link>
+  </nav>
 </Docs>

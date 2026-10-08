@@ -8,6 +8,8 @@
     "*.js",
     "*.mjs",
     "*.cjs",
+    "*.ts",
+    "tests/**/*.ts",
     "apps/**/*.astro",
     "apps/**/*.js",
     "apps/**/*.ts",

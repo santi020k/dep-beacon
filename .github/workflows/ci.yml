@@ -92,12 +92,22 @@ jobs:
         if: >-
           github.event_name == 'pull_request' &&
           !contains(github.event.pull_request.labels.*.name, 'skip-changelog') &&
-          !startsWith(github.head_ref, 'changeset-release/')
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          !startsWith(github.head_ref, 'release/v')
         run: |
           pnpm changeset status --since=origin/main --output=/tmp/changeset-status.json
           jq -e '.releases | length > 0' /tmp/changeset-status.json >/dev/null
       - name: Run repository validation
         run: pnpm run validate
+      - name: Verify prepared release versions
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/v')
+        env:
+          RELEASE_BRANCH: ${{ github.head_ref }}
+        run: pnpm run check:release
+      - name: Install documentation browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Verify documentation interactions
+        run: pnpm run test:docs
       - name: Check the Zed adapter
         run: cargo check --locked --manifest-path extensions/dep-beacon/Cargo.toml
 

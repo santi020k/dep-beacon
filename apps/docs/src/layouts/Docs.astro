@@ -1,4 +1,6 @@
 ---
+import { Breadcrumb, Link } from '@santi020k/lumen-astro'
+
 import DocsSidebar from '../components/DocsSidebar.astro'
 
 import Base from './Base.astro'
@@ -16,7 +18,7 @@ const docsOgImages: Record<string, string> = {
   '/docs/pnpm-workspaces': '/og/pnpm-workspaces.png',
   '/docs/security': '/og/security.png',
   '/docs/vscode-extension': '/og/extension.png',
-  '/docs/zed-extension': '/og/extension.png'
+  '/docs/zed-extension': '/og/zed-extension.png'
 }
 
 const currentPath = Astro.url.pathname.replace(/\/$/u, '') || '/docs'
@@ -25,11 +27,25 @@ const { description, image = docsOgImages[currentPath] ?? '/og/docs.png', title 
 
 <Base title={title} description={description} image={image} imageAlt={`${title} social preview`}>
   <section class="docs-stage">
-    <div class="docs-shell">
+    <div class="docs-shell site-shell">
       <DocsSidebar />
-      <article class="docs-content">
-        <slot />
-      </article>
+      <div class="docs-reading-column">
+        <Breadcrumb class="docs-location">
+          <ol>
+            <li><Link href="/">Home</Link></li>
+            {currentPath === '/docs' && <li aria-current="page">Documentation</li>}
+            {currentPath !== '/docs' && (
+              <>
+                <li><Link href="/docs">Docs</Link></li>
+                <li aria-current="page">{title}</li>
+              </>
+            )}
+          </ol>
+        </Breadcrumb>
+        <article class="docs-content">
+          <slot />
+        </article>
+      </div>
     </div>
   </section>
 </Base>

@@ -1,0 +1,234 @@
+{
+  "generatorVersion": "1.2.0",
+  "routes": {
+    "/": {
+      "alt": "Dep Beacon social preview",
+      "description": "Inline npm version, pnpm catalog, and OSV security signals.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "home.png",
+          "primary": true,
+          "url": "/og/home.png?v=a6c3750437c2",
+          "version": "a6c3750437c2",
+          "width": 1200
+        },
+        {
+          "directory": "public",
+          "format": "png",
+          "height": 630,
+          "output": "social-card.png",
+          "primary": false,
+          "url": "/social-card.png?v=a6c3750437c2",
+          "version": "a6c3750437c2",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "home.svg",
+          "primary": true,
+          "url": "/og/home.svg?v=d960c47838f3",
+          "version": "d960c47838f3",
+          "width": 1200
+        },
+        {
+          "directory": "public",
+          "format": "svg",
+          "height": 630,
+          "output": "social-card.svg",
+          "primary": false,
+          "url": "/social-card.svg?v=d960c47838f3",
+          "version": "d960c47838f3",
+          "width": 1200
+        }
+      ],
+      "pathname": "/",
+      "title": "Dep Beacon"
+    },
+    "/docs": {
+      "alt": "Dep Beacon Docs social preview",
+      "description": "Understand status colors, update actions, catalogs, and settings.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "docs.png",
+          "primary": true,
+          "url": "/og/docs.png?v=e20be471db42",
+          "version": "e20be471db42",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "docs.svg",
+          "primary": true,
+          "url": "/og/docs.svg?v=d32744606a4a",
+          "version": "d32744606a4a",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs",
+      "title": "Dep Beacon Docs"
+    },
+    "/docs/installation": {
+      "alt": "Install Dep Beacon social preview",
+      "description": "Add dependency intelligence to VS Code and Zed.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "install.png",
+          "primary": true,
+          "url": "/og/install.png?v=fe19a4c08960",
+          "version": "fe19a4c08960",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "install.svg",
+          "primary": true,
+          "url": "/og/install.svg?v=f1c978d9fd80",
+          "version": "f1c978d9fd80",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs/installation",
+      "title": "Install Dep Beacon"
+    },
+    "/docs/vscode-extension": {
+      "alt": "VS Code Extension social preview",
+      "description": "CodeLens update paths, diagnostics, sorting, and cache controls.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "extension.png",
+          "primary": true,
+          "url": "/og/extension.png?v=5c8d25708af8",
+          "version": "5c8d25708af8",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "extension.svg",
+          "primary": true,
+          "url": "/og/extension.svg?v=4eeb31cb15af",
+          "version": "4eeb31cb15af",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs/vscode-extension",
+      "title": "VS Code Extension"
+    },
+    "/docs/zed-extension": {
+      "alt": "Zed Extension social preview",
+      "description": "Dependency diagnostics and update actions through the Language Server Protocol.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "zed-extension.png",
+          "primary": true,
+          "url": "/og/zed-extension.png?v=b44bc785ac62",
+          "version": "b44bc785ac62",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "zed-extension.svg",
+          "primary": true,
+          "url": "/og/zed-extension.svg?v=f3f1e7eb7eef",
+          "version": "f3f1e7eb7eef",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs/zed-extension",
+      "title": "Zed Extension"
+    },
+    "/docs/pnpm-workspaces": {
+      "alt": "Catalog-aware Signals social preview",
+      "description": "Resolve default and named catalogs before checking versions.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "pnpm-workspaces.png",
+          "primary": true,
+          "url": "/og/pnpm-workspaces.png?v=1f9108f1b426",
+          "version": "1f9108f1b426",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "pnpm-workspaces.svg",
+          "primary": true,
+          "url": "/og/pnpm-workspaces.svg?v=1af02ca05d6e",
+          "version": "1af02ca05d6e",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs/pnpm-workspaces",
+      "title": "Catalog-aware Signals"
+    },
+    "/docs/security": {
+      "alt": "Security Signals social preview",
+      "description": "Spot advisory risk in manifests with OSV security diagnostics.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "security.png",
+          "primary": true,
+          "url": "/og/security.png?v=cc9ad4c36a1d",
+          "version": "cc9ad4c36a1d",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "security.svg",
+          "primary": true,
+          "url": "/og/security.svg?v=60133e80a22e",
+          "version": "60133e80a22e",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs/security",
+      "title": "Security Signals"
+    },
+    "/docs/configuration": {
+      "alt": "Configuration social preview",
+      "description": "Tune registry, prerelease, vulnerability, cache, and install behavior.",
+      "images": [
+        {
+          "format": "png",
+          "height": 630,
+          "output": "configuration.png",
+          "primary": true,
+          "url": "/og/configuration.png?v=71a46e266bdb",
+          "version": "71a46e266bdb",
+          "width": 1200
+        },
+        {
+          "format": "svg",
+          "height": 630,
+          "output": "configuration.svg",
+          "primary": true,
+          "url": "/og/configuration.svg?v=01605b9f44b4",
+          "version": "01605b9f44b4",
+          "width": 1200
+        }
+      ],
+      "pathname": "/docs/configuration",
+      "title": "Configuration"
+    }
+  },
+  "version": 1
+}

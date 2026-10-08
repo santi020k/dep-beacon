@@ -144,14 +144,29 @@ const vulnerabilitySeverities = (details: readonly (OsvVulnerability | undefined
 
 export class OsvClient {
   readonly #baseUrl: string
+  readonly #cacheTtlMs: number
+  #cacheExpiresAt = 0
+  #cacheGeneration = 0
   readonly #detailCache = new Map<string, Promise<OsvVulnerability | undefined>>()
   readonly #fetch: FetchLike
+  readonly #now: () => number
+  readonly #queryCache = new Map<string, Promise<VulnerabilitySummary | undefined>>()
   readonly #requestTimeoutMs: number
 
-  constructor(options: { baseUrl?: string, fetch?: FetchLike, requestTimeoutMs?: number } = {}) {
+  constructor(options: {
+    baseUrl?: string
+    cacheTtlMs?: number
+    fetch?: FetchLike
+    now?: () => number
+    requestTimeoutMs?: number
+  } = {}) {
     this.#baseUrl = withoutTrailingSlashes(options.baseUrl ?? 'https://api.osv.dev')
 
+    this.#cacheTtlMs = Math.max(0, options.cacheTtlMs ?? 15 * 60_000)
+
     this.#fetch = options.fetch ?? fetch
+
+    this.#now = options.now ?? Date.now
 
     this.#requestTimeoutMs = options.requestTimeoutMs ?? 10_000
   }
@@ -159,6 +174,54 @@ export class OsvClient {
   async queryMany(queries: readonly OsvQuery[]): Promise<Map<string, VulnerabilitySummary>> {
     if (queries.length === 0) return new Map()
 
+    const now = this.#now()
+
+    if (now >= this.#cacheExpiresAt) {
+      this.#cacheGeneration += 1
+
+      this.#queryCache.clear()
+
+      this.#detailCache.clear()
+
+      this.#cacheExpiresAt = now + this.#cacheTtlMs
+    }
+
+    const uniqueQueries = [...new Map(queries.map(query => [queryKey(query), query])).values()]
+    const missingQueries = uniqueQueries.filter(query => !this.#queryCache.has(queryKey(query)))
+
+    if (missingQueries.length > 0) {
+      const batchRequest = this.#queryBatch(missingQueries)
+
+      for (const query of missingQueries) {
+        const key = queryKey(query)
+        const request = this.#queryResult(key, batchRequest, this.#cacheGeneration)
+
+        this.#queryCache.set(key, request)
+      }
+    }
+
+    const summaries = await Promise.all(uniqueQueries.map(async query => {
+      const summary = await this.#queryCache.get(queryKey(query))
+
+      return summary ? [queryKey(query), summary] as const : undefined
+    }))
+
+    return new Map(summaries.flatMap(summary => (summary ? [summary] : [])))
+  }
+
+  async #queryResult(
+    key: string,
+    batchRequest: Promise<Map<string, VulnerabilitySummary> | undefined>,
+    generation: number
+  ): Promise<VulnerabilitySummary | undefined> {
+    const summaries = await batchRequest
+
+    if (summaries === undefined && generation === this.#cacheGeneration) this.#queryCache.delete(key)
+
+    return summaries?.get(key)
+  }
+
+  async #queryBatch(queries: readonly OsvQuery[]): Promise<Map<string, VulnerabilitySummary> | undefined> {
     let batch: OsvBatchResponse
 
     try {
@@ -178,11 +241,11 @@ export class OsvClient {
         method: 'POST'
       }, this.#requestTimeoutMs)
 
-      if (!response.ok) return new Map()
+      if (!response.ok) return undefined
 
       batch = toBatchResponse(await response.json())
     } catch {
-      return new Map()
+      return undefined
     }
 
     const summaries = await Promise.all(

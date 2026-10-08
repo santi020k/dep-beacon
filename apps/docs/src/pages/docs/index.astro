@@ -1,111 +1,89 @@
 ---
-import { Badge, ButtonLink, Callout, Card, Link } from '@santi020k/lumen-astro'
+import { Badge, ButtonLink, Icon } from '@santi020k/lumen-astro'
 
 import Docs from '../../layouts/Docs.astro'
-import { SITE } from '../../site.config'
+
+const guides = [
+  { href: '/docs/installation', title: 'Install Dep Beacon', description: 'Choose your editor and open your first manifest.' },
+  { href: '/docs/vscode-extension', title: 'Work in VS Code', description: 'Read inline signals, inspect hovers, and choose an update.' },
+  { href: '/docs/zed-extension', title: 'Work in Zed', description: 'Use native diagnostics, code actions, and optional inlay hints.' },
+  { href: '/docs/pnpm-workspaces', title: 'Connect your workspace', description: 'Understand default catalogs, named catalogs, and shared policy.' },
+  { href: '/docs/security', title: 'Read security signals', description: 'Separate available updates from reported vulnerability risk.' },
+  { href: '/docs/configuration', title: 'Make it yours', description: 'Adjust registry, privacy, display, and installation settings.' }
+]
 ---
 
 <Docs title="Docs" description="Dep Beacon documentation for VS Code and Zed users.">
-  <div class="docs-hero-panel">
-    <div>
-      <p class="eyebrow">Documentation</p>
-      <h1>Dep Beacon Docs</h1>
-      <p>
-        Dep Beacon brings dependency status into VS Code and Zed manifests. It checks npm registry metadata,
-        calculates semver-aware update targets, resolves pnpm catalogs, and marks OSV security risk with clear editor
-        signals.
-      </p>
-      <div class="docs-actions">
-        <ButtonLink class="button primary" href={SITE.marketplaceUrl} newTab>Install for VS Code</ButtonLink>
-        <ButtonLink class="button secondary" href="/docs/zed-extension" variant="secondary">Use in Zed</ButtonLink>
-      </div>
+  <header class="docs-page-header">
+    <p class="docs-eyebrow"><span>Documentation</span> / Field guide</p>
+    <h1>A clearer view of your dependencies.</h1>
+    <p class="docs-intro">
+      Read the signal. Choose your next update. Keep the decision beside the manifest you are already editing.
+    </p>
+    <div class="docs-actions">
+      <ButtonLink class="docs-primary-action" href="/docs/installation" variant="unstyled">
+        Get started <span><Icon name="arrow-right" /></span>
+      </ButtonLink>
+      <ButtonLink class="docs-text-action" href="/docs/security" variant="unstyled">
+        Understand the signals <Icon name="arrow-up-right" />
+      </ButtonLink>
     </div>
+    <dl class="docs-facts">
+      <div><dt>Editors</dt><dd>VS Code + Zed</dd></div>
+      <div><dt>Packages</dt><dd>npm ecosystem</dd></div>
+      <div><dt>Security data</dt><dd>OSV.dev</dd></div>
+    </dl>
+  </header>
 
-    <figure class="docs-signal-card" aria-label="Dep Beacon dependency signal flow">
-      <div class="signal-orbit">
-        <span class="dot green"></span>
-        <span class="dot yellow"></span>
-        <span class="dot blue"></span>
-        <span class="dot red"></span>
+  <section aria-labelledby="find-your-guide">
+    <div class="docs-section-heading">
+      <h2 id="find-your-guide">Find your next step</h2>
+      <p>From first install to workspace policy.</p>
+    </div>
+    <div class="docs-link-list">
+      {guides.map((guide, index) => (
+        <a href={guide.href}>
+          <span class="docs-row-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+          <div><h3>{guide.title}</h3><p>{guide.description}</p></div>
+          <Icon name="arrow-up-right" />
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section aria-labelledby="read-the-signal">
+    <h2 id="read-the-signal">Read the signal</h2>
+    <p>
+      Dep Beacon combines npm metadata, semver-aware update targets, pnpm catalog resolution, and OSV advisories.
+      Version status and security risk stay distinct, so you can decide what needs attention.
+    </p>
+    <dl class="docs-status-list">
+      <div><dt><Badge variant="success">Up to date</Badge></dt><dd>Your declared range already accepts the latest
+        stable version.</dd></div>
+      <div><dt><Badge variant="warning">Update available</Badge></dt><dd>A newer target is available. Choose patch,
+        minor, major, or latest.</dd></div>
+      <div><dt><Badge variant="destructive">Needs attention</Badge></dt><dd>Review missing packages, invalid
+        ranges, or reported security risk.</dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="supported-files">
+    <h2 id="supported-files">At home in your manifests</h2>
+    <dl class="docs-reference">
+      <div>
+        <dt><code>package.json</code></dt>
+        <dd>Dependency sections, npm overrides, Yarn resolutions, and pnpm-specific blocks.</dd>
       </div>
-      <div class="signal-stack">
-        <Badge class="lens warning" variant="warning">latest 7.0.0</Badge>
-        <Badge class="lens ok" variant="success">minor ^7.0.0</Badge>
-        <Badge class="lens catalog" variant="outline">catalog resolves ^19.0.0</Badge>
-        <Badge class="lens danger" variant="destructive">high vulnerability reported</Badge>
+      <div>
+        <dt><code>pnpm-workspace.yaml</code></dt>
+        <dd>Default and named catalogs, overrides, and package extensions. The <code>.yml</code> extension works
+          too.</dd>
       </div>
-    </figure>
-  </div>
-
-  <Callout class="docs-callout">
-    <strong>Start here:</strong>
-    <span>
-      Install Dep Beacon in VS Code or Zed, open `package.json` or `pnpm-workspace.yaml`, and review the dependency
-      signals in your editor.
-    </span>
-  </Callout>
-
-  <div class="docs-link-grid" aria-label="Documentation shortcuts">
-    <Link href="/docs/installation">
-      <span>01</span>
-      <strong>Install</strong>
-      <p>Add Dep Beacon to VS Code or Zed and open a supported manifest.</p>
-    </Link>
-    <Link href="/docs/vscode-extension">
-      <span>02</span>
-      <strong>VS Code Extension</strong>
-      <p>Understand inline labels, CodeLens actions, commands, and status colors.</p>
-    </Link>
-    <Link href="/docs/zed-extension">
-      <span>03</span>
-      <strong>Zed Extension</strong>
-      <p>Use the zero-config diagnostics dashboard, individual and bulk updates, hovers, and npm links.</p>
-    </Link>
-    <Link href="/docs/pnpm-workspaces">
-      <span>04</span>
-      <strong>pnpm Workspaces</strong>
-      <p>See how default and named catalogs resolve before dependency analysis.</p>
-    </Link>
-    <Link href="/docs/security">
-      <span>05</span>
-      <strong>Security Signals</strong>
-      <p>Use OSV severity signals to separate routine updates from advisory risk.</p>
-    </Link>
-  </div>
-
-  <h2>Core ideas</h2>
-  <div class="docs-idea-grid">
-    <Card as="article">
-      <strong>Stay on the line</strong>
-      <p>Keep update decisions beside the dependency range instead of sending maintainers to another dashboard.</p>
-    </Card>
-    <Card as="article">
-      <strong>Choose the next move</strong>
-      <p>Show patch, minor, major, and latest targets instead of one vague update suggestion.</p>
-    </Card>
-    <Card as="article">
-      <strong>Respect workspace policy</strong>
-      <p>Resolve pnpm catalogs before analysis, so `catalog:` never looks like an unknown version.</p>
-    </Card>
-    <Card as="article">
-      <strong>Separate risk from noise</strong>
-      <p>Keep outdated packages, invalid ranges, and vulnerability severity visually distinct.</p>
-    </Card>
-  </div>
-
-  <h2>Supported files</h2>
-  <div class="docs-file-grid">
-    <Card as="article">
-      <strong>package.json</strong>
-      <p>Dependency sections, npm overrides, Yarn resolutions, and pnpm-specific blocks.</p>
-    </Card>
-    <Card as="article">
-      <strong>pnpm-workspace.yaml</strong>
-      <p>Default catalogs, named catalogs, overrides, and package extensions.</p>
-    </Card>
-    <Card as="article">
-      <strong>Command palette</strong>
-      <p>Refresh signals, clear registry cache, sort manifests, toggle prereleases, and run installs.</p>
-    </Card>
-  </div>
+      <div>
+        <dt>Your editor</dt>
+        <dd>Inspect a dependency, choose an update, or use VS Code commands to refresh signals, sort manifests, and
+          run installs.</dd>
+      </div>
+    </dl>
+  </section>
 </Docs>
