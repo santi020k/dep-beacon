@@ -4,6 +4,12 @@ The local integration target is `release/v1.3.0`, based on current `main`.
 Core and VS Code move from 1.2.1 to 1.3.0; the language server and Zed adapter
 move from 1.1.1 to 1.1.2. Changesets generates the package changelogs and versions.
 
+The release integrates the existing Lumen feature work, uncommitted social previews,
+ESLint refresh, Zed registry identifier fix, manual Infisical connection workflow,
+and dependency/action maintenance branches. The dependency merge retains the newer
+validated catalog instead of restoring removed packages or older versions. The pending
+release-workflow setup change is included while its source worktree remains untouched.
+
 ## Design contract
 
 Dep Beacon keeps its blue, teal, and four status colors, with darker light-theme
@@ -34,6 +40,11 @@ catalog YAML, setting defaults, inline code, and OSV privacy explanations.
 - Shared OSV query/detail caches expire after 15 minutes. Failed query batches retry
   on the next lookup. LSP analysis must match the captured document version before it
   can publish diagnostics or return edits, including changes during debounce.
+- Workspace catalog edits immediately invalidate dependent package analyses. Queued
+  editor requests await the current analysis, including YAML workspace refreshes, and
+  catalog update actions use the current workspace ranges.
+- Zed's direct Rust API remains at the latest stable 0.7.0. An OSV query of all 86
+  registry packages in its lockfile returned no known advisories.
 
 The latest `eslint-plugin-jsx-a11y` package still declares ESLint 9 as its highest
 peer while the owned config requires ESLint 10. Accessibility lint remains enabled;
@@ -48,6 +59,13 @@ Run `pnpm install --frozen-lockfile`, `pnpm run validate`, `pnpm run test:docs`,
 `pnpm run check:release`, and `pnpm audit`. The browser suite covers every route in
 both themes at 320, 375, 768, and 1440 pixels, plus keyboard navigation, focus return,
 theme continuity after page swaps, and code-tab preferences in Chromium and WebKit.
+The test preview stays in the foreground so Playwright owns its startup and shutdown,
+including when Astro detects an agent environment.
+
+Independent review corrections include stale editor ranges, queued requests during
+debounce, immediate catalog invalidation, release-check ordering after the build,
+and reproducible Quality hook setup. Protocol regressions cover package manifests
+and both supported workspace YAML extensions.
 
 Temporary before/after screenshots and the 28-case documentation accessibility sweep
 live outside Git in `/tmp/dep-beacon-redesign`. All seven chapters passed the rendered

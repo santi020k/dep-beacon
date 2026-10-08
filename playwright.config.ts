@@ -17,7 +17,7 @@ export default defineConfig({
     trace: 'retain-on-failure'
   },
   webServer: {
-    command: 'pnpm --filter @santi020k/dep-beacon-docs preview --host 127.0.0.1 --port 4398',
+    command: 'pnpm --filter @santi020k/dep-beacon-docs preview --host 127.0.0.1 --port 4398 --ignore-lock',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     url: 'http://127.0.0.1:4398'
