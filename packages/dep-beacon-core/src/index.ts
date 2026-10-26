@@ -39,3 +39,5 @@ export {
   specSatisfiesLatest,
   versionCandidates
 } from './versions.js'
+
+// Verify package changes and release notes retain affected CI selection.
