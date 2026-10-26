@@ -1,5 +1,11 @@
 # @santi020k/dep-beacon-core
 
+## 1.4.0
+
+### Minor Changes
+
+- Use Turbo affected workspace validation for ordinary pull requests while retaining complete release gates. Fix compatible dependency advisories and backport the upstream MSAL confidential-client authorization response fix until Azure Identity accepts a patched major release.
+
 ## 1.3.0
 
 ### Reliability fixes

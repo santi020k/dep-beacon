@@ -11,7 +11,7 @@
     "build": "pnpm run assets && turbo run build",
     "typecheck": "turbo run typecheck && tsc -p tsconfig.json",
     "test": "turbo run test",
-    "test:coverage": "turbo run test:coverage",
+    "test:coverage": "turbo run test:coverage && pnpm run test:ci && pnpm run check:dependency-security",
     "check:astro": "pnpm --filter @santi020k/dep-beacon-docs check",
     "check:release": "node scripts/check-release.mjs && pnpm run validate:zed",
     "lint": "pnpm run lint:repo && turbo run lint -- --max-warnings=0",
@@ -36,7 +36,12 @@
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run check:astro && pnpm run typecheck && pnpm run test && pnpm run lint",
     "commit": "commitprompt",
-    "test:docs": "pnpm --filter @santi020k/dep-beacon-docs build && playwright test"
+    "test:docs": "pnpm --filter @santi020k/dep-beacon-docs build && playwright test",
+    "ci:check": "node scripts/ci-affected.mjs",
+    "ci:plan": "node scripts/ci-affected.mjs --plan",
+    "test:ci": "node --test scripts/ci-affected.test.mjs",
+    "check:audit": "node scripts/check-audit.mjs",
+    "check:dependency-security": "node --test scripts/check-msal-backport.mjs scripts/check-audit.test.mjs"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",

@@ -1,5 +1,12 @@
 # @santi020k/dep-beacon-lsp
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @santi020k/dep-beacon-core@1.4.0
+
 ## 1.1.2
 
 ### Reliability fixes
