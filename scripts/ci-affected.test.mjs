@@ -12,13 +12,17 @@ const input = { event: 'pull_request', headRef: 'ci/example', files: ['apps/docs
 
 test('ordinary workspace edits can use affected validation', () => {
   assert.equal(requiresFullValidation(input), false)
+
+  assert.equal(requiresFullValidation({ ...input, files: ['packages/cli/index.ts', '.changeset/package-fix.md'] }), false)
+
+  assert.equal(requiresFullValidation({ ...input, files: ['.changeset/package-fix.md'] }), false)
 })
 
 test('release, push, manual, shared, unknown and dependency changes retain full validation', () => {
   for (const override of [
     { full: true }, { event: 'push' }, { event: 'workflow_dispatch' },
     { headRef: 'release/v1.6.0' }, { headRef: 'changeset-release/main' },
-    ...['pnpm-lock.yaml', 'turbo.json', 'scripts/check.mjs', '.github/workflows/ci.yml', 'new-area/file.ts', 'packages/cli/package.json', 'packages/vscode-dep-beacon/resources/icon.svg', 'apps/docs/public/usage-preview.png'].map(file => ({ files: [file] })),
+    ...['pnpm-lock.yaml', 'turbo.json', 'scripts/check.mjs', '.github/workflows/ci.yml', '.changeset/config.json', '.changeset/nested/note.md', 'new-area/file.ts', 'packages/cli/package.json', 'packages/vscode-dep-beacon/resources/icon.svg', 'apps/docs/public/usage-preview.png'].map(file => ({ files: [file] })),
   ]) assert.equal(requiresFullValidation({ ...input, ...override }), true)
 })
 
@@ -99,14 +103,20 @@ test('validated Turbo selection controls consumers and rejects incomplete graphs
 
     writeFileSync(join(directory, 'apps/docs/page.astro'), 'after')
 
+    mkdirSync(join(directory, '.changeset'))
+
+    writeFileSync(join(directory, '.changeset/package-fix.md'), '---\n"vscode-dep-beacon": patch\n---\nRelease note.\n')
+
     const planFor = graph => createPlan({ cwd: directory, base: 'HEAD', env: { ...environment, TEST_GRAPH: graph } })
-    const docsPlan = planFor(JSON.stringify({ packages: [docs] }))
+    const docsPlan = planFor(JSON.stringify({ packages: ['//', docs] }))
 
     assert.equal(docsPlan.mode, 'affected')
 
     assert.equal(docsPlan.docs, true)
 
     assert.equal(docsPlan.packages, false)
+
+    assert.deepEqual(docsPlan.selected, [docs])
 
     assert.deepEqual(docsPlan.commands[0], ['run', 'assets'])
 

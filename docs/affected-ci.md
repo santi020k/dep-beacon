@@ -4,6 +4,9 @@ Ordinary pull requests use the installed Turbo dependency graph to check changed
 workspaces and their dependents. Inspect `pnpm run ci:plan --base <commit>` before
 running `pnpm run ci:check --base <commit>`. Git comparison includes committed,
 staged, unstaged, untracked, deleted, and both sides of renamed paths.
+Changeset Markdown release notes do not expand workspace selection; Changeset
+configuration still selects full validation. Notes retain repository lint and
+spelling checks.
 
 Release branches, pushes, manual runs, missing or invalid history, manifests,
 shared configuration, unknown paths, and invalid dependency graphs retain the
@@ -52,6 +55,13 @@ LSP and VS Code, and shared configuration selects full validation. Alternate
 and separate `TURBO_CACHE_DIR` directories. Check the executed plan each time and
 restore a clean fixture between scenarios. A separate affected preflight also
 passed without build products.
+
+A second regression benchmark includes a core source edit plus its required
+Changeset note, using snapshot `dbcd1a2ad4cfda4155f988051d157c1de0bb909d` and the
+same cache method. Turbo selects core, LSP, and VS Code while excluding docs.
+Cold checks took 18.17 s full versus 13.50 s affected (25.7% less); warm medians
+were 6.96 s versus 6.84 s, which is not a meaningful measured improvement.
+Changeset-only edits select no workspace tasks while retaining repository checks.
 
 ## Release and recovery
 

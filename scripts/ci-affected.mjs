@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util'
 const packageTasks = ['build', 'typecheck', 'lint', 'test:coverage']
 const docsPackage = '@santi020k/dep-beacon-docs'
 const fullScripts = ['validate']
+const isReleaseNote = file => /^\.changeset\/[^/]+\.md$/u.test(file)
 
 export const gitEnvironment = (environment = process.env) => Object.fromEntries(Object.entries(environment).filter(([key]) => !key.startsWith('GIT_')))
 
@@ -21,7 +22,7 @@ export const requiresFullValidation = ({ full, event, headRef, files, workspaces
   full
   || (event && event !== 'pull_request')
   || /^(release\/|changeset-release\/)/u.test(headRef)
-  || files.some(file => (file.endsWith('/package.json') || file.startsWith('packages/vscode-dep-beacon/resources/') || file === 'apps/docs/public/usage-preview.png') || !workspaces.some(workspace => file.startsWith(`${workspace.directory}/`))),
+  || files.some(file => !isReleaseNote(file) && ((file.endsWith('/package.json') || file.startsWith('packages/vscode-dep-beacon/resources/') || file === 'apps/docs/public/usage-preview.png') || !workspaces.some(workspace => file.startsWith(`${workspace.directory}/`)))),
 )
 
 export const changedFiles = (cwd, base) => {
@@ -63,11 +64,13 @@ const selectPackages = (cwd, env, changes, workspaces) => {
 
   const graph = JSON.parse(capture(process.execPath, [env.npm_execpath, 'exec', 'turbo', 'run', ...packageTasks, '--affected', '--dry=json'], cwd, turboEnvironment))
 
-  if (!Array.isArray(graph.packages) || !graph.packages.every(name => typeof name === 'string' && workspaces.some(workspace => workspace.name === name))) throw new Error('Invalid Turbo graph')
+  if (!Array.isArray(graph.packages) || !graph.packages.every(name => typeof name === 'string' && ((name === '//' && changes.files.some(isReleaseNote)) || workspaces.some(workspace => workspace.name === name)))) throw new Error('Invalid Turbo graph')
 
-  const selected = [...new Set(graph.packages)].sort()
+  const selected = [...new Set(graph.packages.filter(name => name !== '//'))].sort()
 
   for (const file of changes.files) {
+    if (isReleaseNote(file)) continue
+
     const owner = workspaces.find(workspace => file.startsWith(`${workspace.directory}/`))
 
     if (!owner || !selected.includes(owner.name)) throw new Error('Turbo omitted a directly changed workspace')
