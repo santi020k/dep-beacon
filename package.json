@@ -39,7 +39,7 @@
     "test:docs": "pnpm --filter @santi020k/dep-beacon-docs build && playwright test",
     "ci:check": "node scripts/ci-affected.mjs",
     "ci:plan": "node scripts/ci-affected.mjs --plan",
-    "test:ci": "node --test scripts/ci-affected.test.mjs",
+    "test:ci": "node --test scripts/ci-affected.test.mjs scripts/zed-release.test.mjs",
     "check:audit": "node scripts/check-audit.mjs",
     "check:dependency-security": "node --test scripts/check-msal-backport.mjs scripts/check-audit.test.mjs"
   },

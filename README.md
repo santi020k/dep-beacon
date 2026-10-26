@@ -161,7 +161,6 @@ Use `infisical run --env dev -- <command>` for commands that require credentials
 - `OVSX_PAT`
 - `ZED_EXTENSIONS_TOKEN` for pushing a Zed registry update branch
 - `ZED_EXTENSIONS_FORK`, for example `santi020k/extensions`
-- optional `ZED_EXTENSIONS_HEAD`; defaults to the repository owner
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - optional `CLOUDFLARE_PAGES_PROJECT_NAME`
@@ -170,6 +169,9 @@ Use `infisical run --env dev -- <command>` for commands that require credentials
 Current publishing and deployment workflows consume GitHub Actions secrets and variables.
 The manual Infisical workflow checks OIDC connectivity; it does not migrate those workflows
 or synchronize credentials. Never commit credentials or local `.env` files.
+
+See [Zed registry publishing](docs/zed-registry-publishing.md) for the least-privilege
+branch preparation and required human-authored upstream submission.
 
 ## What It Tracks
 
