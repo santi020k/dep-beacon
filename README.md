@@ -144,6 +144,11 @@ and keyboard-operated editor examples. `pnpm run validate` remains the full pack
 See [the 1.3 release notes](docs/release-v1.3.0.md) for design decisions, migration,
 validation, and the automated publication boundary.
 
+See [affected CI validation](docs/affected-ci.md) for the v1.4 rollout, benchmark,
+full-validation fallback, and recovery procedure, and the
+[MSAL backport notes](docs/security-msal-backport.md) for the remaining upstream
+audit warning and its tested fix.
+
 ## Environment
 
 Infisical's configured development environment is the source of truth for local secrets.

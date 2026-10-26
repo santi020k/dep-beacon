@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, "release/v*"]
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   workflow_dispatch:
     inputs:
@@ -31,22 +31,26 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - id: paths
         name: Classify changed paths
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_REF: ${{ github.head_ref }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ||
+                "$HEAD_REF" == release/* || "$HEAD_REF" == changeset-release/* ]]; then
             echo "docs=true" >> "$GITHUB_OUTPUT"
             echo "packages=true" >> "$GITHUB_OUTPUT"
+            echo "release=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if [[ "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
             BASE_SHA="$(git rev-parse HEAD^)"
           fi
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          git diff --name-only "$BASE_SHA" HEAD > /tmp/changed-files
+          git diff --no-renames --name-only "$BASE_SHA" HEAD > /tmp/changed-files
           docs_pattern='^(apps/docs/|packages/|scripts/generate-assets\.mjs$|'
           docs_pattern+='pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.github/workflows/ci\.yml$)'
           if grep -Eq "$docs_pattern" /tmp/changed-files; then
@@ -71,11 +75,12 @@ jobs:
           fi
 
   validation:
-    name: Full validation (22.x)
+    name: Repository validation (22.x)
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      QUALITY_CI_BASE: ${{ github.event.pull_request.base.sha }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
     steps:
@@ -87,7 +92,7 @@ jobs:
         with:
           node-version: 22.x
       - name: Audit dependencies
-        run: pnpm audit --audit-level moderate
+        run: pnpm run check:audit
       - name: Validate pull request title
         if: github.event_name == 'pull_request'
         env:
@@ -100,18 +105,23 @@ jobs:
           !startsWith(github.head_ref, 'changeset-release/') &&
           !startsWith(github.head_ref, 'release/v')
         run: |
-          pnpm changeset status --since=origin/main --output=/tmp/changeset-status.json
+          pnpm changeset status --since="$QUALITY_CI_BASE" --output=/tmp/changeset-status.json
           jq -e '.releases | length > 0' /tmp/changeset-status.json >/dev/null
+      - name: Plan repository checks
+        id: scope
+        run: pnpm run ci:plan
       - name: Run repository validation
-        run: pnpm run validate
+        run: pnpm run ci:check
       - name: Verify prepared release versions
         if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/v')
         env:
           RELEASE_BRANCH: ${{ github.head_ref }}
         run: pnpm run check:release
       - name: Install documentation browsers
+        if: steps.scope.outputs.docs == 'true'
         run: pnpm exec playwright install --with-deps chromium webkit
       - name: Verify documentation interactions
+        if: steps.scope.outputs.docs == 'true'
         run: pnpm run test:docs
       - name: Check the Zed adapter
         run: cargo check --locked --manifest-path extensions/dep-beacon-lsp/Cargo.toml
