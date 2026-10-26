@@ -219,7 +219,7 @@ jobs:
           test -n "$VSCE_PAT"
           test -n "$OVSX_PAT"
           pnpm --filter vscode-dep-beacon publish:ext
-      - name: Publish Zed extension
+      - name: Prepare Zed registry update
         if: steps.recovery.outputs.published == 'true' || steps.changesets.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ github.token }}

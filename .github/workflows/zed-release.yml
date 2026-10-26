@@ -1,10 +1,10 @@
-name: Publish Zed Extension
+name: Prepare Zed Extension
 
 on:
   workflow_dispatch:
     inputs:
       source_sha:
-        description: Released commit to publish; defaults to the selected ref
+        description: Released commit for the registry update; defaults to the selected ref
         required: false
         type: string
 
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   publish-zed-extension:
-    name: Open Zed extensions registry PR
+    name: Prepare Zed extensions registry branch
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
@@ -24,7 +24,6 @@ jobs:
       contents: read
     env:
       SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
-      ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
@@ -81,20 +80,50 @@ jobs:
         if: steps.npm-version.outputs.available == 'true'
         env:
           ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
+          ZED_EXTENSIONS_TOKEN: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
         run: |
           test -n "$ZED_EXTENSIONS_TOKEN"
           test -n "$ZED_EXTENSIONS_FORK"
       - name: Check out Zed extensions fork
         if: steps.npm-version.outputs.available == 'true'
-        env:
-          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
-          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          repository: ${{ vars.ZED_EXTENSIONS_FORK }}
+          token: ${{ secrets.ZED_EXTENSIONS_TOKEN }}
+          path: zed-extensions
+          fetch-depth: 0
+      - name: Fetch upstream registry
+        if: steps.npm-version.outputs.available == 'true'
+        working-directory: zed-extensions
         run: |
-          git clone "https://x-access-token:${ZED_EXTENSIONS_TOKEN}@github.com/${ZED_EXTENSIONS_FORK}.git" zed-extensions
-          cd zed-extensions
           git remote add upstream https://github.com/zed-industries/extensions.git
           git fetch upstream main
-          git checkout -B "dep-beacon-lsp-${ZED_VERSION}" upstream/main
+      - name: Select fork-known upstream ancestry
+        if: steps.npm-version.outputs.available == 'true'
+        working-directory: zed-extensions
+        env:
+          ZED_VERSION: ${{ steps.zed-version.outputs.version }}
+        run: |
+          base=""
+          best_distance=""
+          while IFS= read -r ref; do
+            candidate="$(git merge-base upstream/main "$ref" || true)"
+            if [[ -z "$candidate" ]] || ! git diff --quiet "$candidate" "$ref" -- .github/workflows; then
+              continue
+            fi
+            distance="$(git rev-list --count "$candidate..upstream/main")"
+            if [[ -z "$base" || "$distance" -lt "$best_distance" ]]; then
+              base="$candidate"
+              best_distance="$distance"
+            fi
+          done < <(git for-each-ref --format='%(refname)' refs/remotes/origin/)
+          if [[ -z "$base" ]]; then
+            echo "No shared upstream ancestor has workflow files already present in the fork."
+            echo "A maintainer must prepare a compatible fork ref; token scopes were not changed."
+            exit 1
+          fi
+          echo "Using shared upstream ancestor $base without inheriting new workflow files."
+          git switch --create "dep-beacon-lsp-${ZED_VERSION}" "$base"
       - name: Update registry entry
         id: registry-update
         if: steps.npm-version.outputs.available == 'true'
@@ -110,7 +139,7 @@ jobs:
           git submodule update --init extensions/dep-beacon-lsp
           git -C extensions/dep-beacon-lsp fetch origin "$SOURCE_SHA"
           git -C extensions/dep-beacon-lsp checkout "$SOURCE_SHA"
-          python - <<'PY'
+          python3 - <<'PY'
           from pathlib import Path
           import os
 
@@ -140,36 +169,36 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run sort-extensions
           git add .gitmodules extensions.toml extensions/dep-beacon-lsp
+          branch="dep-beacon-lsp-${ZED_VERSION}"
+          if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+            if ! git diff --cached --quiet "refs/remotes/origin/$branch" --; then
+              echo "Existing registry branch differs; preserve it for maintainer review."
+              exit 1
+            fi
+            echo "Registry branch already contains the requested update."
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if git diff --cached --quiet; then
             echo "Zed registry entry is already up to date."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "dep-beacon-lsp ${ZED_VERSION}"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-          git push --force-with-lease origin "dep-beacon-lsp-${ZED_VERSION}"
-      - name: Open Zed registry pull request
-        if: steps.registry-update.outputs.changed == 'true'
-        working-directory: zed-extensions
+          git push origin "HEAD:refs/heads/$branch"
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Hand off Zed registry submission
+        if: steps.registry-update.outputs.ready == 'true'
         env:
-          ZED_EXTENSIONS_HEAD: ${{ vars.ZED_EXTENSIONS_HEAD || github.repository_owner }}
+          ZED_EXTENSIONS_FORK: ${{ vars.ZED_EXTENSIONS_FORK }}
           ZED_VERSION: ${{ steps.zed-version.outputs.version }}
         run: |
-          export GH_TOKEN="$ZED_EXTENSIONS_TOKEN"
-          existing_pr="$(
-            gh api --method GET repos/zed-industries/extensions/pulls \
-              -f state=open \
-              -f "head=${ZED_EXTENSIONS_HEAD}:dep-beacon-lsp-${ZED_VERSION}" \
-              --jq '.[0].number // empty'
-          )"
-          if [[ -n "$existing_pr" ]]; then
-            echo "Zed registry pull request #${existing_pr} already exists."
-            gh pr comment "$existing_pr" --repo zed-industries/extensions --body '@cla-bot check'
-            exit 0
-          fi
-          gh pr create \
-            --repo zed-industries/extensions \
-            --head "${ZED_EXTENSIONS_HEAD}:dep-beacon-lsp-${ZED_VERSION}" \
-            --base main \
-            --title "Add dep-beacon-lsp ${ZED_VERSION}" \
-            --body "Publishes dep-beacon-lsp ${ZED_VERSION}.\n\nSource: https://github.com/santi020k/dep-beacon/tree/${SOURCE_SHA}/extensions/dep-beacon-lsp"
+          fork="${ZED_EXTENSIONS_FORK/\//:}"
+          compare="https://github.com/zed-industries/extensions/compare/main...${fork}:dep-beacon-lsp-${ZED_VERSION}"
+          {
+            echo "## Zed registry update ready for human submission"
+            echo ""
+            echo "[Review the registry update and open the PR](${compare}?expand=1)."
+            echo "Write the PR description and maintainer replies in your own words."
+            echo "The upstream AI policy requires a human in the loop; no PR or comment was created."
+          } >> "$GITHUB_STEP_SUMMARY"
