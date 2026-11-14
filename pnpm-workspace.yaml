@@ -44,7 +44,7 @@ catalog:
   "@types/vscode": ~1.85.0
   "@vscode/vsce": ^4.0.0
   "@vitest/coverage-v8": ^5.0.3
-  astro: ^7.3.7
+  astro: ^7.4.7
   cspell: ^10.3.6
   esbuild: ^0.28.2
   eslint: ^10.12.0
