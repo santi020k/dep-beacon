@@ -1,5 +1,16 @@
 # @santi020k/dep-beacon-lsp
 
+## 1.2.0
+
+### Minor Changes
+
+- Adopt Quality v2 impact planning and reusable task caches, eliminate the duplicate documentation browser build, and require every selected validation before release or deployment.
+
+### Patch Changes
+
+- Updated dependencies [`837a601`]:
+  - @santi020k/dep-beacon-core@1.5.0
+
 ## 1.1.3
 
 ### Patch Changes

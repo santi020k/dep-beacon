@@ -56,7 +56,7 @@ For VS Code, install **Dep Beacon** from the linked Marketplace or Open VSX list
 then open a project’s `package.json`. The extension adds dependency status and
 update actions to the manifest. Use the Zed instructions below for its language-server integration.
 
-Local development requires Node.js 22.19 or newer and the pnpm version declared in `package.json`.
+Local development requires Node.js 22.23.4 or newer and the pnpm version declared in `package.json`.
 
 To develop this repository locally:
 
@@ -94,13 +94,13 @@ pnpm run validate
 
 ## Commits
 
-Install [Quality v1.3.0](https://github.com/santi020k/quality/releases/tag/v1.3.0)
+Install [Quality v2.0.0](https://github.com/santi020k/quality/releases/tag/v2.0.0)
 before configuring Git hooks. On macOS and Linux, its installer verifies the native binary checksum:
 
 ```sh
 curl --proto '=https' --tlsv1.2 -fsSL \
-  https://raw.githubusercontent.com/santi020k/quality/main/install.sh \
-  | sh -s -- santi020k/quality v1.3.0
+  https://raw.githubusercontent.com/santi020k/quality/ff490e9efbd5fdfbdb1e6c404f1741d04c57f585/install.sh \
+  | sh -s -- santi020k/quality v2.0.0
 pnpm run hooks:install
 quality hooks status
 ```

@@ -42,7 +42,7 @@
     "ci:plan": "node scripts/ci-affected.mjs --plan",
     "test:ci": "node --test scripts/ci-affected.test.mjs scripts/zed-release.test.mjs scripts/pipeline-gate.node-test.mjs",
     "check:audit": "node scripts/check-audit.mjs",
-    "check:dependency-security": "node --test scripts/check-msal-backport.mjs scripts/check-audit.test.mjs"
+    "check:dependency-security": "node --test scripts/check-msal-backport.mjs scripts/check-audit.test.mjs scripts/check-toolchain-security.mjs"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
@@ -76,7 +76,7 @@
     ]
   },
   "engines": {
-    "node": ">=22.19.0"
+    "node": ">=22.23.4"
   },
   "packageManager": "pnpm@11.1.2"
 }

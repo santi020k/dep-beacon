@@ -31,3 +31,27 @@ from the actual Node and pnpm versions, platform, and architecture. This prevent
 a broad cache restore from reusing outputs after a runtime patch changes, even
 when the declared Node selector remains unchanged. Local runs without that
 variable use a separate task identity.
+
+## Release security qualification
+
+The release refreshes Astro to 7.4.12 and limits vulnerable glob 9–14,
+minimatch 7–11, and qs consumers to 14.0.6, 11.0.9 and 6.17.1. Import-x 4
+consumers use 4.18.1, which supports the new matcher APIs. The original reviewed
+MSAL backport and its audit digest guard remain unchanged. No new audit
+exception is introduced. Root/docs development requires Node 22.23.4; published
+library, LSP and extension engine floors remain unchanged.
+
+[Glob migration notes](https://github.com/isaacs/node-glob/blob/main/changelog.md),
+[minimatch migration notes](https://github.com/isaacs/minimatch/blob/main/changelog.md),
+[import-x release notes](https://github.com/un-ts/eslint-plugin-import-x/blob/master/CHANGELOG.md)
+and [qs changes](https://github.com/ljharb/qs/blob/main/CHANGELOG.md) describe the
+matching and query changes. Actual Markdown-toolchain glob, shared ESLint import
+rules and extension-publisher query dependencies have behavioral regressions in
+`check:dependency-security`. Remove the scoped overrides when upstream versions
+accept the fixed ranges; retain these consumer checks.
+
+The scoped `@astrojs/astro2tsx` 0.1.1 package extension supplies its missing
+`@emnapi/runtime` 1.11.3 dependency, matching its core dependency. This prevents
+an incompatible runtime 2 beta from the bundler satisfying a transitive peer and
+crashing Astro Check. Remove the extension when upstream declares the matching
+runtime. Other runtime consumers keep their own dependency versions.
