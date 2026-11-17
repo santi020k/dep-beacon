@@ -36,10 +36,11 @@
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run check:astro && pnpm run typecheck && pnpm run test && pnpm run lint",
     "commit": "commitprompt",
+    "test:docs:built": "playwright test",
     "test:docs": "pnpm --filter @santi020k/dep-beacon-docs build && playwright test",
     "ci:check": "node scripts/ci-affected.mjs",
     "ci:plan": "node scripts/ci-affected.mjs --plan",
-    "test:ci": "node --test scripts/ci-affected.test.mjs scripts/zed-release.test.mjs",
+    "test:ci": "node --test scripts/ci-affected.test.mjs scripts/zed-release.test.mjs scripts/pipeline-gate.node-test.mjs",
     "check:audit": "node scripts/check-audit.mjs",
     "check:dependency-security": "node --test scripts/check-msal-backport.mjs scripts/check-audit.test.mjs"
   },

@@ -197,3 +197,5 @@ branch preparation and required human-authored upstream submission.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+See [Quality v2 rollout](docs/quality-v2-rollout.md) for validation and deployment policy.
