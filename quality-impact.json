@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "global_inputs": [
+    ".github/",
+    "scripts/",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "turbo.json",
+    "quality-impact.json",
+    ".quality-version",
+    "quality.yml",
+    "eslint.config.js",
+    "tsconfig.json",
+    "packages/vscode-dep-beacon/resources/",
+    "apps/docs/public/usage-preview.png"
+  ],
+  "ignored_inputs": [],
+  "nodes": {
+    "core": {
+      "inputs": [
+        "packages/dep-beacon-core/"
+      ],
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "turbo",
+        "run",
+        "build",
+        "typecheck",
+        "lint",
+        "--filter=@santi020k/dep-beacon-core"
+      ],
+      "depends_on": []
+    },
+    "lsp": {
+      "inputs": [
+        "packages/dep-beacon-lsp/"
+      ],
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "turbo",
+        "run",
+        "build",
+        "typecheck",
+        "lint",
+        "--filter=@santi020k/dep-beacon-lsp"
+      ],
+      "depends_on": [
+        "core"
+      ]
+    },
+    "vscode": {
+      "inputs": [
+        "packages/vscode-dep-beacon/"
+      ],
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "turbo",
+        "run",
+        "build",
+        "typecheck",
+        "lint",
+        "--filter=vscode-dep-beacon"
+      ],
+      "depends_on": [
+        "core"
+      ]
+    },
+    "docs": {
+      "inputs": [
+        "apps/docs/"
+      ],
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "turbo",
+        "run",
+        "build",
+        "typecheck",
+        "lint",
+        "--filter=@santi020k/dep-beacon-docs"
+      ],
+      "depends_on": [
+        "core"
+      ]
+    },
+    "zed": {
+      "inputs": [
+        "extensions/"
+      ],
+      "command": "cargo",
+      "args": [
+        "check",
+        "--locked",
+        "--manifest-path",
+        "extensions/dep-beacon-lsp/Cargo.toml"
+      ],
+      "depends_on": [
+        "lsp"
+      ]
+    },
+    "security": {
+      "inputs": [],
+      "always": true,
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check:audit"
+      ]
+    }
+  }
+}
