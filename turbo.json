@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": ["VITEST", "QUALITY_TASK_RUNTIME"],
+  "globalDependencies": ["tsconfig.base.json", "tsconfig.eslint.json", "tsconfig.json", "eslint.config.js", "cspell.config.yaml"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

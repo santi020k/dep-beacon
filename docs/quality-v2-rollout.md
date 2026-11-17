@@ -55,3 +55,9 @@ The scoped `@astrojs/astro2tsx` 0.1.1 package extension supplies its missing
 an incompatible runtime 2 beta from the bundler satisfying a transitive peer and
 crashing Astro Check. Remove the extension when upstream declares the matching
 runtime. Other runtime consumers keep their own dependency versions.
+
+Shared root TypeScript configurations, ESLint configuration and spelling
+dictionary are explicit Turbo global inputs. Changing them invalidates affected
+workspace task hashes even when package source files are untouched.
+`test:ci` verifies this with the installed Turbo binary in an isolated copy and
+confirms unrelated root README edits leave task hashes unchanged.
