@@ -22,7 +22,7 @@ test('shared compiler and lint inputs invalidate actual Turbo task hashes', cont
   const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, env: environment, encoding: 'utf8' }).split('\0').filter(Boolean)
 
   for (const file of tracked) {
-    if (!lstatSync(join(root, file)).isFile()) continue
+    if (!lstatSync(join(root, file), { throwIfNoEntry: false })?.isFile()) continue
 
     mkdirSync(dirname(join(directory, file)), { recursive: true })
 

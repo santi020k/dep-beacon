@@ -23,15 +23,11 @@ cached browsers keyed by the resolved Playwright version. The Rust adapter check
 remains mandatory in CI and reuses a compiler cache.
 Pre-push, compatibility, and release validation retain their existing full gates.
 
-The live audit blocks release pull requests, pushes to `main`, and manual runs.
-On ordinary pull requests the `Dependency audit` workflow reports it as a separate,
-non-required check so an unrelated advisory cannot fail validation; the same
-workflow runs daily to surface new advisories.
-
-Pull request title and changeset checks live in the `Pull request metadata`
-workflow. Title edits and label changes rerun only that workflow, never
-repository validation. Branch protection must require its `Pull request metadata`
-check alongside `Required checks` for those rules to keep blocking merges.
+The live audit blocks every pull request, pushes to `main`, and manual runs.
+Scheduled audits supplement this required check. Metadata validation is part of
+the same required CI aggregate; title and label events rerun validation, and
+expensive jobs wait for successful metadata checks. Documentation browser checks
+still run in parallel with package validation.
 
 ## Benchmark
 
@@ -77,7 +73,7 @@ Changeset-only edits select no workspace tasks while retaining repository checks
 
 ## Release and recovery
 
-The rollout targets core and VS Code v1.4.0; Changesets also updates the LSP's
+The rollout targets core and VS Code v1.5.0; Changesets also updates the LSP's
 internal dependency and synchronizes the Zed adapter version. No public API
 migration is required. Compatible transitive security updates and the tested
 [MSAL security backport](security-msal-backport.md) accompany the rollout.

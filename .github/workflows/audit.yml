@@ -1,11 +1,7 @@
 name: Dependency audit
 
-# Reports the live advisory audit without blocking ordinary pull requests. The CI
-# workflow keeps the same audit as a blocking gate for releases, pushes, and manual runs.
+# Scheduled monitoring supplements the mandatory CI audit.
 on:
-  pull_request:
-    branches: [main, "release/v*"]
-    types: [opened, synchronize, reopened]
   schedule:
     - cron: "17 6 * * *"
   workflow_dispatch: {}
@@ -20,9 +16,6 @@ concurrency:
 jobs:
   audit:
     name: Dependency audit
-    if: >-
-      github.event_name != 'pull_request' ||
-      !(startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'changeset-release/'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

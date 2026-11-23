@@ -5,8 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main, "release/v*"]
-    # Title and label events are handled by pr-metadata.yml so they never rerun validation.
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   workflow_dispatch:
     inputs:
       verify_credentials:
@@ -22,6 +21,35 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  metadata:
+    name: Pull request metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          fetch-depth: 0
+      - name: Set up pnpm workspace
+        uses: santi020k/quality/actions/setup-pnpm@ff490e9efbd5fdfbdb1e6c404f1741d04c57f585 # v2.0.0
+        with:
+          node-version: 22.x
+      - name: Validate pull request title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitprompt validate --input -
+      - name: Require a changeset
+        if: >-
+          github.event_name == 'pull_request' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changelog') &&
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          !startsWith(github.head_ref, 'release/v')
+        run: |
+          pnpm changeset status --since="$BASE_SHA" --output="$RUNNER_TEMP/changeset-status.json"
+          jq -e '.releases | length > 0' "$RUNNER_TEMP/changeset-status.json" >/dev/null
+
   impact:
     name: Quality v2 shadow plan
     runs-on: ubuntu-latest
@@ -103,7 +131,7 @@ jobs:
 
   validation:
     name: Repository validation (22.x)
-    needs: changes
+    needs: [changes, metadata]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -128,13 +156,7 @@ jobs:
           platform="$(node -p 'process.platform + "/" + process.arch')"
           echo "QUALITY_TASK_RUNTIME=$node_version-$pnpm_version-$platform" >> "$GITHUB_ENV"
 
-      # Ordinary pull requests report the live audit through audit.yml without blocking.
-      # Release pull requests, pushes, and manual runs keep it as a blocking gate.
       - name: Audit dependencies
-        if: >-
-          github.event_name != 'pull_request' ||
-          startsWith(github.head_ref, 'release/') ||
-          startsWith(github.head_ref, 'changeset-release/')
         run: pnpm run check:audit
       - name: Plan repository checks
         id: scope
@@ -155,7 +177,7 @@ jobs:
 
   docs-e2e:
     name: Documentation interactions
-    needs: changes
+    needs: [changes, metadata]
     if: needs.changes.outputs.docs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -216,7 +238,7 @@ jobs:
 
   compatibility:
     name: Package compatibility (24.x)
-    needs: changes
+    needs: [changes, metadata]
     if: needs.changes.outputs.packages == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -419,11 +441,12 @@ jobs:
   gate:
     name: Required checks
     if: always()
-    needs: [changes, impact, validation, docs-e2e, compatibility, deploy-docs, credentials]
+    needs: [changes, metadata, impact, validation, docs-e2e, compatibility, deploy-docs, credentials]
     runs-on: ubuntu-latest
     steps:
       - name: Verify relevant jobs
         env:
+          METADATA: ${{ needs.metadata.result }}
           IMPACT: ${{ needs.impact.result }}
           PACKAGES: ${{ needs.changes.outputs.packages }}
           DOCS: ${{ needs.changes.outputs.docs }}
@@ -435,13 +458,15 @@ jobs:
           DEPLOY: ${{ needs.deploy-docs.result }}
           CREDENTIALS: ${{ needs.credentials.result }}
         run: |
-          for result in "$IMPACT" "$CHANGES" "$VALIDATION" "$DOCS_E2E" "$COMPATIBILITY" "$DEPLOY" "$CREDENTIALS"; do
+          for result in "$METADATA" "$IMPACT" "$CHANGES" "$VALIDATION" "$DOCS_E2E" \
+              "$COMPATIBILITY" "$DEPLOY" "$CREDENTIALS"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               exit 1
             fi
           done
 
-          [[ "$IMPACT" == success && "$CHANGES" == success && "$VALIDATION" == success ]] || exit 1
+          [[ "$METADATA" == success && "$IMPACT" == success &&
+             "$CHANGES" == success && "$VALIDATION" == success ]] || exit 1
           [[ "$PACKAGES" == true || "$PACKAGES" == false ]] || exit 1
           [[ "$DOCS" == true || "$DOCS" == false ]] || exit 1
           if [[ "$PACKAGES" == true ]]; then [[ "$COMPATIBILITY" == success ]] || exit 1; fi
