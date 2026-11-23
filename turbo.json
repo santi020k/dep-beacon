@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["VITEST"],
+  "globalEnv": ["VITEST", "QUALITY_TASK_RUNTIME"],
+  "globalDependencies": ["tsconfig.base.json", "tsconfig.eslint.json", "tsconfig.json", "eslint.config.js", "cspell.config.yaml"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -51,6 +52,11 @@
     "//#lint:repo": {
       "dependsOn": ["^build"],
       "outputLogs": "errors-only"
+    },
+    "@santi020k/dep-beacon-docs#build": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": ["dist/**"]
     },
     "clean": {
       "cache": false

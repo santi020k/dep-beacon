@@ -18,8 +18,17 @@ Affected runs preserve repository lint, root TypeScript checks, spelling, Knip,
 asset generation, core prerequisite builds, selector tests, and security-backport
 regressions. Selected packages run build, types, lint, and coverage through Turbo;
 the extension is packaged when selected. Documentation browser tests run when docs
-are selected. The live audit and Rust adapter check remain mandatory in CI.
+are selected, in a parallel job that builds the documentation itself and restores
+cached browsers keyed by the resolved Playwright version. The Rust adapter check
+remains mandatory in CI and reuses GitHub's allowed cache action, keyed by the
+resolved Rust compiler, platform and lockfile. Cargo still checks the current source.
 Pre-push, compatibility, and release validation retain their existing full gates.
+
+The live audit blocks every pull request, pushes to `main`, and manual runs.
+Scheduled audits supplement this required check. Metadata validation is part of
+the same required CI aggregate; title and label events rerun validation, and
+expensive jobs wait for successful metadata checks. Documentation browser checks
+still run in parallel with package validation.
 
 ## Benchmark
 
@@ -65,7 +74,7 @@ Changeset-only edits select no workspace tasks while retaining repository checks
 
 ## Release and recovery
 
-The rollout targets core and VS Code v1.4.0; Changesets also updates the LSP's
+The rollout targets core and VS Code v1.5.0; Changesets also updates the LSP's
 internal dependency and synchronizes the Zed adapter version. No public API
 migration is required. Compatible transitive security updates and the tested
 [MSAL security backport](security-msal-backport.md) accompany the rollout.
