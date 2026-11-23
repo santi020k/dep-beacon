@@ -12,8 +12,9 @@ Release and manual runs retain full validation; plans do not execute jobs.
 CI persists Turbo task caches through the shared setup action, keyed by its
 runtime, platform, lockfile and task identity. Documentation builds remain
 uncached because generated presentation content may depend on external data.
-Browser checks consume the preceding successful documentation build instead of
-building it twice. Standalone `test:docs` still builds before testing.
+Browser checks run in a parallel job that builds the documentation it tests;
+the aggregate and deployment require that job whenever documentation is selected.
+Standalone `test:docs` still builds before testing.
 Fresh dependency audit and OSV/security qualification remain outside cached
 results. CI and the aggregate reject failed, cancelled or skipped selected jobs.
 No credentials, release review, marketplace publishing or Zed delivery gates

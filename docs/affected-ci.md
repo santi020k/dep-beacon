@@ -18,8 +18,20 @@ Affected runs preserve repository lint, root TypeScript checks, spelling, Knip,
 asset generation, core prerequisite builds, selector tests, and security-backport
 regressions. Selected packages run build, types, lint, and coverage through Turbo;
 the extension is packaged when selected. Documentation browser tests run when docs
-are selected. The live audit and Rust adapter check remain mandatory in CI.
+are selected, in a parallel job that builds the documentation itself and restores
+cached browsers keyed by the resolved Playwright version. The Rust adapter check
+remains mandatory in CI and reuses a compiler cache.
 Pre-push, compatibility, and release validation retain their existing full gates.
+
+The live audit blocks release pull requests, pushes to `main`, and manual runs.
+On ordinary pull requests the `Dependency audit` workflow reports it as a separate,
+non-required check so an unrelated advisory cannot fail validation; the same
+workflow runs daily to surface new advisories.
+
+Pull request title and changeset checks live in the `Pull request metadata`
+workflow. Title edits and label changes rerun only that workflow, never
+repository validation. Branch protection must require its `Pull request metadata`
+check alongside `Required checks` for those rules to keep blocking merges.
 
 ## Benchmark
 

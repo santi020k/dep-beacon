@@ -5,7 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main, "release/v*"]
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+    # Title and label events are handled by pr-metadata.yml so they never rerun validation.
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       verify_credentials:
@@ -127,22 +128,14 @@ jobs:
           platform="$(node -p 'process.platform + "/" + process.arch')"
           echo "QUALITY_TASK_RUNTIME=$node_version-$pnpm_version-$platform" >> "$GITHUB_ENV"
 
+      # Ordinary pull requests report the live audit through audit.yml without blocking.
+      # Release pull requests, pushes, and manual runs keep it as a blocking gate.
       - name: Audit dependencies
-        run: pnpm run check:audit
-      - name: Validate pull request title
-        if: github.event_name == 'pull_request'
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitprompt validate --input -
-      - name: Require a changeset
         if: >-
-          github.event_name == 'pull_request' &&
-          !contains(github.event.pull_request.labels.*.name, 'skip-changelog') &&
-          !startsWith(github.head_ref, 'changeset-release/') &&
-          !startsWith(github.head_ref, 'release/v')
-        run: |
-          pnpm changeset status --since="$QUALITY_CI_BASE" --output=/tmp/changeset-status.json
-          jq -e '.releases | length > 0' /tmp/changeset-status.json >/dev/null
+          github.event_name != 'pull_request' ||
+          startsWith(github.head_ref, 'release/') ||
+          startsWith(github.head_ref, 'changeset-release/')
+        run: pnpm run check:audit
       - name: Plan repository checks
         id: scope
         run: pnpm run ci:plan
@@ -153,14 +146,73 @@ jobs:
         env:
           RELEASE_BRANCH: ${{ github.head_ref }}
         run: pnpm run check:release
-      - name: Install documentation browsers
+      - name: Restore the Zed adapter build cache
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: extensions/dep-beacon-lsp
+      - name: Check the Zed adapter
+        run: cargo check --locked --manifest-path extensions/dep-beacon-lsp/Cargo.toml
+
+  docs-e2e:
+    name: Documentation interactions
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QUALITY_CI_BASE: ${{ github.event.pull_request.base.sha }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          fetch-depth: 0
+      - name: Set up pnpm workspace
+        uses: santi020k/quality/actions/setup-pnpm@ff490e9efbd5fdfbdb1e6c404f1741d04c57f585 # v2.0.0
+        with:
+          node-version: 22.x
+      - name: Bind task cache to the resolved runtime
+        shell: bash
+        run: |
+          node_version="$(node --version)"
+          pnpm_version="$(pnpm --version)"
+          platform="$(node -p 'process.platform + "/" + process.arch')"
+          echo "QUALITY_TASK_RUNTIME=$node_version-$pnpm_version-$platform" >> "$GITHUB_ENV"
+
+      - name: Plan repository checks
+        id: scope
+        run: pnpm run ci:plan
+      - name: Resolve the Playwright version
+        id: playwright
         if: steps.scope.outputs.docs == 'true'
+        shell: bash
+        run: |
+          version="$(pnpm exec playwright --version)"
+          version="${version##* }"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Restore documentation browsers
+        id: browsers
+        if: steps.scope.outputs.docs == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: >-
+            playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}-chromium-webkit
+      - name: Install documentation browsers
+        if: steps.scope.outputs.docs == 'true' && steps.browsers.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Install documentation browser system dependencies
+        if: steps.scope.outputs.docs == 'true' && steps.browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium webkit
+      - name: Build documentation
+        if: steps.scope.outputs.docs == 'true'
+        run: |
+          pnpm run assets
+          pnpm exec turbo run build --filter=@santi020k/dep-beacon-docs
       - name: Verify documentation interactions
         if: steps.scope.outputs.docs == 'true'
         run: pnpm run test:docs:built
-      - name: Check the Zed adapter
-        run: cargo check --locked --manifest-path extensions/dep-beacon-lsp/Cargo.toml
 
   compatibility:
     name: Package compatibility (24.x)
@@ -193,7 +245,7 @@ jobs:
 
   deploy-docs:
     name: Deploy documentation
-    needs: [changes, impact, validation, compatibility]
+    needs: [changes, impact, validation, docs-e2e, compatibility]
     if: >-
       always() &&
       !inputs.verify_credentials &&
@@ -202,6 +254,7 @@ jobs:
       needs.changes.outputs.docs == 'true' &&
       needs.impact.result == 'success' &&
       needs.validation.result == 'success' &&
+      needs.docs-e2e.result == 'success' &&
       (needs.compatibility.result == 'success' ||
       (needs.changes.outputs.packages == 'false' && needs.compatibility.result == 'skipped'))
     runs-on: ubuntu-latest
@@ -366,7 +419,7 @@ jobs:
   gate:
     name: Required checks
     if: always()
-    needs: [changes, impact, validation, compatibility, deploy-docs, credentials]
+    needs: [changes, impact, validation, docs-e2e, compatibility, deploy-docs, credentials]
     runs-on: ubuntu-latest
     steps:
       - name: Verify relevant jobs
@@ -377,11 +430,12 @@ jobs:
           VERIFY_CREDENTIALS: ${{ inputs.verify_credentials || false }}
           CHANGES: ${{ needs.changes.result }}
           VALIDATION: ${{ needs.validation.result }}
+          DOCS_E2E: ${{ needs.docs-e2e.result }}
           COMPATIBILITY: ${{ needs.compatibility.result }}
           DEPLOY: ${{ needs.deploy-docs.result }}
           CREDENTIALS: ${{ needs.credentials.result }}
         run: |
-          for result in "$IMPACT" "$CHANGES" "$VALIDATION" "$COMPATIBILITY" "$DEPLOY" "$CREDENTIALS"; do
+          for result in "$IMPACT" "$CHANGES" "$VALIDATION" "$DOCS_E2E" "$COMPATIBILITY" "$DEPLOY" "$CREDENTIALS"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               exit 1
             fi
@@ -391,6 +445,7 @@ jobs:
           [[ "$PACKAGES" == true || "$PACKAGES" == false ]] || exit 1
           [[ "$DOCS" == true || "$DOCS" == false ]] || exit 1
           if [[ "$PACKAGES" == true ]]; then [[ "$COMPATIBILITY" == success ]] || exit 1; fi
+          if [[ "$DOCS" == true ]]; then [[ "$DOCS_E2E" == success ]] || exit 1; fi
           if [[ "$VERIFY_CREDENTIALS" == true ]]; then [[ "$CREDENTIALS" == success ]] || exit 1; fi
           if [[ "$GITHUB_REF" == refs/heads/main && "$GITHUB_EVENT_NAME" != pull_request &&
                 "$DOCS" == true && "$VERIFY_CREDENTIALS" != true ]]; then
