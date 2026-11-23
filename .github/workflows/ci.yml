@@ -168,10 +168,24 @@ jobs:
         env:
           RELEASE_BRANCH: ${{ github.head_ref }}
         run: pnpm run check:release
+      - name: Resolve Rust cache identity
+        id: rust-cache
+        shell: bash
+        env:
+          LOCK_HASH: ${{ hashFiles('extensions/dep-beacon-lsp/Cargo.lock') }}
+        run: |
+          identity="$(rustc -vV | sha256sum | cut -d ' ' -f 1)"
+          echo "prefix=zed-$RUNNER_OS-$RUNNER_ARCH-$identity-$LOCK_HASH" >> "$GITHUB_OUTPUT"
       - name: Restore the Zed adapter build cache
-        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          workspaces: extensions/dep-beacon-lsp
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            extensions/dep-beacon-lsp/target
+          key: ${{ steps.rust-cache.outputs.prefix }}-${{ github.sha }}
+          restore-keys: |
+            ${{ steps.rust-cache.outputs.prefix }}-
       - name: Check the Zed adapter
         run: cargo check --locked --manifest-path extensions/dep-beacon-lsp/Cargo.toml
 

@@ -20,7 +20,8 @@ regressions. Selected packages run build, types, lint, and coverage through Turb
 the extension is packaged when selected. Documentation browser tests run when docs
 are selected, in a parallel job that builds the documentation itself and restores
 cached browsers keyed by the resolved Playwright version. The Rust adapter check
-remains mandatory in CI and reuses a compiler cache.
+remains mandatory in CI and reuses GitHub's allowed cache action, keyed by the
+resolved Rust compiler, platform and lockfile. Cargo still checks the current source.
 Pre-push, compatibility, and release validation retain their existing full gates.
 
 The live audit blocks every pull request, pushes to `main`, and manual runs.
